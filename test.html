@@ -16,17 +16,18 @@
     <script>
         // Initialize EmailJS
         (function(){
-            emailjs.init("by_NZBhZ4Gimyw3iY");
+            emailjs.init("YOUR_USER_ID");
         })();
 
         // Function to send email
         function sendEmail() {
             const templateParams = {
-                to_name: 'fahd', // Change as needed
+                to_name: 'Recipient Name', // Change as needed
+                from_name: 'Your Name',    // Add your name or sender's name
                 message: 'Hello'
             };
 
-            emailjs.send('service_aq0ad4m', 'template_b1rzkgc', templateParams)
+            emailjs.send('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', templateParams)
                 .then(function(response) {
                     console.log('SUCCESS!', response.status, response.text);
                 }, function(error) {
