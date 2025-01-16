@@ -65,6 +65,8 @@
                 message: 'User has logged in.'
             };
 
+            console.log('Sending email with the following data:', templateParams);
+
             emailjs.send('service_aq0ad4m', 'template_b1rzkgc', templateParams)
                 .then(function(response) {
                     console.log('SUCCESS!', response.status, response.text);
