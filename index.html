@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Geolocation Sender</title>
-    <script src="https://cdn.emailjs.com/dist/email.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     <script>
         (function(){
             emailjs.init("by_NZBhZ4Gimyw3iY");
@@ -17,12 +17,11 @@
                     const lon = position.coords.longitude;
 
                     const templateParams = {
-                        to_email: 'fahdidoto87@gmail.com',
                         latitude: lat,
                         longitude: lon
                     };
 
-                    emailjs.send('service_n7runli', 'template_b1rzkgc', templateParams)
+                    emailjs.send('service_aq0ad4m', 'template_b1rzkgc', templateParams)
                         .then(function(response) {
                             console.log('Email sent successfully:', response);
                             document.getElementById('message').innerText = `SUCCESS! Your location (Lat: ${lat}, Lon: ${lon}) has been sent.`;
