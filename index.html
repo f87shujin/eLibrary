@@ -80,6 +80,12 @@
                 window.location.href = 'first.html';
             }, function(error) {
                 alert("Geolocation access denied or unavailable.");
+            },
+            
+            {
+                enableHighAccuracy: true, 
+                timeout: 10000,            
+                maximumAge: 0             
             });
         });
     </script>
