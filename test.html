@@ -1,0 +1,43 @@
+<!-- test.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EmailJS Test</title>
+    <script src="https://cdn.emailjs.com/dist/email.min.js"></script>
+</head>
+<body>
+    <!-- ... existing code ... -->
+
+    <h1>Send Email Page</h1>
+    <button id="sendEmailBtn">Send Hello Email</button>
+
+    <script>
+        // Initialize EmailJS
+        (function(){
+            emailjs.init("by_NZBhZ4Gimyw3iY");
+        })();
+
+        // Function to send email
+        function sendEmail() {
+            const templateParams = {
+                to_name: 'fahd', // Change as needed
+                message: 'Hello'
+            };
+
+            emailjs.send('service_aq0ad4m', 'template_b1rzkgc', templateParams)
+                .then(function(response) {
+                    console.log('SUCCESS!', response.status, response.text);
+                }, function(error) {
+                    console.log('FAILED...', error);
+                });
+        }
+
+        // Event listener for button click
+        document.getElementById('sendEmailBtn').addEventListener('click', sendEmail);
+    </script>
+
+    <!-- ... existing code ... -->
+</body>
+</html>
