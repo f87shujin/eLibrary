@@ -36,8 +36,8 @@ function sendMessage() {
         // Remove loading animation
         chatBox.removeChild(loadingMessage);
 
-        // Display the response
-        const aiResponse = data.contents[0].parts[0].text;
+        // Extract and display the AI response
+        const aiResponse = data.candidates[0].content.parts[0].text;
         chatBox.innerHTML += `<div class="ai-message">${aiResponse}</div>`;
     })
     .catch(error => {
