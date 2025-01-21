@@ -1,4 +1,9 @@
 document.getElementById('send-button').addEventListener('click', sendMessage);
+document.getElementById('user-input').addEventListener('keypress', function(event) {
+    if (event.key === 'Enter') {
+        sendMessage();
+    }
+});
 
 function sendMessage() {
     const userInput = document.getElementById('user-input').value;
@@ -39,6 +44,7 @@ function sendMessage() {
         // Extract and display the AI response
         const aiResponse = data.candidates[0].content.parts[0].text;
         chatBox.innerHTML += `<div class="ai-message">${aiResponse}</div>`;
+        chatBox.scrollTop = chatBox.scrollHeight; // Scroll to the bottom
     })
     .catch(error => {
         console.error('Error:', error);

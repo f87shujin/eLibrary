@@ -2,16 +2,29 @@
 body {
     font-family: Arial, sans-serif;
     background-color: #f4f4f9;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
 }
 
 #chat-container {
     max-width: 500px;
+    width: 100%;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
+    border-radius: 8px;
+    overflow: hidden;
 }
 
 #chat-box {
     height: 400px;
     overflow-y: auto;
-    background-color: #fff;
+    background-color: #f9f9f9;
+    padding: 10px;
+    border-bottom: 1px solid #ccc;
 }
 
 .loading {
@@ -20,14 +33,11 @@ body {
 }
 
 #user-input {
-    width: calc(100% - 60px);
-    padding: 10px;
     border: none;
     border-top: 1px solid #ccc;
 }
 
 #send-button {
-    width: 50px;
     border: none;
     background-color: #007bff;
     color: white;
