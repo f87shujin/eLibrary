@@ -25,10 +25,12 @@ const Book = mongoose.model('Book', {
 // Serve static files
 app.use(express.static('public'));
 
-// API endpoint to get books
+// API endpoint to get books with optional search query
 app.get('/api/books', async (req, res) => {
+    const { search } = req.query; // Get the search query from the request
     try {
-        const books = await Book.find();
+        const query = search ? { name: { $regex: search, $options: 'i' } } : {}; // Create a search query
+        const books = await Book.find(query); // Find books based on the query
         res.json(books);
     } catch (error) {
         console.error('Error fetching books:', error);
