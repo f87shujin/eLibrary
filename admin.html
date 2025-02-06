@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Page</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <h2>Admin Page</h2>
+        <p>Welcome, admin!</p>
+        <button id="logout" class="btn btn-danger">Logout</button>
+    </div>
+
+    <script>
+        // Check if user is logged in as admin
+        const token = localStorage.getItem('token');
+        if (!token) {
+            alert('You are not authorized to access this page.');
+            window.location.href = 'login.html'; // Redirect to login page
+        }
+
+        // Fetch admin content
+        fetch('https://elibrary-1rh1.onrender.com/api/admin', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        })
+        .then(response => {
+            if (!response.ok) {
+                alert('You are not authorized to access this page.');
+                window.location.href = 'login.html'; // Redirect to login page
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log(data.message); // Display admin message
+        });
+
+        // Logout functionality
+        document.getElementById('logout').addEventListener('click', () => {
+            localStorage.removeItem('token'); // Remove token from local storage
+            window.location.href = 'login.html'; // Redirect to login page
+        });
+    </script>
+</body>
+</html> 
