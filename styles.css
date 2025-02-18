@@ -1,7 +1,7 @@
 #chat-box {
     height: 400px;
     overflow-y: auto;
-    background: #f8f9fa;
+    background: var(--dark-secondary);
     padding: 20px;
 }
 
@@ -14,22 +14,22 @@
 }
 
 .user-message {
-    background: #007bff;
-    color: white;
+    background: var(--dark-primary);
+    color: var(--dark-text);
     margin-left: auto;
     border-bottom-right-radius: 5px;
 }
 
 .ai-message {
-    background: #e9ecef;
-    color: black;
+    background: var(--dark-input);
+    color: var(--dark-text);
     margin-right: auto;
     border-bottom-left-radius: 5px;
 }
 
 .error-message {
     background: #dc3545;
-    color: white;
+    color: var(--dark-text);
     text-align: center;
     margin: 10px auto;
     width: 100%;

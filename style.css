@@ -1,7 +1,8 @@
 /* styles.css */
 body {
     font-family: Arial, sans-serif;
-    background-color: #f4f4f9;
+    background-color: var(--dark-bg);
+    color: var(--dark-text);
     margin: 0;
     padding: 0;
     display: flex;
@@ -13,8 +14,8 @@ body {
 #chat-container {
     max-width: 500px;
     width: 100%;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    background-color: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    background-color: var(--dark-secondary);
     border-radius: 8px;
     overflow: hidden;
 }
@@ -22,7 +23,7 @@ body {
 #chat-box {
     height: 400px;
     overflow-y: auto;
-    background-color: #f9f9f9;
+    background-color: var(--dark-input);
     padding: 10px;
     border-bottom: 1px solid #ccc;
 }
@@ -35,6 +36,9 @@ body {
 #user-input {
     border: none;
     border-top: 1px solid #ccc;
+    background-color: var(--dark-input);
+    color: var(--dark-text);
+    border-color: var(--dark-border);
 }
 
 #send-button {
