@@ -56,22 +56,92 @@
     </style>
 </head>
 <body>
-    <!-- Header -->
-    <header>
-        <!-- Include header content here -->
-    </header>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">eLibrary</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNavDropdown">
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            Menu
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="https://f87shujin.github.io/eLibrary/chat">Chatbot</a></li>
+                            <li><a class="dropdown-item" href="https://f87shujin.github.io/eLibrary/register">register/login</a></li>
+                            <li><a class="dropdown-item" href="#">Category 3</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
 
-    <!-- Main content of index.html -->
-    <div class="container">
-        <h1>Welcome to eLibrary</h1>
-        <!-- Other content -->
+    <!-- Search Bar -->
+    <div class="search-container">
+        <div class="container">
+            <form class="d-flex" id="search-form">
+                <input class="form-control me-2" type="search" placeholder="Search products..." id="search-input">
+                <button class="btn btn-outline-success" type="submit">Search</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Product Grid -->
+    <div class="container content">
+        <div class="product-grid" id="product-grid">
+            <!-- Products will be dynamically inserted here -->
+        </div>
     </div>
 
     <!-- Footer -->
-    <footer>
-        <!-- Include footer content here -->
+    <footer class="text-center">
+        <div class="container">
+            <p></p>
+            <p>
+                <a href="https://www.instagram.com/f87shujin/" target="_blank">Instagram</a> |
+                <a href="https://www.facebook.com/profile.php?id=100089008475919" target="_blank">Facebook</a> |
+                <a href="https://github.com/f87shujin/eLibrary" target="_blank">GitHub</a>
+            </p>
+        </div>
     </footer>
 
+    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const searchForm = document.getElementById('search-form');
+        const searchInput = document.getElementById('search-input');
+        const productGrid = document.getElementById('product-grid');
+
+        // Function to fetch books
+        const fetchBooks = async (search = '') => {
+            const response = await fetch(`https://elibrary-1rh1.onrender.com/api/books?search=${search}`);
+            const books = await response.json();
+            productGrid.innerHTML = ''; // Clear existing products
+            books.forEach(book => {
+                const productCard = `
+                    <div class="product-card">
+                        <img src="${book.image}" alt="${book.name}">
+                        <h5>${book.name}</h5>
+                        <p>$${book.price.toFixed(2)}</p>
+                    </div>
+                `;
+                productGrid.innerHTML += productCard;
+            });
+        };
+
+        // Fetch all books on initial load
+        fetchBooks();
+
+        // Handle search form submission
+        searchForm.addEventListener('submit', (event) => {
+            event.preventDefault(); // Prevent the default form submission
+            const searchTerm = searchInput.value.trim(); // Get the search term
+            fetchBooks(searchTerm); // Fetch books based on the search term
+        });
+    </script>
 </body>
 </html>
