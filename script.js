@@ -19,21 +19,31 @@ function sendMessage() {
     loadingMessage.innerText = 'Loading...';
     chatBox.appendChild(loadingMessage);
 
-    // Call the API directly with the user input
-    fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=AIzaSyC7Q7UFYHlIdmt1Vl1tJn-lsOp7bEgmRng', {
+    // Call the API with proper error handling
+    fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=YOUR_API_KEY', {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
         },
         body: JSON.stringify({
             contents: [{
                 parts: [{ text: userInput }]
-            }]
+            }],
+            safetySettings: [
+                {
+                    category: "HARM_CATEGORY_HARASSMENT",
+                    threshold: "BLOCK_NONE"
+                },
+                {
+                    category: "HARM_CATEGORY_HATE_SPEECH",
+                    threshold: "BLOCK_NONE"
+                }
+            ]
         })
     })
     .then(response => {
         if (!response.ok) {
-            throw new Error('Network response was not ok');
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
         return response.json();
     })
@@ -41,14 +51,18 @@ function sendMessage() {
         // Remove loading animation
         chatBox.removeChild(loadingMessage);
 
+        if (!data.candidates || !data.candidates[0]?.content?.parts?.[0]?.text) {
+            throw new Error('Invalid response format from API');
+        }
+
         // Extract and display the AI response
         const aiResponse = data.candidates[0].content.parts[0].text;
         chatBox.innerHTML += `<div class="ai-message">${aiResponse}</div>`;
-        chatBox.scrollTop = chatBox.scrollHeight; // Scroll to the bottom
+        chatBox.scrollTop = chatBox.scrollHeight;
     })
     .catch(error => {
         console.error('Error:', error);
         chatBox.removeChild(loadingMessage);
-        chatBox.innerHTML += `<div class="error-message">Error fetching response</div>`;
+        chatBox.innerHTML += `<div class="error-message">Error: ${error.message}</div>`;
     });
 }

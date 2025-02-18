@@ -1,0 +1,37 @@
+#chat-box {
+    height: 400px;
+    overflow-y: auto;
+    background: #f8f9fa;
+}
+
+.user-message, .ai-message, .error-message {
+    margin: 10px;
+    padding: 10px;
+    border-radius: 5px;
+    max-width: 80%;
+}
+
+.user-message {
+    background: #007bff;
+    color: white;
+    margin-left: auto;
+}
+
+.ai-message {
+    background: #e9ecef;
+    color: black;
+    margin-right: auto;
+}
+
+.error-message {
+    background: #dc3545;
+    color: white;
+    margin: 10px auto;
+    text-align: center;
+}
+
+.loading {
+    text-align: center;
+    color: #6c757d;
+    margin: 10px;
+} 
