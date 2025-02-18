@@ -5,8 +5,6 @@ document.getElementById('user-input').addEventListener('keypress', function(even
     }
 });
 
-let chatHistory = [];
-
 function sendMessage() {
     const userInput = document.getElementById('user-input').value;
     if (!userInput) return;
@@ -15,39 +13,31 @@ function sendMessage() {
     chatBox.innerHTML += `<div class="user-message">${userInput}</div>`;
     document.getElementById('user-input').value = '';
 
-    // Add user input to chat history
-    chatHistory.push({ role: 'user', text: userInput });
-
     // Display loading animation
     const loadingMessage = document.createElement('div');
     loadingMessage.className = 'loading';
     loadingMessage.innerText = 'Loading...';
     chatBox.appendChild(loadingMessage);
 
-    // Prepare the chat history for the API
-    const apiInput = chatHistory.map(entry => ({
-        parts: [{ text: entry.text }]
-    }));
-
-    // Call the API
+    // Call the API directly with the user input
     fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=AIzaSyC7Q7UFYHlIdmt1Vl1tJn-lsOp7bEgmRng', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-            contents: apiInput
+            contents: [{
+                parts: [{ text: userInput }]
+            }]
         })
     })
     .then(response => {
-        console.log('Response:', response);
         if (!response.ok) {
             throw new Error('Network response was not ok');
         }
         return response.json();
     })
     .then(data => {
-        console.log('Data:', data);
         // Remove loading animation
         chatBox.removeChild(loadingMessage);
 
@@ -55,9 +45,6 @@ function sendMessage() {
         const aiResponse = data.candidates[0].content.parts[0].text;
         chatBox.innerHTML += `<div class="ai-message">${aiResponse}</div>`;
         chatBox.scrollTop = chatBox.scrollHeight; // Scroll to the bottom
-
-        // Add AI response to chat history
-        chatHistory.push({ role: 'ai', text: aiResponse });
     })
     .catch(error => {
         console.error('Error:', error);
