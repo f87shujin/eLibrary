@@ -1,4 +1,6 @@
-// Add event listeners when the document loads
+// Your API key should be stored securely
+const API_KEY = 'AIzaSyC7Q7UFYHlIdmt1Vl1tJn-lsOp7bEgmRng'; // Replace with your actual API key
+
 document.addEventListener('DOMContentLoaded', function() {
     const sendButton = document.getElementById('send-button');
     const userInput = document.getElementById('user-input');
@@ -38,11 +40,10 @@ async function sendMessage() {
     chatBox.scrollTop = chatBox.scrollHeight;
 
     try {
-        const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent', {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${API_KEY}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer YOUR_API_KEY_HERE` // Replace with your actual API key
             },
             body: JSON.stringify({
                 contents: [{
@@ -62,12 +63,17 @@ async function sendMessage() {
         // Remove loading indicator
         loadingDiv.remove();
 
-        // Add AI response to chat
-        chatBox.innerHTML += `
-            <div class="ai-message">
-                <p>${data.candidates[0].content.parts[0].text}</p>
-            </div>
-        `;
+        // Check if we have a valid response
+        if (data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
+            const aiResponse = data.candidates[0].content.parts[0].text;
+            chatBox.innerHTML += `
+                <div class="ai-message">
+                    <p>${aiResponse}</p>
+                </div>
+            `;
+        } else {
+            throw new Error('Invalid response format from API');
+        }
 
         // Auto scroll to bottom
         chatBox.scrollTop = chatBox.scrollHeight;
@@ -81,7 +87,7 @@ async function sendMessage() {
         // Show error message in chat
         chatBox.innerHTML += `
             <div class="error-message">
-                <p>Sorry, I encountered an error: ${error.message}</p>
+                <p>Sorry, I encountered an error. Please try again later.</p>
             </div>
         `;
         
