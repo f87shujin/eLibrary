@@ -1,54 +1,100 @@
-document.getElementById('send-button').addEventListener('click', sendMessage);
-document.getElementById('user-input').addEventListener('keypress', function(event) {
-    if (event.key === 'Enter') {
-        sendMessage();
-    }
+// Store API key
+const API_KEY = 'AIzaSyBmwLJ7A0GwAXpao_EdMhnNdkangS6MSwA'; // Replace with your actual API key
+
+document.addEventListener('DOMContentLoaded', function() {
+    const sendButton = document.getElementById('send-button');
+    const userInput = document.getElementById('user-input');
+
+    sendButton.addEventListener('click', sendMessage);
+    userInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            sendMessage();
+        }
+    });
 });
 
-function sendMessage() {
-    const userInput = document.getElementById('user-input').value;
-    if (!userInput) return;
-
+async function sendMessage() {
+    const userInput = document.getElementById('user-input');
     const chatBox = document.getElementById('chat-box');
-    chatBox.innerHTML += `<div class="user-message">${userInput}</div>`;
-    document.getElementById('user-input').value = '';
+    const message = userInput.value.trim();
 
-    // Display loading animation
-    const loadingMessage = document.createElement('div');
-    loadingMessage.className = 'loading';
-    loadingMessage.innerText = 'Loading...';
-    chatBox.appendChild(loadingMessage);
+    if (!message) return;
 
-    // Call the API directly with the user input
-    fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=AIzaSyC7Q7UFYHlIdmt1Vl1tJn-lsOp7bEgmRng', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            contents: [{
-                parts: [{ text: userInput }]
-            }]
-        })
-    })
-    .then(response => {
+    try {
+        // Show user message
+        appendMessage('user', message);
+        userInput.value = '';
+
+        // Show loading state
+        const loadingDiv = showLoading();
+
+        // Make API request
+        const response = await fetch('https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=' + API_KEY, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                contents: [{
+                    parts: [{
+                        text: message
+                    }]
+                }],
+                generationConfig: {
+                    temperature: 0.9,
+                    topK: 1,
+                    topP: 1,
+                    maxOutputTokens: 2048,
+                }
+            })
+        });
+
+        // Remove loading indicator
+        loadingDiv.remove();
+
         if (!response.ok) {
-            throw new Error('Network response was not ok');
+            throw new Error(`API Error: ${response.status}`);
         }
-        return response.json();
-    })
-    .then(data => {
-        // Remove loading animation
-        chatBox.removeChild(loadingMessage);
 
-        // Extract and display the AI response
-        const aiResponse = data.candidates[0].content.parts[0].text;
-        chatBox.innerHTML += `<div class="ai-message">${aiResponse}</div>`;
-        chatBox.scrollTop = chatBox.scrollHeight; // Scroll to the bottom
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        chatBox.removeChild(loadingMessage);
-        chatBox.innerHTML += `<div class="error-message">Error fetching response</div>`;
-    });
+        const data = await response.json();
+
+        if (!data.candidates || !data.candidates[0]?.content?.parts?.[0]?.text) {
+            throw new Error('Invalid API response format');
+        }
+
+        // Show AI response
+        appendMessage('ai', data.candidates[0].content.parts[0].text);
+
+    } catch (error) {
+        console.error('Chat Error:', error);
+        showError('Sorry, there was an error processing your request. Please try again.');
+    }
+}
+
+function appendMessage(type, content) {
+    const chatBox = document.getElementById('chat-box');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `${type}-message`;
+    messageDiv.innerHTML = `<p>${content}</p>`;
+    chatBox.appendChild(messageDiv);
+    chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+function showLoading() {
+    const chatBox = document.getElementById('chat-box');
+    const loadingDiv = document.createElement('div');
+    loadingDiv.className = 'loading';
+    loadingDiv.textContent = 'AI is thinking...';
+    chatBox.appendChild(loadingDiv);
+    chatBox.scrollTop = chatBox.scrollHeight;
+    return loadingDiv;
+}
+
+function showError(message) {
+    const chatBox = document.getElementById('chat-box');
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'error-message';
+    errorDiv.innerHTML = `<p>${message}</p>`;
+    chatBox.appendChild(errorDiv);
+    chatBox.scrollTop = chatBox.scrollHeight;
 }

@@ -1,0 +1,60 @@
+#chat-box {
+    height: 400px;
+    overflow-y: auto;
+    background: var(--dark-secondary);
+    padding: 20px;
+}
+
+.user-message, .ai-message, .error-message {
+    margin: 10px 0;
+    padding: 10px 15px;
+    border-radius: 15px;
+    max-width: 80%;
+    word-wrap: break-word;
+}
+
+.user-message {
+    background: var(--dark-primary);
+    color: var(--dark-text);
+    margin-left: auto;
+    border-bottom-right-radius: 5px;
+}
+
+.ai-message {
+    background: var(--dark-input);
+    color: var(--dark-text);
+    margin-right: auto;
+    border-bottom-left-radius: 5px;
+}
+
+.error-message {
+    background: #dc3545;
+    color: var(--dark-text);
+    text-align: center;
+    margin: 10px auto;
+    width: 100%;
+}
+
+.loading {
+    text-align: center;
+    color: #6c757d;
+    margin: 10px;
+    font-style: italic;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 0.6; }
+    50% { opacity: 1; }
+    100% { opacity: 0.6; }
+}
+
+#user-input {
+    border-radius: 20px;
+    padding: 10px 15px;
+}
+
+.input-group-append .btn {
+    border-radius: 20px;
+    margin-left: 10px;
+}

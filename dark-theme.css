@@ -1,0 +1,97 @@
+/* Dark theme variables */
+:root {
+    --dark-bg: #1a1a1a;
+    --dark-text: #ffffff;
+    --dark-secondary: #2d2d2d;
+    --dark-input: #333333;
+    --dark-border: #404040;
+    --dark-primary: #0d6efd;
+    --dark-hover: #1a1a1a;
+}
+
+/* Global dark theme styles */
+body {
+    background-color: var(--dark-bg) !important;
+    color: var(--dark-text) !important;
+}
+
+.container {
+    background-color: var(--dark-bg);
+}
+
+/* Form elements */
+.form-control {
+    background-color: var(--dark-input) !important;
+    border-color: var(--dark-border) !important;
+    color: var(--dark-text) !important;
+}
+
+.form-control:focus {
+    background-color: var(--dark-input);
+    color: var(--dark-text);
+}
+
+/* Cards and containers */
+.card, .product-card {
+    background-color: var(--dark-secondary) !important;
+    border-color: var(--dark-border) !important;
+}
+
+/* Chat specific */
+#chat-box {
+    background-color: var(--dark-secondary) !important;
+    border-color: var(--dark-border) !important;
+}
+
+.user-message {
+    background-color: var(--dark-primary);
+    color: var(--dark-text);
+}
+
+.ai-message {
+    background-color: var(--dark-input);
+    color: var(--dark-text);
+}
+
+/* Navbar */
+.navbar {
+    background-color: var(--dark-secondary) !important;
+}
+
+.dropdown-menu {
+    background-color: var(--dark-secondary) !important;
+}
+
+.dropdown-item {
+    color: var(--dark-text) !important;
+}
+
+.dropdown-item:hover {
+    background-color: var(--dark-hover) !important;
+}
+
+/* Search container */
+.search-container {
+    background-color: var(--dark-secondary) !important;
+}
+
+/* Footer */
+footer {
+    background-color: var(--dark-secondary) !important;
+    color: var(--dark-text) !important;
+}
+
+/* Buttons */
+.btn-primary {
+    background-color: var(--dark-primary);
+    border-color: var(--dark-primary);
+}
+
+/* Links */
+a {
+    color: var(--dark-primary);
+}
+
+a:hover {
+    color: #0056b3;
+} 
