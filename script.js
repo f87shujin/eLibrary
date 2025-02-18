@@ -1,5 +1,5 @@
 // Store API key
-const API_KEY = 'AIzaSyC7Q7UFYHlIdmt1Vl1tJn-lsOp7bEgmRng'; // Replace with your actual API key
+const API_KEY = 'AIzaSyBmwLJ7A0GwAXpao_EdMhnNdkangS6MSwA'; // Replace with your actual API key
 
 document.addEventListener('DOMContentLoaded', function() {
     const sendButton = document.getElementById('send-button');
