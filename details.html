@@ -9,6 +9,7 @@
     <style>
         .book-details {
             display: flex;
+            justify-content: center; /* Center the content horizontally */
             padding: 20px;
             background-color: var(--dark-secondary);
         }
@@ -21,7 +22,8 @@
             height: auto;
         }
         .book-info {
-            flex: 300px 300px 300px; /* Fixed width for the bubble */
+            width: 400px; /* Fixed width for the bubble */
+            height: 300px; /* Fixed height for the bubble */
             background-color: rgba(255, 255, 255, 0.1); /* Semi-transparent background */
             border-radius: 10px; /* Rounded corners */
             padding: 20px; /* Padding inside the bubble */
@@ -30,6 +32,7 @@
             flex-direction: column; /* Stack children vertically */
             align-items: center; /* Center items horizontally */
             text-align: center; /* Center text */
+            justify-content: center; /* Center content vertically */
         }
         .book-buttons {
             margin-top: 20px;
