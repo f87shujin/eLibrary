@@ -41,6 +41,21 @@ app.get('/api/books', async (req, res) => {
     }
 });
 
+// API endpoint to get a single book by ID
+app.get('/api/books/:id', async (req, res) => {
+    const { id } = req.params; // Get the book ID from the request parameters
+    try {
+        const book = await Book.findById(id); // Find the book by ID
+        if (!book) {
+            return res.status(404).json({ message: 'Book not found' });
+        }
+        res.json(book); // Return the book details
+    } catch (error) {
+        console.error('Error fetching book:', error);
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+});
+
 // User registration
 app.post('/api/register', async (req, res) => {
     try {
