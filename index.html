@@ -125,9 +125,11 @@
             books.forEach(book => {
                 const productCard = `
                     <div class="product-card">
-                        <img src="${book.image}" alt="${book.name}">
-                        <h5>${book.name}</h5>
-                        <p>$${book.price.toFixed(2)}</p>
+                        <a href="details.html?id=${book._id}">
+                            <img src="${book.image}" alt="${book.name}">
+                            <h5>${book.name}</h5>
+                            <p>$${book.price.toFixed(2)}</p>
+                        </a>
                     </div>
                 `;
                 productGrid.innerHTML += productCard;

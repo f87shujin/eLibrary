@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Details</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="dark-theme.css">
+    <style>
+        .book-details {
+            display: flex;
+            padding: 20px;
+            background-color: var(--dark-secondary);
+        }
+        .book-image {
+            flex: 1;
+            margin-right: 20px;
+        }
+        .book-image img {
+            max-width: 100%;
+            height: auto;
+        }
+        .book-info {
+            flex: 2;
+        }
+        .book-buttons {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="book-details">
+            <div class="book-image">
+                <img src="path/to/book-image.jpg" alt="Book Image">
+            </div>
+            <div class="book-info">
+                <h2 class="book-title">Book Title</h2>
+                <p class="book-price">$19.99</p>
+                <div class="book-buttons">
+                    <button class="btn btn-primary">Rent</button>
+                    <button class="btn btn-success">Buy</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Fetch book details based on the book ID passed in the URL
+        const fetchBookDetails = async () => {
+            const params = new URLSearchParams(window.location.search);
+            const bookId = params.get('id'); // Assuming the book ID is passed as a query parameter
+            const response = await fetch(`https://elibrary-1rh1.onrender.com/api/books/${bookId}`);
+            const book = await response.json();
+            document.querySelector('.book-title').textContent = book.name;
+            document.querySelector('.book-price').textContent = `$${book.price.toFixed(2)}`;
+            document.querySelector('.book-image img').src = book.image;
+        };
+
+        // Call the function to fetch book details
+        fetchBookDetails();
+    </script>
+</body>
+</html>
