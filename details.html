@@ -9,7 +9,7 @@
     <style>
         .book-details {
             display: flex;
-            justify-content: space-between; /* Center the content horizontally */
+            justify-content: center; /* Center the content horizontally */
             align-items: center; /* Center the content vertically */
             padding: 100px;
             background-color: var(--dark-secondary);
@@ -38,6 +38,13 @@
         .book-buttons {
             margin-top: 20px;
         }
+        .description-container {
+            margin-top: 40px; /* Space above the description */
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.1); /* Semi-transparent background */
+            border-radius: 10px; /* Rounded corners */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Shadow effect */
+        }
     </style>
 </head>
 <body>
@@ -54,6 +61,12 @@
                     <button class="btn btn-success">Buy</button>
                 </div>
             </div>
+        </div>
+
+        <!-- Description Container -->
+        <div class="description-container">
+            <h3>Description</h3>
+            <p>This is a test description for the book. It provides an overview of the book's content, themes, and other relevant information that may interest potential readers.</p>
         </div>
     </div>
     <script>
