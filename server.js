@@ -152,6 +152,27 @@ app.put('/api/updateProfile', async (req, res) => {
     });
 });
 
+// API endpoint to get user details
+app.get('/api/user', async (req, res) => {
+    const token = req.headers['authorization']?.split(' ')[1];
+    if (!token) return res.status(403).json({ message: 'No token provided' });
+
+    jwt.verify(token, 'your_jwt_secret', async (err, decoded) => {
+        if (err) return res.status(500).json({ message: 'Failed to authenticate token' });
+
+        try {
+            const user = await User.findById(decoded.id).select('-password'); // Exclude password from the response
+            if (!user) {
+                return res.status(404).json({ message: 'User not found' });
+            }
+            res.json(user); // Return user details
+        } catch (error) {
+            console.error('Error fetching user details:', error);
+            res.status(500).json({ message: 'Internal Server Error' });
+        }
+    });
+});
+
 // Start the server
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
