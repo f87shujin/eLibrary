@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rent Book - eLibrary</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="dark-theme.css">
+    <style>
+        .rent-container {
+            padding: 40px;
+            background-color: var(--dark-secondary);
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        .book-preview {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        .book-preview img {
+            max-width: 200px;
+            margin-right: 20px;
+        }
+        .rent-form {
+            background-color: var(--dark-input);
+            padding: 20px;
+            border-radius: 8px;
+        }
+        .price-preview {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: var(--dark-input);
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div id="header"></div>
+    </header>
+
+    <div class="container">
+        <div class="rent-container">
+            <h2>Rent Book</h2>
+            <div class="book-preview">
+                <img id="book-image" src="" alt="Book Cover">
+                <div>
+                    <h3 id="book-title"></h3>
+                    <p>Daily Rate: $<span id="book-price"></span></p>
+                </div>
+            </div>
+
+            <div class="rent-form">
+                <form id="rent-form">
+                    <div class="mb-3">
+                        <label for="rental-days" class="form-label">Number of Days</label>
+                        <input type="number" class="form-control" id="rental-days" min="1" max="30" value="1" required>
+                        <small class="text-muted">Maximum rental period is 30 days</small>
+                    </div>
+
+                    <div class="price-preview">
+                        <div class="d-flex justify-content-between">
+                            <span>Daily Rate:</span>
+                            <span>$<span id="daily-rate">0.00</span></span>
+                        </div>
+                        <div class="d-flex justify-content-between mt-2">
+                            <span>Number of Days:</span>
+                            <span id="days-display">1</span>
+                        </div>
+                        <hr>
+                        <div class="d-flex justify-content-between fw-bold">
+                            <span>Total:</span>
+                            <span>$<span id="total-price">0.00</span></span>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 mt-4">Add to Cart</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div id="footer"></div>
+    </footer>
+
+    <script>
+        // Get book ID from URL
+        const params = new URLSearchParams(window.location.search);
+        const bookId = params.get('id');
+        let bookData = null;
+
+        // Fetch book details
+        async function fetchBookDetails() {
+            try {
+                const response = await fetch(`https://elibrary-1rh1.onrender.com/api/books/${bookId}`);
+                bookData = await response.json();
+                
+                // Update UI with book details
+                document.getElementById('book-image').src = bookData.image;
+                document.getElementById('book-title').textContent = bookData.name;
+                document.getElementById('book-price').textContent = bookData.price.toFixed(2);
+                document.getElementById('daily-rate').textContent = bookData.price.toFixed(2);
+                updateTotalPrice();
+            } catch (error) {
+                console.error('Error fetching book details:', error);
+                alert('Error loading book details');
+            }
+        }
+
+        // Update price calculations
+        function updateTotalPrice() {
+            const days = parseInt(document.getElementById('rental-days').value);
+            const dailyRate = parseFloat(document.getElementById('daily-rate').textContent);
+            const total = days * dailyRate;
+            
+            document.getElementById('days-display').textContent = days;
+            document.getElementById('total-price').textContent = total.toFixed(2);
+        }
+
+        // Handle form submission
+        document.getElementById('rent-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const days = parseInt(document.getElementById('rental-days').value);
+            const total = parseFloat(document.getElementById('total-price').textContent);
+
+            // Create rental item for cart
+            const rentalItem = {
+                _id: bookData._id,
+                name: bookData.name,
+                image: bookData.image,
+                price: total,
+                quantity: 1,
+                rentalDays: days,
+                type: 'rental'
+            };
+
+            // Add to cart
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            cart.push(rentalItem);
+            localStorage.setItem('cart', JSON.stringify(cart));
+
+            // Show success message and redirect
+            alert('Book rental added to cart!');
+            window.location.href = 'cart.html';
+        });
+
+        // Update calculations when rental days change
+        document.getElementById('rental-days').addEventListener('input', updateTotalPrice);
+
+        // Load book details when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchBookDetails();
+            
+            // Load header and footer
+            loadHTML('header', 'header.html');
+            loadHTML('footer', 'footer.html');
+        });
+
+        // Function to load HTML content
+        function loadHTML(elementId, filePath) {
+            fetch(filePath)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.text();
+                })
+                .then(data => {
+                    document.getElementById(elementId).innerHTML = data;
+                })
+                .catch(error => {
+                    console.error('Error loading HTML:', error);
+                });
+        }
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 
