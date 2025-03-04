@@ -88,15 +88,19 @@ app.post('/api/login', async (req, res) => {
         return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    if (user.password !== password) {
+    // Check if the password matches
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
         return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    // Make sure role is included in the token
+    // Create a token with name, email, and role
     const token = jwt.sign(
         { 
             id: user._id, 
-            role: user.role  // Include the role in the token
+            name: user.name, // Include name
+            email: user.email, // Include email
+            role: user.role  // Include role
         }, 
         'your_jwt_secret', 
         { expiresIn: '1h' }

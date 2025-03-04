@@ -24,6 +24,10 @@
                 <input type="email" class="form-control" id="email" required>
             </div>
             <div class="mb-3">
+                <label for="role" class="form-label">Role</label>
+                <input type="text" class="form-control" id="role" readonly>
+            </div>
+            <div class="mb-3">
                 <label for="password" class="form-label">Password</label>
                 <input type="password" class="form-control" id="password">
                 <small class="form-text text-muted">Leave blank to keep current password.</small>
@@ -47,6 +51,7 @@
             const tokenPayload = JSON.parse(atob(token.split('.')[1]));
             document.getElementById('name').value = tokenPayload.name;
             document.getElementById('email').value = tokenPayload.email;
+            document.getElementById('role').value = tokenPayload.role;
         } else {
             alert('You need to log in to view this page.');
             window.location.href = 'login.html'; // Redirect to login if not logged in
