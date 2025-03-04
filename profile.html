@@ -17,21 +17,24 @@
         <div class="mb-3">
             <label class="form-label">Name</label>
             <p id="name" class="form-control-plaintext">Loading...</p>
+            <button class="btn btn-secondary btn-sm" onclick="editField('name')">Edit</button>
         </div>
         <div class="mb-3">
             <label class="form-label">Email</label>
             <p id="email" class="form-control-plaintext">Loading...</p>
+            <button class="btn btn-secondary btn-sm" onclick="editField('email')">Edit</button>
         </div>
         <div class="mb-3">
             <label class="form-label">Role</label>
             <p id="role" class="form-control-plaintext">Loading...</p>
+            <button class="btn btn-secondary btn-sm" onclick="editField('role')">Edit</button>
         </div>
         <div class="mb-3">
             <label class="form-label">Password</label>
             <p class="form-control-plaintext">********</p>
             <small class="form-text text-muted">Leave blank to keep current password.</small>
         </div>
-        <button id="edit-button" class="btn btn-primary">Edit Profile</button>
+        <button id="update-button" class="btn btn-primary">Update Profile</button>
     </div>
 
     <footer>
@@ -39,44 +42,21 @@
     </footer>
 
     <script>
-           function loadHTML(elementId, filePath) {
-            fetch(filePath)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.text();
-                })
-                .then(data => {
-                    document.getElementById(elementId).innerHTML = data;
-                })
-                .catch(error => {
-                    console.error('Error loading HTML:', error);
-                });
-        }
-
-        // Load header and footer
-        loadHTML('header', 'header.html');
-        loadHTML('footer', 'footer.html');
-
         // Fetch user details
         const token = localStorage.getItem('token');
         if (token) {
-            console.log('Token:', token); // Log the token to see if it's being retrieved
             fetch('https://elibrary-1rh1.onrender.com/api/user', {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
             })
             .then(response => {
-                console.log('Response status:', response.status); // Log the response status
                 if (!response.ok) {
                     throw new Error('Failed to fetch user details');
                 }
                 return response.json();
             })
             .then(user => {
-                console.log('User details:', user); // Log the user details
                 document.getElementById('name').textContent = user.name;
                 document.getElementById('email').textContent = user.email;
                 document.getElementById('role').textContent = user.role;
@@ -90,9 +70,45 @@
             window.location.href = 'login.html'; // Redirect to login if not logged in
         }
 
-        // Handle edit button click
-        document.getElementById('edit-button').addEventListener('click', () => {
-            window.location.href = 'edit-profile.html'; // Redirect to an edit profile page (you can create this page)
+        // Edit field function
+        function editField(field) {
+            const fieldElement = document.getElementById(field);
+            const currentValue = fieldElement.textContent;
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.value = currentValue;
+            input.className = 'form-control';
+            fieldElement.innerHTML = ''; // Clear the current text
+            fieldElement.appendChild(input); // Add the input field
+        }
+
+        // Handle update button click
+        document.getElementById('update-button').addEventListener('click', () => {
+            const token = localStorage.getItem('token');
+            const name = document.getElementById('name').querySelector('input')?.value || document.getElementById('name').textContent;
+            const email = document.getElementById('email').querySelector('input')?.value || document.getElementById('email').textContent;
+            const role = document.getElementById('role').querySelector('input')?.value || document.getElementById('role').textContent;
+
+            fetch('https://elibrary-1rh1.onrender.com/api/updateProfile', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ name, email, role })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to update profile');
+                }
+                alert('Profile updated successfully!');
+                // Optionally, refresh the page or fetch user details again
+                window.location.reload();
+            })
+            .catch(error => {
+                console.error('Error updating profile:', error);
+                alert('Failed to update profile. Please try again.');
+            });
         });
     </script>
 </body>
