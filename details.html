@@ -57,7 +57,7 @@
                 <h2 class="book-title">Book Title</h2>
                 <p class="book-price">$19.99</p>
                 <div class="book-buttons">
-                    <button class="btn btn-primary">Rent</button>
+                    <button class="btn btn-primary" onclick="window.location.href='rent.html?id=' + new URLSearchParams(window.location.search).get('id')">Rent</button>
                     <button class="btn btn-success">Buy</button>
                 </div>
             </div>
