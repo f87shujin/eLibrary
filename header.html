@@ -63,8 +63,21 @@
                     <li class="nav-item">
                         <a class="nav-link" href="admin.html">Admin</a>
                     </li>
+                    <li class="nav-item ms-auto">
+                        <a class="nav-link" id="profile-link" href="profile.html">Guest</a>
+                    </li>
                 </ul>
             </div>
         </div>
     </nav>
 </header>
+
+<script>
+    // Check if user is logged in
+    const token = localStorage.getItem('token');
+    if (token) {
+        // Decode the JWT token to get user name
+        const tokenPayload = JSON.parse(atob(token.split('.')[1]));
+        document.getElementById('profile-link').textContent = tokenPayload.name; // Set the name in the profile link
+    }
+</script>

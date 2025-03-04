@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const cors = require('cors'); // Import CORS
 const jwt = require('jsonwebtoken');
 const User = require('./models/User'); // Import the User model
+const bcrypt = require('bcrypt');
 const app = express();
 const PORT = process.env.PORT || 10000;
 
@@ -119,6 +120,32 @@ const isAdmin = (req, res, next) => {
 // Admin route
 app.get('/api/admin', isAdmin, (req, res) => {
     res.json({ message: 'Welcome to the admin page!' });
+});
+
+// Update user profile
+app.put('/api/updateProfile', async (req, res) => {
+    const token = req.headers['authorization']?.split(' ')[1];
+    if (!token) return res.status(403).json({ message: 'No token provided' });
+
+    jwt.verify(token, 'your_jwt_secret', async (err, decoded) => {
+        if (err) return res.status(500).json({ message: 'Failed to authenticate token' });
+
+        const { name, email, password } = req.body;
+        const updates = { name, email };
+
+        // Only update password if provided
+        if (password) {
+            updates.password = await bcrypt.hash(password, 10);
+        }
+
+        try {
+            await User.findByIdAndUpdate(decoded.id, updates);
+            res.json({ message: 'Profile updated successfully' });
+        } catch (error) {
+            console.error('Error updating profile:', error);
+            res.status(500).json({ message: 'Internal Server Error' });
+        }
+    });
 });
 
 // Start the server
