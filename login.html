@@ -61,6 +61,8 @@
                         window.location.href = 'index.html';
                     }
                 } else {
+                    const errorData = await response.json(); // Get error message from response
+                    console.error('Login failed:', errorData.message); // Log the error message
                     alert('Login failed. Please check your credentials.');
                 }
             } catch (error) {
