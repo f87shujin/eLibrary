@@ -48,6 +48,9 @@
     </style>
 </head>
 <body>
+    <header>
+        <div id="header"></div>
+    </header>
     <div class="container">
         <div class="book-details">
             <div class="book-image">
@@ -69,7 +72,12 @@
             <p>This is a test description for the book. It provides an overview of the book's content, themes, and other relevant information that may interest potential readers.</p>
         </div>
     </div>
+    <footer>
+        <div id="footer"></div>
+    </footer>
     <script>
+        loadHTML('header', 'header.html');
+        loadHTML('footer', 'footer.html');
         // Fetch book details based on the book ID passed in the URL
         const fetchBookDetails = async () => {
             const params = new URLSearchParams(window.location.search);
