@@ -111,21 +111,33 @@
 
       // Fetch book details
       const fetchBookDetails = async () => {
-        const params = new URLSearchParams(window.location.search);
-        const bookId = params.get("id");
-        const response = await fetch(
-          `https://elibrary-1rh1.onrender.com/api/books/${bookId}`
-        );
-        bookData = await response.json();
+        try {
+          const params = new URLSearchParams(window.location.search);
+          const bookId = params.get("id");
+          const response = await fetch(
+            `https://elibrary-1rh1.onrender.com/api/books/${bookId}`
+          );
+          bookData = await response.json();
 
-        document.getElementById("book-title").textContent = bookData.name;
-        document.getElementById("book-price").textContent =
-          bookData.price.toFixed(2);
-        document.getElementById("unit-price").textContent =
-          bookData.price.toFixed(2);
-        document.getElementById("total-price").textContent =
-          bookData.price.toFixed(2);
-        document.getElementById("book-image").src = bookData.image;
+          // Make sure we have valid price data
+          if (!bookData || typeof bookData.price !== "number") {
+            throw new Error("Invalid book data received");
+          }
+
+          document.getElementById("book-title").textContent = bookData.name;
+          document.getElementById("book-price").textContent =
+            bookData.price.toFixed(2);
+          document.getElementById("unit-price").textContent =
+            bookData.price.toFixed(2);
+          document.getElementById("total-price").textContent =
+            bookData.price.toFixed(2);
+          document.getElementById("book-image").src = bookData.image;
+
+          console.log("Book data loaded:", bookData); // Debug log
+        } catch (error) {
+          console.error("Error fetching book details:", error);
+          alert("Error loading book details. Please try again.");
+        }
       };
 
       // Update quantity and total price
