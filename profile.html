@@ -14,26 +14,24 @@
 
     <div class="container">
         <h2>User Profile</h2>
-        <form id="profile-form">
-            <div class="mb-3">
-                <label for="name" class="form-label">Name</label>
-                <input type="text" class="form-control" id="name" required>
-            </div>
-            <div class="mb-3">
-                <label for="email" class="form-label">Email</label>
-                <input type="email" class="form-control" id="email" required>
-            </div>
-            <div class="mb-3">
-                <label for="role" class="form-label">Role</label>
-                <input type="text" class="form-control" id="role" readonly>
-            </div>
-            <div class="mb-3">
-                <label for="password" class="form-label">Password</label>
-                <input type="password" class="form-control" id="password">
-                <small class="form-text text-muted">Leave blank to keep current password.</small>
-            </div>
-            <button type="submit" class="btn btn-primary">Update Profile</button>
-        </form>
+        <div class="mb-3">
+            <label class="form-label">Name</label>
+            <p id="name" class="form-control-plaintext">Guest</p>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Email</label>
+            <p id="email" class="form-control-plaintext">guest@example.com</p>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Role</label>
+            <p id="role" class="form-control-plaintext">User</p>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Password</label>
+            <p class="form-control-plaintext">********</p>
+            <small class="form-text text-muted">Leave blank to keep current password.</small>
+        </div>
+        <button id="edit-button" class="btn btn-primary">Edit Profile</button>
     </div>
 
     <footer>
@@ -49,36 +47,17 @@
         const token = localStorage.getItem('token');
         if (token) {
             const tokenPayload = JSON.parse(atob(token.split('.')[1]));
-            document.getElementById('name').value = tokenPayload.name;
-            document.getElementById('email').value = tokenPayload.email;
-            document.getElementById('role').value = tokenPayload.role;
+            document.getElementById('name').textContent = tokenPayload.name;
+            document.getElementById('email').textContent = tokenPayload.email;
+            document.getElementById('role').textContent = tokenPayload.role;
         } else {
             alert('You need to log in to view this page.');
             window.location.href = 'login.html'; // Redirect to login if not logged in
         }
 
-        // Handle profile form submission
-        document.getElementById('profile-form').addEventListener('submit', async (event) => {
-            event.preventDefault();
-            const name = document.getElementById('name').value;
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-
-            const response = await fetch('https://elibrary-1rh1.onrender.com/api/updateProfile', {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ name, email, password })
-            });
-
-            if (response.ok) {
-                alert('Profile updated successfully!');
-                window.location.reload(); // Reload the page to reflect changes
-            } else {
-                alert('Failed to update profile. Please try again.');
-            }
+        // Handle edit button click
+        document.getElementById('edit-button').addEventListener('click', () => {
+            window.location.href = 'edit-profile.html'; // Redirect to an edit profile page (you can create this page)
         });
     </script>
 </body>
