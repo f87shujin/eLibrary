@@ -88,12 +88,13 @@ app.post('/api/login', async (req, res) => {
     const user = await User.findOne({ email });
 
     if (!user) {
+        console.log('User not found:', email); // Log if user is not found
         return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    // Check if the password matches
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
+    // Compare the plain text password directly
+    if (password !== user.password) {
+        console.log('Password does not match for user:', email); // Log if password does not match
         return res.status(401).json({ message: 'Invalid credentials' });
     }
 
@@ -101,14 +102,14 @@ app.post('/api/login', async (req, res) => {
     const token = jwt.sign(
         { 
             id: user._id, 
-            name: user.name, // Include name
-            email: user.email, // Include email
-            role: user.role  // Include role
+            name: user.name, 
+            email: user.email, 
+            role: user.role  
         }, 
         'your_jwt_secret', 
         { expiresIn: '1h' }
     );
-    
+
     res.json({ token });
 });
 
