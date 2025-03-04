@@ -75,6 +75,7 @@
 <script>
     // Check if user is logged in
     const token = localStorage.getItem('token');
+    console.log('Token:', token); // Log the token to see if it's being retrieved
     if (token) {
         // Decode the JWT token to get user name
         const tokenPayload = JSON.parse(atob(token.split('.')[1]));
