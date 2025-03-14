@@ -1,11 +1,10 @@
-// Store API key
-const API_KEY = 'AIzaSyBmwLJ7A0GwAXpao_EdMhnNdkangS6MSwA'; // Replace with your actual API key
-
+// Remove unused API key
 document.addEventListener('DOMContentLoaded', function() {
     const sendButton = document.getElementById('send-button');
     const userInput = document.getElementById('user-input');
-
-    // Remove unused API_KEY since we're using local Ollama
+    
+    // Add a check for local API availability on load
+    checkLibrarianAPI();
     
     sendButton.addEventListener('click', sendMessage);
     userInput.addEventListener('keypress', function(e) {
@@ -15,6 +14,20 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
+// Function to check if the librarian API is available
+async function checkLibrarianAPI() {
+    try {
+        const response = await fetch('http://127.0.0.1:3000/health');
+        const data = await response.json();
+        if (data.status === 'ok') {
+            console.log('Librarian API is available:', data.ollama_version);
+        }
+    } catch (error) {
+        console.error('Librarian API is not available:', error);
+        showError('Please make sure the Librarian API is running locally on your computer (http://127.0.0.1:3000)');
+    }
+}
+
 async function sendMessage() {
     const userInput = document.getElementById('user-input');
     const chatBox = document.getElementById('chat-box');
@@ -23,38 +36,45 @@ async function sendMessage() {
     if (!message) return;
 
     try {
-        // Show user message
         appendMessage('user', message);
         userInput.value = '';
 
-        // Show loading state
         const loadingDiv = showLoading();
 
-        // Make API request to the local Ollama model
-        const response = await fetch('http://127.0.0.1:3000/api/librarian', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ message })
-        });
+        // Try to connect to local API
+        try {
+            const response = await fetch('http://127.0.0.1:3000/api/librarian', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ message })
+            });
 
-        // Remove loading indicator
-        loadingDiv.remove();
+            loadingDiv.remove();
 
-        if (!response.ok) {
-            throw new Error(`API Error: ${response.status}`);
+            if (!response.ok) {
+                throw new Error(`API Error: ${response.status}`);
+            }
+
+            const data = await response.json();
+            const aiResponse = data.response || 'No response received';
+            appendMessage('ai', aiResponse);
+
+        } catch (apiError) {
+            loadingDiv.remove();
+            console.error('API Error:', apiError);
+            showError(`
+                Unable to connect to the Librarian API. Please ensure:
+                1. The librarian server is running on your computer
+                2. You're running 'node librarian.js' in your terminal
+                3. Your computer's port 3000 is available
+            `);
         }
-
-        const data = await response.json();
-        
-        // Show AI response - handle potential markdown formatting
-        const aiResponse = data.response || 'No response received';
-        appendMessage('ai', aiResponse);
 
     } catch (error) {
         console.error('Chat Error:', error);
-        showError('Sorry, there was an error connecting to the librarian. Make sure the server is running on localhost:3000');
+        showError('An unexpected error occurred. Please check the console for details.');
     }
 }
 
