@@ -5,6 +5,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const sendButton = document.getElementById('send-button');
     const userInput = document.getElementById('user-input');
 
+    // Remove unused API_KEY since we're using local Ollama
+    
     sendButton.addEventListener('click', sendMessage);
     userInput.addEventListener('keypress', function(e) {
         if (e.key === 'Enter') {
@@ -29,12 +31,12 @@ async function sendMessage() {
         const loadingDiv = showLoading();
 
         // Make API request to the local Ollama model
-        const response = await fetch('http://localhost:3000/api/librarian', { // Update to your local API
+        const response = await fetch('http://127.0.0.1:3000/api/librarian', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ message }) // Send the user message
+            body: JSON.stringify({ message })
         });
 
         // Remove loading indicator
@@ -45,13 +47,14 @@ async function sendMessage() {
         }
 
         const data = await response.json();
-
-        // Show AI response
-        appendMessage('ai', data.response);
+        
+        // Show AI response - handle potential markdown formatting
+        const aiResponse = data.response || 'No response received';
+        appendMessage('ai', aiResponse);
 
     } catch (error) {
         console.error('Chat Error:', error);
-        showError('Sorry, there was an error processing your request. Please try again.');
+        showError('Sorry, there was an error connecting to the librarian. Make sure the server is running on localhost:3000');
     }
 }
 

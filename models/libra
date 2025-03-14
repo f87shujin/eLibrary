@@ -1,4 +1,4 @@
-FROM llama3.2  # Utilise le modèle de base Llama 3 (ou un autre modèle compatible)
+FROM llama3.2  
 
 # Paramètres du modèle
 PARAMETER temperature 0.7
