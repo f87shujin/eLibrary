@@ -37,6 +37,7 @@ app.use(bodyParser.json());
 // Function to fetch books from your main server
 async function fetchBooks() {
     try {
+        // Using your deployed server URL
         const response = await axios.get('https://elibrary-1rh1.onrender.com/api/books');
         return response.data;
     } catch (error) {
@@ -56,6 +57,10 @@ app.post('/api/librarian', async (req, res) => {
         // Fetch books first
         const books = await fetchBooks();
         
+        if (!books || books.length === 0) {
+            console.warn('No books fetched from the library');
+        }
+        
         // Create a context message with the books data
         const booksContext = books.map(book => 
             `"${book.name}" (Price: $${book.price}) - ${book.description}`
@@ -64,11 +69,14 @@ app.post('/api/librarian', async (req, res) => {
         // Prepare the full prompt with context
         const contextPrompt = `Here is our library catalog:\n${booksContext}\n\nUser question: ${userMessage}`;
 
+        // Escape special characters in the prompt
+        const escapedPrompt = contextPrompt.replace(/"/g, '\\"');
+
         // Run Ollama with the context
-        exec(`ollama run Toshokan "${contextPrompt}"`, (error, stdout, stderr) => {
+        exec(`ollama run Toshokan "${escapedPrompt}"`, (error, stdout, stderr) => {
             if (error) {
-                console.error(`Error executing command:`, error);
-                return res.status(500).json({ error: 'Error processing request' });
+                console.error(`Error executing Ollama:`, error);
+                return res.status(500).json({ error: 'Error processing request with AI model' });
             }
             res.json({ response: stdout.trim() });
         });
@@ -79,24 +87,42 @@ app.post('/api/librarian', async (req, res) => {
     }
 });
 
-// Add a simple status check that also verifies Ollama is installed
+// Health check endpoint
 app.get('/health', async (req, res) => {
-    exec('ollama --version', (error, stdout, stderr) => {
-        if (error) {
-            return res.status(500).json({ 
-                status: 'error',
-                message: 'Ollama not available',
-                error: error.message
+    try {
+        exec('ollama --version', (error, stdout, stderr) => {
+            if (error) {
+                return res.status(500).json({ 
+                    status: 'error',
+                    message: 'Ollama not available',
+                    error: error.message
+                });
+            }
+            res.json({ 
+                status: 'ok',
+                ollama_version: stdout.trim()
             });
-        }
-        res.json({ 
-            status: 'ok',
-            ollama_version: stdout.trim()
         });
-    });
+    } catch (error) {
+        res.status(500).json({ 
+            status: 'error',
+            message: 'Health check failed',
+            error: error.message
+        });
+    }
 });
 
 // Change the listen call to bind to localhost only
 app.listen(PORT, HOST, () => {
     console.log(`Server is running on http://${HOST}:${PORT}`);
+    console.log('Make sure Ollama is installed and running!');
+});
+
+// Error handling for uncaught exceptions
+process.on('uncaughtException', (error) => {
+    console.error('Uncaught Exception:', error);
+});
+
+process.on('unhandledRejection', (error) => {
+    console.error('Unhandled Rejection:', error);
 }); 
