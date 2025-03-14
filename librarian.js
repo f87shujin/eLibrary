@@ -11,7 +11,7 @@ app.post('/api/librarian', (req, res) => {
     const userMessage = req.body.message;
 
     // Command to run the Ollama model
-    const command = `ollama run Librarian "${userMessage}"`;
+    const command = `ollama run Toshokan "${userMessage}"`;
 
     exec(command, (error, stdout, stderr) => {
         if (error) {
