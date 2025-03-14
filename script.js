@@ -28,25 +28,13 @@ async function sendMessage() {
         // Show loading state
         const loadingDiv = showLoading();
 
-        // Make API request
-        const response = await fetch('https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=' + API_KEY, {
+        // Make API request to the local Ollama model
+        const response = await fetch('http://localhost:3000/api/librarian', { // Update to your local API
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({
-                contents: [{
-                    parts: [{
-                        text: message
-                    }]
-                }],
-                generationConfig: {
-                    temperature: 0.9,
-                    topK: 1,
-                    topP: 1,
-                    maxOutputTokens: 2048,
-                }
-            })
+            body: JSON.stringify({ message }) // Send the user message
         });
 
         // Remove loading indicator
@@ -58,12 +46,8 @@ async function sendMessage() {
 
         const data = await response.json();
 
-        if (!data.candidates || !data.candidates[0]?.content?.parts?.[0]?.text) {
-            throw new Error('Invalid API response format');
-        }
-
         // Show AI response
-        appendMessage('ai', data.candidates[0].content.parts[0].text);
+        appendMessage('ai', data.response);
 
     } catch (error) {
         console.error('Chat Error:', error);
