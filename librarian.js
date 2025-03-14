@@ -37,7 +37,7 @@ app.use(bodyParser.json());
 // Function to fetch books from your main server
 async function fetchBooks() {
     try {
-        const response = await axios.get('http://localhost:10000/api/books');
+        const response = await axios.get('https://elibrary-1rh1.onrender.com/api/books');
         return response.data;
     } catch (error) {
         console.error('Error fetching books:', error);
