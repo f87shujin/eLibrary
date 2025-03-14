@@ -69,21 +69,32 @@ app.post('/api/librarian', async (req, res) => {
         // Prepare the full prompt with context
         const contextPrompt = `Here is our library catalog:\n${booksContext}\n\nUser question: ${userMessage}`;
 
-        // Escape special characters in the prompt
-        const escapedPrompt = contextPrompt.replace(/"/g, '\\"');
+        // Add timeout to the exec command
+        const execPromise = new Promise((resolve, reject) => {
+            const process = exec(`ollama run Toshokan "${contextPrompt}"`, (error, stdout, stderr) => {
+                if (error) {
+                    reject(error);
+                    return;
+                }
+                resolve(stdout.trim());
+            });
 
-        // Run Ollama with the context
-        exec(`ollama run Toshokan "${escapedPrompt}"`, (error, stdout, stderr) => {
-            if (error) {
-                console.error(`Error executing Ollama:`, error);
-                return res.status(500).json({ error: 'Error processing request with AI model' });
-            }
-            res.json({ response: stdout.trim() });
+            // Add timeout of 30 seconds
+            setTimeout(() => {
+                process.kill();
+                reject(new Error('Request timed out after 30 seconds'));
+            }, 30000);
         });
+
+        const response = await execPromise;
+        res.json({ response });
 
     } catch (error) {
         console.error('Error:', error);
-        res.status(500).json({ error: 'Error processing request' });
+        res.status(500).json({ 
+            error: 'Error processing request',
+            details: error.message
+        });
     }
 });
 
@@ -110,6 +121,11 @@ app.get('/health', async (req, res) => {
             error: error.message
         });
     }
+});
+
+// Add a test endpoint that doesn't use Ollama
+app.get('/test', (req, res) => {
+    res.json({ message: 'API is working' });
 });
 
 // Change the listen call to bind to localhost only

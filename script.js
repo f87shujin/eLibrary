@@ -24,7 +24,16 @@ async function checkLibrarianAPI() {
         }
     } catch (error) {
         console.error('Librarian API is not available:', error);
-        showError('Please make sure the Librarian API is running locally on your computer (http://127.0.0.1:3000)');
+        showError(`
+            Please follow these steps to connect to the local API:
+            1. Make sure the Librarian API is running (node librarian.js)
+            2. In Opera, click the shield icon in the address bar
+            3. Select "Site Settings"
+            4. Find "Insecure content" and set it to "Allow"
+            5. Refresh the page
+            
+            If you still see this error, check if the API is running at http://127.0.0.1:3000
+        `);
     }
 }
 
@@ -41,14 +50,16 @@ async function sendMessage() {
 
         const loadingDiv = showLoading();
 
-        // Try to connect to local API
         try {
             const response = await fetch('http://127.0.0.1:3000/api/librarian', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ message })
+                body: JSON.stringify({ message }),
+                // Add these settings for Opera
+                mode: 'cors',
+                cache: 'no-cache',
             });
 
             loadingDiv.remove();
@@ -65,10 +76,16 @@ async function sendMessage() {
             loadingDiv.remove();
             console.error('API Error:', apiError);
             showError(`
-                Unable to connect to the Librarian API. Please ensure:
-                1. The librarian server is running on your computer
-                2. You're running 'node librarian.js' in your terminal
-                3. Your computer's port 3000 is available
+                Unable to connect to the Librarian API. For Opera users:
+                1. Click the shield icon in the address bar
+                2. Select "Site Settings"
+                3. Find "Insecure content" and set it to "Allow"
+                4. Refresh the page
+                
+                Also ensure:
+                - The librarian server is running on your computer
+                - You're running 'node librarian.js' in your terminal
+                - Port 3000 is available
             `);
         }
 
