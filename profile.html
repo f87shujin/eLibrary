@@ -6,35 +6,42 @@
     <title>Profile</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="dark-theme.css">
+    <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <header>
         <div id="header"></div>
     </header>
 
-    <div class="container">
-        <h2>User Profile</h2>
-        <div class="mb-3">
-            <label class="form-label">Name</label>
-            <p id="name" class="form-control-plaintext">Loading...</p>
-            <button class="btn btn-secondary btn-sm" onclick="editField('name')">Edit</button>
+    <div class="library-container">
+        <h2 class="library-title">Your Profile</h2>
+        <div class="decorative-line"></div>
+        <div class="library-card">
+            <div class="profile-info">
+                <div class="mb-3">
+                    <label class="form-label">Name</label>
+                    <p id="name" class="form-control-plaintext">Loading...</p>
+                    <button class="btn btn-secondary btn-sm" onclick="editField('name')">Edit</button>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Email</label>
+                    <p id="email" class="form-control-plaintext">Loading...</p>
+                    <button class="btn btn-secondary btn-sm" onclick="editField('email')">Edit</button>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Role</label>
+                    <p id="role" class="form-control-plaintext">Loading...</p>
+                    <button class="btn btn-secondary btn-sm" onclick="editField('role')">Edit</button>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Password</label>
+                    <p class="form-control-plaintext">********</p>
+                    <small class="form-text text-muted">Leave blank to keep current password.</small>
+                </div>
+                <button id="update-button" class="btn btn-primary">Update Profile</button>
+            </div>
         </div>
-        <div class="mb-3">
-            <label class="form-label">Email</label>
-            <p id="email" class="form-control-plaintext">Loading...</p>
-            <button class="btn btn-secondary btn-sm" onclick="editField('email')">Edit</button>
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Role</label>
-            <p id="role" class="form-control-plaintext">Loading...</p>
-            <button class="btn btn-secondary btn-sm" onclick="editField('role')">Edit</button>
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Password</label>
-            <p class="form-control-plaintext">********</p>
-            <small class="form-text text-muted">Leave blank to keep current password.</small>
-        </div>
-        <button id="update-button" class="btn btn-primary">Update Profile</button>
     </div>
 
     <footer>

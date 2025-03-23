@@ -58,3 +58,93 @@
     border-radius: 20px;
     margin-left: 10px;
 }
+
+/* Common Library Theme Styles */
+:root {
+    --library-primary: rgba(44, 54, 57, 0.9);
+    --library-secondary: rgba(63, 78, 79, 0.95);
+    --library-accent: #A27B5C;
+    --library-text: #DCD7C9;
+    --shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+body {
+    font-family: 'Libre Baskerville', serif;
+    background-image: url('woodbg.jpg');
+    background-size: cover;
+    background-attachment: fixed;
+    background-position: center;
+    color: var(--library-text);
+    min-height: 100vh;
+}
+
+.library-container {
+    background-color: var(--library-primary);
+    border-radius: 15px;
+    padding: 30px;
+    margin: 40px auto;
+    box-shadow: var(--shadow);
+    border: 2px solid var(--library-accent);
+    max-width: 1200px;
+}
+
+.library-card {
+    background-color: var(--library-secondary);
+    border-radius: 10px;
+    padding: 20px;
+    margin: 20px 0;
+    border: 1px solid var(--library-accent);
+    box-shadow: var(--shadow);
+    transition: transform 0.3s ease;
+}
+
+.library-card:hover {
+    transform: translateY(-5px);
+}
+
+.library-title {
+    font-family: 'Playfair Display', serif;
+    color: var(--library-accent);
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 2.5rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.library-input {
+    background-color: rgba(220, 215, 201, 0.1);
+    border: 1px solid var(--library-accent);
+    color: var(--library-text);
+    padding: 10px 15px;
+    border-radius: 5px;
+    width: 100%;
+    margin-bottom: 15px;
+}
+
+.library-input:focus {
+    outline: none;
+    border-color: #DCD7C9;
+    box-shadow: 0 0 5px rgba(220, 215, 201, 0.5);
+}
+
+.library-btn {
+    background-color: var(--library-accent);
+    color: var(--library-text);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.library-btn:hover {
+    background-color: #8B6B4D;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+}
+
+.decorative-line {
+    height: 2px;
+    background: linear-gradient(to right, transparent, var(--library-accent), transparent);
+    margin: 20px 0;
+}
