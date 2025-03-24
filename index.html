@@ -9,101 +9,28 @@
     <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
     <style>
-        html, body {
-            height: 100%; 
-            margin: 0; /* Remove default margin */
-        }
-        body {
-            display: flex;
-            flex-direction: column; /* Stack children vertically */
-        }
-        .content {
-            flex: 1; /* Allow content to grow and fill space */
-        }
         .product-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 25px;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
             padding: 20px;
         }
         .product-card {
-            background-color: var(--library-secondary);
             border: 1px solid var(--library-accent);
-            border-radius: 10px;
-            padding: 20px;
+            padding: 15px;
             text-align: center;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        .product-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+            background-color: var(--library-secondary);
+            border-radius: 10px;
         }
         .product-card img {
             max-width: 100%;
             height: auto;
-            border-radius: 5px;
-            margin-bottom: 15px;
-        }
-        .product-card h3 {
-            color: var(--library-text);
-            font-size: 1.2rem;
-            margin-bottom: 10px;
-        }
-        .product-card p {
-            color: var(--library-accent);
-            font-weight: bold;
-            margin-bottom: 15px;
         }
         .search-container {
-            background-color: var(--library-secondary);
             padding: 20px;
+            background-color: var(--library-secondary);
             border-radius: 10px;
-            margin-bottom: 30px;
-            border: 1px solid var(--library-accent);
-        }
-        .search-container input {
-            background-color: rgba(220, 215, 201, 0.1);
-            border: 1px solid var(--library-accent);
-            color: var(--library-text);
-            padding: 12px 20px;
-            border-radius: 8px;
-        }
-        .search-container input::placeholder {
-            color: rgba(220, 215, 201, 0.6);
-        }
-        .book-buttons {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-        }
-        .book-buttons button {
-            padding: 8px 20px;
-            border-radius: 5px;
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        .book-buttons .btn-primary {
-            background-color: var(--library-accent);
-            color: var(--library-text);
-        }
-        .book-buttons .btn-primary:hover {
-            background-color: #8B6B4D;
-            transform: translateY(-2px);
-        }
-        footer {
-            background-color: #333;
-            color: white;
-            padding: 20px 0;
-            margin-top: 50px;
-        }
-        footer a {
-            color: white;
-            margin: 0 10px;
-            text-decoration: none;
-        }
-        footer a:hover {
-            text-decoration: underline;
+            margin: 20px;
         }
     </style>
 </head>
@@ -112,22 +39,17 @@
         <div id="header"></div>
     </header>
 
-    <div class="library-container">
-        <h2 class="library-title">Welcome to eLibrary</h2>
-        <div class="decorative-line"></div>
-
-        <!-- Search Section -->
-        <div class="search-container">
-            <div class="input-group">
-                <input type="text" class="form-control" placeholder="Search for books...">
-                <button class="library-btn">Search</button>
-            </div>
+    <!-- Search Container -->
+    <div class="search-container">
+        <div class="input-group">
+            <input type="text" class="form-control" placeholder="Search for books...">
+            <button class="btn btn-primary">Search</button>
         </div>
+    </div>
 
-        <!-- Books Grid -->
-        <div class="product-grid" id="books-container">
-            <!-- Books will be dynamically inserted here -->
-        </div>
+    <!-- Books Grid -->
+    <div class="product-grid" id="books-container">
+        <!-- Books will be dynamically inserted here -->
     </div>
 
     <footer>
