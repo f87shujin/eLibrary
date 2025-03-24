@@ -76,35 +76,18 @@ body {
     background-position: center;
     color: var(--library-text);
     min-height: 100vh;
-<<<<<<< HEAD
-    position: relative;
-}
-
-body::before {
-    content: none;
-}
-
-/* Remove or comment out these styles */
-/* .library-container {
-    position: relative;
-    z-index: 1;
-    background-color: rgba(44, 54, 57, 0.85);
-    backdrop-filter: blur(5px);
-=======
     margin: 0;
     padding: 0;
 }
 
 .library-container {
     background-color: var(--library-primary);
->>>>>>> parent of e854397 (Workaround the background cutting off in the main page)
     border-radius: 15px;
     padding: 30px;
     margin: 40px auto;
     box-shadow: var(--shadow);
     border: 2px solid var(--library-accent);
-    max-width: 1200px;
-} */
+}
 
 .library-card {
     background-color: var(--library-secondary);
@@ -165,7 +148,6 @@ body::before {
     height: 2px;
     background: linear-gradient(to right, transparent, var(--library-accent), transparent);
     margin: 20px 0;
-<<<<<<< HEAD
 }
 
 .book-card {
@@ -241,6 +223,4 @@ button,
 input {
     position: relative;
     z-index: 2;
-=======
->>>>>>> parent of e854397 (Workaround the background cutting off in the main page)
 }

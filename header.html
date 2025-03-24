@@ -159,18 +159,6 @@
                             <i class="fas fa-comments me-1"></i>Chatbot
                         </a>
                     </li>
-<<<<<<< HEAD
-                </ul>
-                <ul class="navbar-nav ms-auto">
-                    <!-- Show when user is NOT logged in -->
-                    <li class="nav-item" id="signup-link">
-                        <a class="nav-link" href="register.html">Sign Up</a>
-                    </li>
-                    
-                    <!-- Show only when user is logged in -->
-                    <li class="nav-item" id="profile-link" style="display: none;">
-                        <a class="nav-link" href="profile.html">Profile</a>
-=======
                     <li class="nav-item">
                         <a class="nav-link" href="admin.html">
                             <i class="fas fa-user-shield me-1"></i>Admin
@@ -187,7 +175,6 @@
                         <a class="nav-link" href="https://f87shujin.github.io/eLibrary/register">
                             <i class="fas fa-user-plus me-1"></i>Sign Up
                         </a>
->>>>>>> parent of 485471c (Sessions update 1)
                     </li>
                     
                     <!-- Show only when user is admin -->
@@ -208,7 +195,6 @@
 </header>
 
 <script>
-<<<<<<< HEAD
     // Check authentication status when page loads
     document.addEventListener('DOMContentLoaded', function() {
         const token = localStorage.getItem('token');
@@ -252,17 +238,6 @@
             console.log('Not logged in');
         }
     });
-=======
-    // Check if user is logged in
-    const token = localStorage.getItem('token');
-    console.log('Token:', token); // Log the token to see if it's being retrieved
-    if (token) {
-        // Decode the JWT token to get user name
-        const tokenPayload = JSON.parse(atob(token.split('.')[1]));
-        document.getElementById('profile-link').textContent = tokenPayload.name; // Set the name in the profile link
-    }
-
->>>>>>> parent of 485471c (Sessions update 1)
 </script>
 
 <div class="content-container">
