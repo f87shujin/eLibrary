@@ -34,12 +34,25 @@
     <div class="library-container">
         <h2 class="library-title">Your Cart</h2>
         <div class="decorative-line"></div>
-        <div id="cart-items" class="mt-4">
+        
+        <div id="cart-items" class="mb-4">
             <!-- Cart items will be dynamically inserted here -->
         </div>
-        <div class="cart-summary">
-            <h4>Total: $<span id="cart-total">0.00</span></h4>
-            <button id="checkout-btn" class="library-btn w-100 mt-3">Proceed to Checkout</button>
+        
+        <div class="library-card">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h4 class="mb-0">Total Amount:</h4>
+                    <p class="h2 mb-0" style="color: var(--library-accent)">
+                        $<span id="cart-total">0.00</span>
+                    </p>
+                </div>
+                <div class="col-md-6 text-md-end mt-3 mt-md-0">
+                    <button id="checkout-btn" class="library-btn">
+                        <i class="fas fa-shopping-cart me-2"></i>Proceed to Checkout
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 

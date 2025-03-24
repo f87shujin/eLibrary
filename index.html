@@ -72,8 +72,29 @@
 
     <!-- Product Grid -->
     <div class="container content">
-        <div class="product-grid" id="product-grid">
-            <!-- Products will be dynamically inserted here -->
+        <div class="library-container">
+            <h1 class="library-title">Welcome to eLibrary</h1>
+            <div class="decorative-line"></div>
+            
+            <!-- Search Section -->
+            <div class="library-card">
+                <div class="input-group mb-4">
+                    <input type="text" class="library-input" placeholder="Search for books...">
+                    <button class="library-btn ms-2">Search</button>
+                </div>
+            </div>
+
+            <!-- Books Grid -->
+            <div class="book-grid" id="books-container">
+                <!-- Book cards will be dynamically inserted here -->
+            </div>
+
+            <!-- Loading indicator -->
+            <div id="loading-indicator" class="text-center" style="display: none;">
+                <div class="spinner-border text-accent" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
         </div>
     </div>
 

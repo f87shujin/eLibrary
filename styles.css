@@ -68,23 +68,41 @@
     --shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
-body {
-    font-family: 'Libre Baskerville', serif;
-    background-image: url('woodbg.jpg') !important;
-    background-size: cover;
-    background-attachment: fixed;
-    background-position: center;
-    color: var(--library-text);
-    min-height: 100vh;
+html, body {
+    min-height: 100%;
     margin: 0;
     padding: 0;
 }
 
+body {
+    font-family: 'Libre Baskerville', serif;
+    background-image: url('woodbg.jpg');
+    background-size: cover;
+    background-attachment: fixed;
+    background-position: center;
+    color: var(--library-text);
+    position: relative;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 0;
+}
+
 .library-container {
-    background-color: var(--library-primary);
+    position: relative;
+    z-index: 1;
+    background-color: rgba(44, 54, 57, 0.85);
+    backdrop-filter: blur(5px);
     border-radius: 15px;
     padding: 30px;
-    margin: 40px auto;
+    margin: 20px auto;
     box-shadow: var(--shadow);
     border: 2px solid var(--library-accent);
     max-width: 1200px;
@@ -93,7 +111,7 @@ body {
 .library-card {
     background-color: var(--library-secondary);
     border-radius: 10px;
-    padding: 20px;
+    padding: 25px;
     margin: 20px 0;
     border: 1px solid var(--library-accent);
     box-shadow: var(--shadow);
@@ -108,8 +126,8 @@ body {
     font-family: 'Playfair Display', serif;
     color: var(--library-accent);
     text-align: center;
-    margin-bottom: 30px;
     font-size: 2.5rem;
+    margin-bottom: 20px;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
 
@@ -117,10 +135,11 @@ body {
     background-color: rgba(220, 215, 201, 0.1);
     border: 1px solid var(--library-accent);
     color: var(--library-text);
-    padding: 10px 15px;
-    border-radius: 5px;
+    padding: 12px 20px;
+    border-radius: 8px;
     width: 100%;
     margin-bottom: 15px;
+    font-size: 1rem;
 }
 
 .library-input:focus {
@@ -133,10 +152,11 @@ body {
     background-color: var(--library-accent);
     color: var(--library-text);
     border: none;
-    padding: 10px 20px;
-    border-radius: 5px;
+    padding: 12px 25px;
+    border-radius: 8px;
     cursor: pointer;
     transition: all 0.3s ease;
+    font-weight: 500;
 }
 
 .library-btn:hover {
@@ -149,4 +169,63 @@ body {
     height: 2px;
     background: linear-gradient(to right, transparent, var(--library-accent), transparent);
     margin: 20px 0;
+}
+
+.book-card {
+    background-color: rgba(63, 78, 79, 0.9);
+    border: 1px solid var(--library-accent);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.book-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+.book-card img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 5px;
+    transition: transform 0.3s ease;
+}
+
+.book-card:hover img {
+    transform: scale(1.02);
+}
+
+.book-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 25px;
+    padding: 20px 0;
+}
+
+@keyframes loading {
+    0% { background-position: -200px 0; }
+    100% { background-position: 200px 0; }
+}
+
+.skeleton {
+    background: linear-gradient(90deg, 
+        rgba(255, 255, 255, 0.1) 25%, 
+        rgba(255, 255, 255, 0.2) 50%, 
+        rgba(255, 255, 255, 0.1) 75%);
+    background-size: 200px 100%;
+    animation: loading 1.5s infinite;
+}
+
+@media (max-width: 768px) {
+    .library-container {
+        margin: 10px;
+        padding: 20px;
+    }
+
+    .book-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 15px;
+    }
 }
