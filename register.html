@@ -6,6 +6,8 @@
     <title>Register</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="dark-theme.css">
+    <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <!-- Header -->
@@ -13,30 +15,30 @@
         <div id="header"></div>
     </header>
 
-    <div class="container">
-        <h2>Register</h2>
-        <form id="register-form">
+    <div class="library-container" style="max-width: 500px;">
+        <h2 class="library-title">Register</h2>
+        <div class="decorative-line"></div>
+        <form id="register-form" class="library-card">
             <div class="mb-3">
-                <label for="name" class="form-label">Name</label>
-                <input type="text" class="form-control" id="name" required>
+                <input type="text" class="library-input" id="name" placeholder="Full Name" required>
             </div>
             <div class="mb-3">
-                <label for="email" class="form-label">Email</label>
-                <input type="email" class="form-control" id="email" required>
+                <input type="email" class="library-input" id="email" placeholder="Email" required>
             </div>
             <div class="mb-3">
-                <label for="password" class="form-label">Password</label>
-                <input type="password" class="form-control" id="password" required>
+                <input type="password" class="library-input" id="password" placeholder="Password" required>
             </div>
             <div class="mb-3">
-                <label for="role" class="form-label">Role</label>
-                <select class="form-control" id="role" required>
+                <select class="library-input" id="role" required>
+                    <option value="" disabled selected>Select Role</option>
                     <option value="user">User</option>
                     <option value="admin">Admin</option>
                 </select>
             </div>
-            <button type="submit" class="btn btn-primary">Register</button>
-            <a href="login.html" class="btn btn-link">Already have an account? Login</a>
+            <button type="submit" class="library-btn w-100">Register</button>
+            <div class="text-center mt-3">
+                <a href="login.html" class="text-decoration-none" style="color: var(--library-accent);">Already have an account? Login</a>
+            </div>
         </form>
     </div>
 
@@ -74,8 +76,9 @@
                 alert('Registration failed. Please try again.');
             }
         });
-           // Function to load HTML content
-           function loadHTML(elementId, filePath) {
+
+        // Function to load HTML content
+        function loadHTML(elementId, filePath) {
             fetch(filePath)
                 .then(response => {
                     if (!response.ok) {
