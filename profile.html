@@ -17,47 +17,29 @@
     <div class="library-container">
         <h2 class="library-title">Your Profile</h2>
         <div class="decorative-line"></div>
-        
-        <div class="row">
-            <div class="col-md-4">
-                <div class="library-card text-center">
-                    <div class="mb-4">
-                        <img src="default-avatar.png" alt="Profile" 
-                             class="rounded-circle" style="width: 150px; height: 150px;">
-                    </div>
-                    <h3 id="user-name" class="h4 mb-3">John Doe</h3>
-                    <p id="user-email" class="text-muted">john@example.com</p>
+        <div class="library-card">
+            <div class="profile-info">
+                <div class="mb-3">
+                    <label class="form-label">Name</label>
+                    <p id="name" class="form-control-plaintext">Loading...</p>
+                    <button class="btn btn-secondary btn-sm" onclick="editField('name')">Edit</button>
                 </div>
-            </div>
-            
-            <div class="col-md-8">
-                <div class="library-card">
-                    <h3 class="h4 mb-4">Account Details</h3>
-                    <form id="profile-form">
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="form-label">Name</label>
-                                <input type="text" class="library-input" id="name">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Email</label>
-                                <input type="email" class="library-input" id="email" readonly>
-                            </div>
-                            <div class="col-12">
-                                <button type="submit" class="library-btn">
-                                    Update Profile
-                                </button>
-                            </div>
-                        </div>
-                    </form>
+                <div class="mb-3">
+                    <label class="form-label">Email</label>
+                    <p id="email" class="form-control-plaintext">Loading...</p>
+                    <button class="btn btn-secondary btn-sm" onclick="editField('email')">Edit</button>
                 </div>
-                
-                <div class="library-card mt-4">
-                    <h3 class="h4 mb-4">Recent Activity</h3>
-                    <div id="recent-activity">
-                        <!-- Activity items will be dynamically inserted here -->
-                    </div>
+                <div class="mb-3">
+                    <label class="form-label">Role</label>
+                    <p id="role" class="form-control-plaintext">Loading...</p>
+                    <button class="btn btn-secondary btn-sm" onclick="editField('role')">Edit</button>
                 </div>
+                <div class="mb-3">
+                    <label class="form-label">Password</label>
+                    <p class="form-control-plaintext">********</p>
+                    <small class="form-text text-muted">Leave blank to keep current password.</small>
+                </div>
+                <button id="update-button" class="btn btn-primary">Update Profile</button>
             </div>
         </div>
     </div>
@@ -103,8 +85,9 @@
                 return response.json();
             })
             .then(user => {
-                document.getElementById('user-name').textContent = user.name;
-                document.getElementById('user-email').textContent = user.email;
+                document.getElementById('name').textContent = user.name;
+                document.getElementById('email').textContent = user.email;
+                document.getElementById('role').textContent = user.role;
             })
             .catch(error => {
                 console.error('Error fetching user details:', error);
@@ -128,11 +111,11 @@
         }
 
         // Handle update button click
-        document.getElementById('profile-form').addEventListener('submit', (event) => {
-            event.preventDefault();
+        document.getElementById('update-button').addEventListener('click', () => {
             const token = localStorage.getItem('token');
-            const name = document.getElementById('name').value;
-            const email = document.getElementById('email').value;
+            const name = document.getElementById('name').querySelector('input')?.value || document.getElementById('name').textContent;
+            const email = document.getElementById('email').querySelector('input')?.value || document.getElementById('email').textContent;
+            const role = document.getElementById('role').querySelector('input')?.value || document.getElementById('role').textContent;
 
             fetch('https://elibrary-1rh1.onrender.com/api/updateProfile', {
                 method: 'PUT',
@@ -140,7 +123,7 @@
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ name, email })
+                body: JSON.stringify({ name, email, role })
             })
             .then(response => {
                 if (!response.ok) {

@@ -68,20 +68,15 @@
     --shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
-html, body {
-    min-height: 100%;
-    margin: 0;
-    padding: 0;
-}
-
 body {
     font-family: 'Libre Baskerville', serif;
-    background-image: url('woodbg.jpg');
+    background-image: url('woodbg.jpg') !important;
     background-size: cover;
     background-attachment: fixed;
     background-position: center;
     color: var(--library-text);
     min-height: 100vh;
+<<<<<<< HEAD
     position: relative;
 }
 
@@ -95,9 +90,17 @@ body::before {
     z-index: 1;
     background-color: rgba(44, 54, 57, 0.85);
     backdrop-filter: blur(5px);
+=======
+    margin: 0;
+    padding: 0;
+}
+
+.library-container {
+    background-color: var(--library-primary);
+>>>>>>> parent of e854397 (Workaround the background cutting off in the main page)
     border-radius: 15px;
     padding: 30px;
-    margin: 20px auto;
+    margin: 40px auto;
     box-shadow: var(--shadow);
     border: 2px solid var(--library-accent);
     max-width: 1200px;
@@ -106,7 +109,7 @@ body::before {
 .library-card {
     background-color: var(--library-secondary);
     border-radius: 10px;
-    padding: 25px;
+    padding: 20px;
     margin: 20px 0;
     border: 1px solid var(--library-accent);
     box-shadow: var(--shadow);
@@ -121,8 +124,8 @@ body::before {
     font-family: 'Playfair Display', serif;
     color: var(--library-accent);
     text-align: center;
+    margin-bottom: 30px;
     font-size: 2.5rem;
-    margin-bottom: 20px;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
 
@@ -130,11 +133,10 @@ body::before {
     background-color: rgba(220, 215, 201, 0.1);
     border: 1px solid var(--library-accent);
     color: var(--library-text);
-    padding: 12px 20px;
-    border-radius: 8px;
+    padding: 10px 15px;
+    border-radius: 5px;
     width: 100%;
     margin-bottom: 15px;
-    font-size: 1rem;
 }
 
 .library-input:focus {
@@ -147,11 +149,10 @@ body::before {
     background-color: var(--library-accent);
     color: var(--library-text);
     border: none;
-    padding: 12px 25px;
-    border-radius: 8px;
+    padding: 10px 20px;
+    border-radius: 5px;
     cursor: pointer;
     transition: all 0.3s ease;
-    font-weight: 500;
 }
 
 .library-btn:hover {
@@ -164,6 +165,7 @@ body::before {
     height: 2px;
     background: linear-gradient(to right, transparent, var(--library-accent), transparent);
     margin: 20px 0;
+<<<<<<< HEAD
 }
 
 .book-card {
@@ -239,4 +241,6 @@ button,
 input {
     position: relative;
     z-index: 2;
+=======
+>>>>>>> parent of e854397 (Workaround the background cutting off in the main page)
 }

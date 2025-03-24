@@ -18,26 +18,18 @@
     <div class="library-container" style="max-width: 500px;">
         <h2 class="library-title">Login</h2>
         <div class="decorative-line"></div>
-        
-        <div class="library-card">
-            <form id="login-form">
-                <div class="mb-4">
-                    <label class="form-label">Email Address</label>
-                    <input type="email" class="library-input" id="email" required>
-                </div>
-                <div class="mb-4">
-                    <label class="form-label">Password</label>
-                    <input type="password" class="library-input" id="password" required>
-                </div>
-                <button type="submit" class="library-btn w-100 mb-3">Sign In</button>
-                <div class="text-center">
-                    <a href="register.html" class="text-decoration-none" 
-                       style="color: var(--library-accent)">
-                       Need an account? Sign Up
-                    </a>
-                </div>
-            </form>
-        </div>
+        <form id="login-form" class="library-card">
+            <div class="mb-3">
+                <input type="email" class="library-input" id="email" placeholder="Email" required>
+            </div>
+            <div class="mb-3">
+                <input type="password" class="library-input" id="password" placeholder="Password" required>
+            </div>
+            <button type="submit" class="library-btn w-100">Login</button>
+            <div class="text-center mt-3">
+                <a href="register.html" class="text-decoration-none" style="color: var(--library-accent);">Need an account? Sign Up</a>
+            </div>
+        </form>
     </div>
 
     <!-- Footer -->
