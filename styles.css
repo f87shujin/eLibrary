@@ -95,7 +95,8 @@ body::before {
     z-index: 0;
 }
 
-.library-container {
+/* Remove or comment out these styles */
+/* .library-container {
     position: relative;
     z-index: 1;
     background-color: rgba(44, 54, 57, 0.85);
@@ -106,7 +107,7 @@ body::before {
     box-shadow: var(--shadow);
     border: 2px solid var(--library-accent);
     max-width: 1200px;
-}
+} */
 
 .library-card {
     background-color: var(--library-secondary);
