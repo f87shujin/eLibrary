@@ -31,10 +31,40 @@ app.use(express.static('public'));
 
 // API endpoint to get books with optional search query
 app.get('/api/books', async (req, res) => {
-    const { search } = req.query; // Get the search query from the request
+    const { search, sort, category } = req.query;
     try {
-        const query = search ? { name: { $regex: search, $options: 'i' } } : {}; // Create a search query
-        const books = await Book.find(query); // Find books based on the query
+        let query = {};
+        
+        // Add search filter if provided
+        if (search) {
+            query.name = { $regex: search, $options: 'i' };
+        }
+        
+        // Add category filter if provided
+        if (category && category !== 'all') {
+            query.category = category;
+        }
+
+        // Build sort object
+        let sortObj = {};
+        if (sort) {
+            switch (sort) {
+                case 'price-asc':
+                    sortObj = { price: 1 };
+                    break;
+                case 'price-desc':
+                    sortObj = { price: -1 };
+                    break;
+                case 'name-asc':
+                    sortObj = { name: 1 };
+                    break;
+                case 'name-desc':
+                    sortObj = { name: -1 };
+                    break;
+            }
+        }
+
+        const books = await Book.find(query).sort(sortObj);
         res.json(books);
     } catch (error) {
         console.error('Error fetching books:', error);
