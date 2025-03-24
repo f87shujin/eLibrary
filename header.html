@@ -155,20 +155,23 @@
                     <li class="nav-item">
                         <a class="nav-link" href="https://f87shujin.github.io/eLibrary/chat">Chatbot</a>
                     </li>
-                    <!-- Admin link will only show for admin users -->
-                    <li class="nav-item admin-only" style="display: none;">
-                        <a class="nav-link" href="admin.html">Admin</a>
-                    </li>
                 </ul>
                 <ul class="navbar-nav ms-auto">
-                    <!-- Profile link will show for logged-in users -->
-                    <li class="nav-item auth-only" style="display: none;">
-                        <a class="nav-link" id="profile-link" href="profile.html">Profile</a>
+                    <!-- Show when user is NOT logged in -->
+                    <li class="nav-item" id="signup-link">
+                        <a class="nav-link" href="register.html">Sign Up</a>
                     </li>
-                    <!-- Sign Up link will show for non-logged-in users -->
-                    <li class="nav-item no-auth-only" style="display: none;">
-                        <a class="nav-link" href="https://f87shujin.github.io/eLibrary/register">Sign Up</a>
+                    
+                    <!-- Show only when user is logged in -->
+                    <li class="nav-item" id="profile-link" style="display: none;">
+                        <a class="nav-link" href="profile.html">Profile</a>
                     </li>
+                    
+                    <!-- Show only when user is admin -->
+                    <li class="nav-item" id="admin-link" style="display: none;">
+                        <a class="nav-link" href="admin.html">Admin</a>
+                    </li>
+
                     <li class="nav-item cart-icon">
                         <a class="nav-link" href="cart.html">
                             <i class="fas fa-shopping-cart">cart</i>
@@ -181,61 +184,47 @@
 </header>
 
 <script>
-    // Function to check user authentication and role
-    function checkAuthStatus() {
+    // Check authentication status when page loads
+    document.addEventListener('DOMContentLoaded', function() {
         const token = localStorage.getItem('token');
-        const adminElements = document.querySelectorAll('.admin-only');
-        const authElements = document.querySelectorAll('.auth-only');
-        const noAuthElements = document.querySelectorAll('.no-auth-only');
+        const signupLink = document.getElementById('signup-link');
+        const profileLink = document.getElementById('profile-link');
+        const adminLink = document.getElementById('admin-link');
 
         if (token) {
             try {
-                // Decode the JWT token
+                // Decode the token
                 const tokenPayload = JSON.parse(atob(token.split('.')[1]));
                 
-                // Show/hide elements based on authentication
-                authElements.forEach(el => el.style.display = 'block');
-                noAuthElements.forEach(el => el.style.display = 'none');
-
-                // Update profile name if available
+                // Hide signup, show profile
+                signupLink.style.display = 'none';
+                profileLink.style.display = 'block';
+                
+                // Update profile link with user's name if available
                 if (tokenPayload.name) {
-                    document.getElementById('profile-link').textContent = tokenPayload.name;
+                    profileLink.querySelector('a').textContent = tokenPayload.name;
                 }
 
-                // Check for admin role
+                // Show admin link if user is admin
                 if (tokenPayload.role === 'admin') {
-                    adminElements.forEach(el => el.style.display = 'block');
-                } else {
-                    adminElements.forEach(el => el.style.display = 'none');
+                    adminLink.style.display = 'block';
                 }
+
+                console.log('Logged in as:', tokenPayload.name, 'Role:', tokenPayload.role);
             } catch (error) {
-                console.error('Error parsing token:', error);
-                // If token is invalid, treat as logged out
-                handleLoggedOut();
+                console.error('Invalid token:', error);
+                // If token is invalid, show only signup
+                signupLink.style.display = 'block';
+                profileLink.style.display = 'none';
+                adminLink.style.display = 'none';
+                localStorage.removeItem('token'); // Clear invalid token
             }
         } else {
-            handleLoggedOut();
-        }
-    }
-
-    // Handle logged out state
-    function handleLoggedOut() {
-        const adminElements = document.querySelectorAll('.admin-only');
-        const authElements = document.querySelectorAll('.auth-only');
-        const noAuthElements = document.querySelectorAll('.no-auth-only');
-
-        adminElements.forEach(el => el.style.display = 'none');
-        authElements.forEach(el => el.style.display = 'none');
-        noAuthElements.forEach(el => el.style.display = 'block');
-    }
-
-    // Check auth status when page loads
-    document.addEventListener('DOMContentLoaded', checkAuthStatus);
-
-    // Add listener for authentication changes
-    window.addEventListener('storage', function(e) {
-        if (e.key === 'token') {
-            checkAuthStatus();
+            // Not logged in, show only signup
+            signupLink.style.display = 'block';
+            profileLink.style.display = 'none';
+            adminLink.style.display = 'none';
+            console.log('Not logged in');
         }
     });
 </script>

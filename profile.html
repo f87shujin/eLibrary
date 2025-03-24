@@ -66,6 +66,8 @@
         <div id="footer"></div>
     </footer>
 
+    <button id="logout-btn" class="library-btn">Logout</button>
+
     <script>
        function loadHTML(elementId, filePath) {
         fetch(filePath)
@@ -152,6 +154,11 @@
                 console.error('Error updating profile:', error);
                 alert('Failed to update profile. Please try again.');
             });
+        });
+
+        document.getElementById('logout-btn').addEventListener('click', function() {
+            localStorage.removeItem('token');
+            window.location.href = 'index.html';
         });
     </script>
 </body>
