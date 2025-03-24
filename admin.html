@@ -73,12 +73,29 @@
     </footer>
 
     <script>
-        // Check if user is logged in as admin
-        const token = localStorage.getItem('token');
-        if (!token) {
-            alert('You are not authorized to access this page.');
-            window.location.href = 'login.html'; // Redirect to login page
-        }
+        // At the top of your admin.html script
+        document.addEventListener('DOMContentLoaded', function() {
+            const token = localStorage.getItem('token');
+            
+            if (!token) {
+                alert('Please login to access this page');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            try {
+                const tokenPayload = JSON.parse(atob(token.split('.')[1]));
+                if (tokenPayload.role !== 'admin') {
+                    alert('You do not have permission to access this page');
+                    window.location.href = 'index.html';
+                    return;
+                }
+            } catch (error) {
+                console.error('Error checking admin status:', error);
+                alert('Authentication error. Please login again.');
+                window.location.href = 'login.html';
+            }
+        });
 
         // Fetch admin content
         fetch('https://elibrary-1rh1.onrender.com/api/admin', {
