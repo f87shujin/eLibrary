@@ -213,7 +213,6 @@ body::before {
     height: 100%;
     z-index: 0;
     background-color: rgba(0, 0, 0, 0.3);
-    backdrop-filter: blur(3px);
 }
 
 @media (max-width: 768px) {
