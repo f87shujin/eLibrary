@@ -6,14 +6,16 @@
         --library-secondary: #3F4E4F;
         --library-accent: #A27B5C;
         --library-text: #DCD7C9;
-        --wood-texture: url('https://www.transparenttextures.com/patterns/wood-pattern.png');
     }
 
     body {
         font-family: 'Libre Baskerville', serif;
-        background-color: var(--library-primary);
-        background-image: var(--wood-texture);
+        background-image: url('woodbg.jpg') !important; /* Force the background image */
+        background-size: cover;
+        background-attachment: fixed;
+        background-position: center;
         color: var(--library-text);
+        min-height: 100vh;
     }
 
     .navbar {
