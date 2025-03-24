@@ -81,18 +81,12 @@ body {
     background-attachment: fixed;
     background-position: center;
     color: var(--library-text);
+    min-height: 100vh;
     position: relative;
 }
 
 body::before {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.4);
-    z-index: 0;
+    content: none;
 }
 
 /* Remove or comment out these styles */
@@ -229,4 +223,20 @@ body::before {
         grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
         gap: 15px;
     }
+}
+
+.navbar {
+    position: relative;
+    z-index: 1000;
+}
+
+.product-grid, 
+.search-container,
+.product-card,
+.nav-link,
+form,
+button,
+input {
+    position: relative;
+    z-index: 2;
 }
