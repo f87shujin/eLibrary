@@ -22,10 +22,10 @@
         }
         .product-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr); /* Exactly 4 columns */
-            gap: 25px;
+            grid-template-columns: repeat(6, 1fr); 
+            gap: 15px; /* Slightly reduced gap to fit more items */
             padding: 20px;
-            max-width: 1400px; /* Control maximum width */
+            max-width: 1800px; /* Increased max-width to accommodate 6 items */
             margin: 0 auto; /* Center the grid */
         }
         .product-card {
@@ -35,13 +35,13 @@
             display: flex;
             flex-direction: column;
             height: 100%;
-            width: 100%; /* Ensure full width of grid cell */
+            width: 100%;
         }
         .product-card img {
             width: 100%;
-            height: 300px; /* Fixed height for all images */
-            object-fit: cover; /* This ensures the image covers the area without distortion */
-            border-radius: 10px 10px 0 0; /* Rounded corners only at top */
+            height: 250px; /* Slightly reduced height to fit better in smaller cards */
+            object-fit: cover;
+            border-radius: 10px 10px 0 0;
         }
         .product-details {
             padding: 15px;
@@ -169,7 +169,17 @@
                 width: 100%;
             }
         }
-        /* Add responsive breakpoints for different screen sizes */
+        /* Update responsive breakpoints for different screen sizes */
+        @media (max-width: 1600px) {
+            .product-grid {
+                grid-template-columns: repeat(5, 1fr); /* 5 books per row on large screens */
+            }
+        }
+        @media (max-width: 1400px) {
+            .product-grid {
+                grid-template-columns: repeat(4, 1fr); /* 4 books per row on medium-large screens */
+            }
+        }
         @media (max-width: 1200px) {
             .product-grid {
                 grid-template-columns: repeat(3, 1fr); /* 3 books per row on medium screens */
