@@ -22,9 +22,11 @@
         }
         .product-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            grid-template-columns: repeat(4, 1fr); /* Exactly 4 columns */
             gap: 25px;
             padding: 20px;
+            max-width: 1400px; /* Control maximum width */
+            margin: 0 auto; /* Center the grid */
         }
         .product-card {
             background-color: var(--library-secondary);
@@ -33,6 +35,7 @@
             display: flex;
             flex-direction: column;
             height: 100%;
+            width: 100%; /* Ensure full width of grid cell */
         }
         .product-card img {
             width: 100%;
@@ -164,6 +167,22 @@
             }
             .sort-select {
                 width: 100%;
+            }
+        }
+        /* Add responsive breakpoints for different screen sizes */
+        @media (max-width: 1200px) {
+            .product-grid {
+                grid-template-columns: repeat(3, 1fr); /* 3 books per row on medium screens */
+            }
+        }
+        @media (max-width: 992px) {
+            .product-grid {
+                grid-template-columns: repeat(2, 1fr); /* 2 books per row on smaller screens */
+            }
+        }
+        @media (max-width: 576px) {
+            .product-grid {
+                grid-template-columns: 1fr; /* 1 book per row on mobile */
             }
         }
     </style>
