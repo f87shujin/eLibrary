@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
-let API_BASE_URL = "http://107.159.209.164:11434"; // Default to public API
+let API_BASE_URL = "http://107.159.209.164:11434"; // Default to Ollama server IP
 
 async function checkAPIAvailability() {
     try {
