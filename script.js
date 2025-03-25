@@ -13,21 +13,23 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
-let API_BASE_URL = "http://107.159.209.164:11434"; // Default to Ollama server IP
+let API_BASE_URL = "https://107.159.209.164:11434"; // Use HTTPS
 
 async function checkAPIAvailability() {
     try {
-        // Try local API first
-        const localResponse = await fetch('http://127.0.0.1:11434/api/chat', {
+        // Try local API first with HTTPS
+        const localResponse = await fetch('https://127.0.0.1:11434/api/chat', {
             method: 'HEAD',
             mode: 'cors',
             headers: {
-                'Access-Control-Allow-Origin': '*'
-            }
+                'Content-Type': 'application/json'
+            },
+            // Add this to accept self-signed certificates
+            rejectUnauthorized: false
         });
         
         if (localResponse.ok) {
-            API_BASE_URL = "http://127.0.0.1:11434";
+            API_BASE_URL = "https://127.0.0.1:11434";
             console.log("Using local API:", API_BASE_URL);
             return;
         }
@@ -36,17 +38,19 @@ async function checkAPIAvailability() {
     }
 
     try {
-        // Try remote API
-        const remoteResponse = await fetch('http://107.159.209.164:11434/api/chat', {
+        // Try remote API with HTTPS
+        const remoteResponse = await fetch('https://107.159.209.164:11434/api/chat', {
             method: 'HEAD',
             mode: 'cors',
             headers: {
-                'Access-Control-Allow-Origin': '*'
-            }
+                'Content-Type': 'application/json'
+            },
+            // Add this to accept self-signed certificates
+            rejectUnauthorized: false
         });
         
         if (remoteResponse.ok) {
-            API_BASE_URL = "http://107.159.209.164:11434";
+            API_BASE_URL = "https://107.159.209.164:11434";
             console.log("Using remote API:", API_BASE_URL);
         } else {
             console.error("Remote API not responding correctly");
@@ -72,9 +76,8 @@ async function sendMessage() {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*',
             },
-            mode: 'cors',
+            mode: 'cors', // Keep CORS mode
             body: JSON.stringify({
                 model: "Toshokan",
                 messages: [
@@ -92,17 +95,32 @@ async function sendMessage() {
             throw new Error(`API Error: ${response.status}`);
         }
 
-        const responseText = await response.text();
-        console.log('Raw response:', responseText);
+        // Handle streaming response
+        const reader = response.body.getReader();
+        let aiResponse = '';
 
-        try {
-            const data = JSON.parse(responseText);
-            const aiResponse = data.message?.content || data.response || "No response received.";
-            appendMessage('ai', aiResponse);
-        } catch (parseError) {
-            console.error('Error parsing JSON:', parseError);
-            throw new Error('Invalid JSON response from API');
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            // Convert the chunk to text
+            const chunk = new TextDecoder().decode(value);
+            try {
+                const jsonResponse = JSON.parse(chunk);
+                if (jsonResponse.response) {
+                    aiResponse += jsonResponse.response;
+                    // Update the message in real-time
+                    updateLastAIMessage(aiResponse);
+                }
+            } catch (e) {
+                console.error('Error parsing chunk:', e);
+            }
         }
+
+        if (!aiResponse) {
+            throw new Error('No response received from AI');
+        }
+
     } catch (error) {
         loadingDiv.remove();
         console.error('API Error:', error);
@@ -172,4 +190,20 @@ async function testAPI() {
     } catch (error) {
         console.error('Test failed:', error);
     }
+}
+
+// Add this new function to update the AI message in real-time
+function updateLastAIMessage(content) {
+    const chatBox = document.getElementById('chat-box');
+    let lastAIMessage = chatBox.querySelector('.ai-message:last-child');
+    
+    if (!lastAIMessage) {
+        lastAIMessage = document.createElement('div');
+        lastAIMessage.className = 'ai-message';
+        lastAIMessage.innerHTML = '<p></p>';
+        chatBox.appendChild(lastAIMessage);
+    }
+    
+    lastAIMessage.querySelector('p').textContent = content;
+    chatBox.scrollTop = chatBox.scrollHeight;
 }
