@@ -65,7 +65,7 @@
                     window.dispatchEvent(new StorageEvent('storage', { key: 'token', newValue: data.token }));
                     
                     // Wait a brief moment to ensure token is set and header is updated
-                    await new Promise(resolve => setTimeout(resolve, 500));
+                    await new Promise(resolve => setTimeout(resolve, 1000));
                     
                     // Redirect based on user role
                     if (tokenPayload.role === 'admin') {
@@ -101,7 +101,33 @@
         }
 
         // Load header and footer
-        loadHTML('header', 'header.html');
+        loadHTML('header', 'header.html').then(() => {
+            // After header is loaded, check auth status
+            const checkAuthStatus = () => {
+                const token = localStorage.getItem('token');
+                if (token) {
+                    try {
+                        const tokenPayload = JSON.parse(atob(token.split('.')[1]));
+                        if (tokenPayload.exp && tokenPayload.exp < Math.floor(Date.now() / 1000)) {
+                            localStorage.removeItem('token');
+                        } else {
+                            // If token is valid, redirect to appropriate page
+                            if (tokenPayload.role === 'admin') {
+                                window.location.replace('admin.html');
+                            } else {
+                                window.location.replace('index.html');
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Invalid token:', error);
+                        localStorage.removeItem('token');
+                    }
+                }
+            };
+            
+            // Check auth status after a short delay
+            setTimeout(checkAuthStatus, 500);
+        });
         loadHTML('footer', 'footer.html');
     </script>
 

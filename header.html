@@ -270,6 +270,13 @@
                 checkAuthStatus();
             }
         });
+
+        // Also check when the page becomes visible
+        document.addEventListener('visibilitychange', function() {
+            if (document.visibilityState === 'visible') {
+                checkAuthStatus();
+            }
+        });
     }
 
     // Run initialization when DOM is loaded
