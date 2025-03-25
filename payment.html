@@ -77,6 +77,37 @@
             background-color: #005ea6;
             transform: translateY(-2px);
         }
+
+        .input-group button {
+            background-color: var(--library-accent);
+            color: var(--library-text);
+            border: none;
+            padding: 5px 10px;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+        .input-group button:hover {
+            background-color: var(--library-primary);
+        }
+        .input-group input {
+            background-color: var(--library-secondary);
+            border: none;
+            color: var(--library-text);
+            text-align: center;
+            font-size: 0.9rem;
+            width: 50px;
+        }
+        .delete-btn {
+            background-color: transparent;
+            border: none;
+            color: #dc3545;
+            padding: 5px;
+            transition: all 0.3s ease;
+        }
+        .delete-btn:hover {
+            color: #c82333;
+            transform: scale(1.1);
+        }
     </style>
 </head>
 <body>
@@ -257,15 +288,15 @@
                             <div class="col-md-2">
                                 ${item.type === 'purchase' ? `
                                     <div class="input-group">
-                                        <button class="btn btn-outline-secondary" onclick="updateQuantity(${index}, -1)">-</button>
+                                        <button class="btn" onclick="updateQuantity(${index}, -1)">-</button>
                                         <input type="text" class="form-control text-center" value="${item.quantity}" readonly>
-                                        <button class="btn btn-outline-secondary" onclick="updateQuantity(${index}, 1)">+</button>
+                                        <button class="btn" onclick="updateQuantity(${index}, 1)">+</button>
                                     </div>
                                 ` : `
                                     <div class="input-group">
-                                        <button class="btn btn-outline-secondary" onclick="updateRentalDays(${index}, -1)">-</button>
+                                        <button class="btn" onclick="updateRentalDays(${index}, -1)">-</button>
                                         <input type="text" class="form-control text-center" value="${item.rentalDays}" readonly>
-                                        <button class="btn btn-outline-secondary" onclick="updateRentalDays(${index}, 1)">+</button>
+                                        <button class="btn" onclick="updateRentalDays(${index}, 1)">+</button>
                                     </div>
                                 `}
                             </div>
@@ -273,8 +304,8 @@
                                 $${item.price.toFixed(2)}
                             </div>
                             <div class="col-md-2">
-                                <button class="btn btn-danger" onclick="removeItem(${index})">
-                                    <i class="bi bi-trash"></i>
+                                <button class="delete-btn" onclick="removeItem(${index})">
+                                    <i class="fas fa-trash"></i>
                                 </button>
                             </div>
                         </div>
@@ -289,8 +320,9 @@
         function updateQuantity(index, change) {
             const cart = JSON.parse(localStorage.getItem('cart')) || [];
             if (cart[index].type === 'purchase') {
+                const originalPrice = cart[index].price / cart[index].quantity; // Get the original price per unit
                 cart[index].quantity = Math.max(1, cart[index].quantity + change);
-                cart[index].price = cart[index].price * cart[index].quantity;
+                cart[index].price = originalPrice * cart[index].quantity; // Calculate new total price
                 localStorage.setItem('cart', JSON.stringify(cart));
                 updateCartItems();
             }
@@ -300,8 +332,9 @@
         function updateRentalDays(index, change) {
             const cart = JSON.parse(localStorage.getItem('cart')) || [];
             if (cart[index].type === 'rental') {
+                const dailyRate = cart[index].dailyRate; // Get the daily rate from the item
                 cart[index].rentalDays = Math.max(1, Math.min(30, cart[index].rentalDays + change));
-                cart[index].price = cart[index].price * cart[index].rentalDays;
+                cart[index].price = dailyRate * cart[index].rentalDays; // Calculate new total price
                 localStorage.setItem('cart', JSON.stringify(cart));
                 updateCartItems();
             }

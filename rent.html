@@ -220,10 +220,11 @@
                 _id: bookData._id,
                 name: bookData.name,
                 image: bookData.image,
-                price: total,
+                price: bookData.price * days,
                 quantity: 1,
                 rentalDays: days,
-                type: 'rental'
+                type: 'rental',
+                dailyRate: bookData.price
             };
 
             // Add to cart
