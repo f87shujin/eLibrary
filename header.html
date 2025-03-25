@@ -171,7 +171,7 @@
                     <!-- Show only when user is logged in -->
                     <li class="nav-item" id="profile-link" style="display: none;">
                         <a class="nav-link" href="profile.html">
-                            <i class="fas fa-user me-1"></i><span id="welcome-text"></span>
+                            <i class="fas fa-user me-1"></i>Profile
                         </a>
                     </li>
                     
@@ -179,6 +179,13 @@
                     <li class="nav-item" id="admin-link" style="display: none;">
                         <a class="nav-link" href="admin.html">
                             <i class="fas fa-user-shield me-1"></i>Admin
+                        </a>
+                    </li>
+
+                    <!-- Show only when user is logged in -->
+                    <li class="nav-item" id="logout-link" style="display: none;">
+                        <a class="nav-link" href="#" onclick="logout()">
+                            <i class="fas fa-sign-out-alt me-1"></i>Logout
                         </a>
                     </li>
 
@@ -201,9 +208,9 @@
         const signupLink = document.getElementById('signup-link');
         const profileLink = document.getElementById('profile-link');
         const adminLink = document.getElementById('admin-link');
-        const welcomeText = document.getElementById('welcome-text');
+        const logoutLink = document.getElementById('logout-link');
 
-        if (!signupLink || !profileLink || !adminLink || !welcomeText) {
+        if (!signupLink || !profileLink || !adminLink || !logoutLink) {
             console.log('Header elements not loaded yet');
             return;
         }
@@ -213,15 +220,11 @@
                 // Decode the token
                 const tokenPayload = JSON.parse(atob(token.split('.')[1]));
                 
-                // Hide signup, show profile
+                // Hide signup, show profile and logout
                 signupLink.style.display = 'none';
                 profileLink.style.display = 'block';
+                logoutLink.style.display = 'block';
                 
-                // Update welcome text with user's name
-                if (tokenPayload.name) {
-                    welcomeText.textContent = `Welcome, ${tokenPayload.name}!`;
-                }
-
                 // Show admin link if user is admin
                 if (tokenPayload.role === 'admin') {
                     adminLink.style.display = 'block';
@@ -234,6 +237,7 @@
                 signupLink.style.display = 'block';
                 profileLink.style.display = 'none';
                 adminLink.style.display = 'none';
+                logoutLink.style.display = 'none';
                 localStorage.removeItem('token'); // Clear invalid token
             }
         } else {
@@ -241,8 +245,15 @@
             signupLink.style.display = 'block';
             profileLink.style.display = 'none';
             adminLink.style.display = 'none';
+            logoutLink.style.display = 'none';
             console.log('Not logged in');
         }
+    }
+
+    // Logout function
+    function logout() {
+        localStorage.removeItem('token');
+        window.location.href = 'index.html';
     }
 
     // Initialize header
