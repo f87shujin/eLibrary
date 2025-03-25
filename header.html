@@ -256,24 +256,9 @@
         }
     }
 
-    // Function to load header content
-    function loadHeader() {
-        fetch('header.html')
-            .then(response => response.text())
-            .then(html => {
-                document.getElementById('header').innerHTML = html;
-                // Check auth status immediately after header loads
-                checkAuthStatus();
-            })
-            .catch(error => console.error('Error loading header:', error));
-    }
-
-    // Run immediately when script loads
-    checkAuthStatus();
-
-    // Also run when DOM is fully loaded
-    document.addEventListener('DOMContentLoaded', function() {
-        // Initial check
+    // Initialize header
+    function initializeHeader() {
+        // Check auth status immediately
         checkAuthStatus();
         
         // Set up periodic checks
@@ -285,7 +270,14 @@
                 checkAuthStatus();
             }
         });
-    });
+    }
+
+    // Run initialization when DOM is loaded
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initializeHeader);
+    } else {
+        initializeHeader();
+    }
 </script>
 
 <div class="content-container">

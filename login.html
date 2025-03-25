@@ -65,13 +65,13 @@
                     window.dispatchEvent(new StorageEvent('storage', { key: 'token', newValue: data.token }));
                     
                     // Wait a brief moment to ensure token is set and header is updated
-                    await new Promise(resolve => setTimeout(resolve, 100));
+                    await new Promise(resolve => setTimeout(resolve, 500));
                     
                     // Redirect based on user role
                     if (tokenPayload.role === 'admin') {
-                        window.location.href = 'admin.html';
+                        window.location.replace('admin.html');
                     } else {
-                        window.location.href = 'index.html';
+                        window.location.replace('index.html');
                     }
                 } else {
                     const errorData = await response.json();
