@@ -17,16 +17,42 @@ let API_BASE_URL = "http://107.159.209.164:11434"; // Default to Ollama server I
 
 async function checkAPIAvailability() {
     try {
-        // Check if local API is available
-        const response = await fetch('http://127.0.0.1:11434/api/chat');
-        if (response.ok) {
-            API_BASE_URL = "http://127.0.0.1:11434"; // Switch to local API if available
+        // Try local API first
+        const localResponse = await fetch('http://127.0.0.1:11434/api/chat', {
+            method: 'HEAD',
+            mode: 'cors',
+            headers: {
+                'Access-Control-Allow-Origin': '*'
+            }
+        });
+        
+        if (localResponse.ok) {
+            API_BASE_URL = "http://127.0.0.1:11434";
             console.log("Using local API:", API_BASE_URL);
-        } else {
-            console.log("Using public API:", API_BASE_URL);
+            return;
         }
     } catch (error) {
-        console.log("Using public API:", API_BASE_URL);
+        console.log("Local API not available, trying remote API...");
+    }
+
+    try {
+        // Try remote API
+        const remoteResponse = await fetch('http://107.159.209.164:11434/api/chat', {
+            method: 'HEAD',
+            mode: 'cors',
+            headers: {
+                'Access-Control-Allow-Origin': '*'
+            }
+        });
+        
+        if (remoteResponse.ok) {
+            API_BASE_URL = "http://107.159.209.164:11434";
+            console.log("Using remote API:", API_BASE_URL);
+        } else {
+            console.error("Remote API not responding correctly");
+        }
+    } catch (error) {
+        console.error("Error checking remote API:", error);
     }
 }
 
@@ -46,7 +72,9 @@ async function sendMessage() {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*',
             },
+            mode: 'cors',
             body: JSON.stringify({
                 model: "Toshokan",
                 messages: [
@@ -64,16 +92,21 @@ async function sendMessage() {
             throw new Error(`API Error: ${response.status}`);
         }
 
-        const data = await response.json();
-        // Extract the message from the response
-        const aiResponse = data.message?.content || data.content || "No response received.";
-        appendMessage('ai', aiResponse);
+        const responseText = await response.text();
+        console.log('Raw response:', responseText);
+
+        try {
+            const data = JSON.parse(responseText);
+            const aiResponse = data.message?.content || data.response || "No response received.";
+            appendMessage('ai', aiResponse);
+        } catch (parseError) {
+            console.error('Error parsing JSON:', parseError);
+            throw new Error('Invalid JSON response from API');
+        }
     } catch (error) {
         loadingDiv.remove();
         console.error('API Error:', error);
-        showError(`Failed to connect to the API. Please ensure:
-        - The API is running at ${API_BASE_URL}
-        - Your internet connection is stable`);
+        showError(`Failed to connect to the API. Error: ${error.message}\nAPI URL: ${API_BASE_URL}`);
     }
 }
 
@@ -103,4 +136,40 @@ function showError(message) {
     errorDiv.innerHTML = `<p>${message}</p>`;
     chatBox.appendChild(errorDiv);
     chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+// Add this function to help with debugging
+async function testAPI() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/chat`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*',
+            },
+            mode: 'cors',
+            body: JSON.stringify({
+                model: "Toshokan",
+                messages: [
+                    { 
+                        role: "user", 
+                        content: "Test message" 
+                    }
+                ]
+            }),
+        });
+
+        console.log('Response status:', response.status);
+        const text = await response.text();
+        console.log('Raw response:', text);
+        
+        try {
+            const json = JSON.parse(text);
+            console.log('Parsed response:', json);
+        } catch (e) {
+            console.error('Failed to parse JSON:', e);
+        }
+    } catch (error) {
+        console.error('Test failed:', error);
+    }
 }
