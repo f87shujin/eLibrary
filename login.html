@@ -61,6 +61,11 @@
                     const tokenPayload = JSON.parse(atob(data.token.split('.')[1]));
                     console.log('Login successful:', tokenPayload);
                     
+                    // Set user session data
+                    localStorage.setItem('userName', tokenPayload.name);
+                    localStorage.setItem('userRole', tokenPayload.role);
+                    localStorage.setItem('isLoggedIn', 'true');
+                    
                     // Force a storage event to trigger header update
                     window.dispatchEvent(new StorageEvent('storage', { key: 'token', newValue: data.token }));
                     
@@ -100,34 +105,45 @@
                 });
         }
 
-        // Load header and footer
-        loadHTML('header', 'header.html').then(() => {
-            // After header is loaded, check auth status
-            const checkAuthStatus = () => {
-                const token = localStorage.getItem('token');
-                if (token) {
-                    try {
-                        const tokenPayload = JSON.parse(atob(token.split('.')[1]));
-                        if (tokenPayload.exp && tokenPayload.exp < Math.floor(Date.now() / 1000)) {
-                            localStorage.removeItem('token');
-                        } else {
-                            // If token is valid, redirect to appropriate page
-                            if (tokenPayload.role === 'admin') {
-                                window.location.replace('admin.html');
-                            } else {
-                                window.location.replace('index.html');
-                            }
-                        }
-                    } catch (error) {
-                        console.error('Invalid token:', error);
-                        localStorage.removeItem('token');
-                    }
-                }
-            };
+        // Check if user is already logged in
+        function checkLoginStatus() {
+            const token = localStorage.getItem('token');
+            const isLoggedIn = localStorage.getItem('isLoggedIn');
             
-            // Check auth status after a short delay
-            setTimeout(checkAuthStatus, 500);
-        });
+            if (token && isLoggedIn === 'true') {
+                try {
+                    const tokenPayload = JSON.parse(atob(token.split('.')[1]));
+                    const currentTime = Math.floor(Date.now() / 1000);
+                    
+                    if (tokenPayload.exp && tokenPayload.exp < currentTime) {
+                        // Token is expired, clear session
+                        localStorage.removeItem('token');
+                        localStorage.removeItem('userName');
+                        localStorage.removeItem('userRole');
+                        localStorage.removeItem('isLoggedIn');
+                    } else {
+                        // Token is valid, redirect to appropriate page
+                        if (tokenPayload.role === 'admin') {
+                            window.location.replace('admin.html');
+                        } else {
+                            window.location.replace('index.html');
+                        }
+                    }
+                } catch (error) {
+                    console.error('Invalid token:', error);
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('userName');
+                    localStorage.removeItem('userRole');
+                    localStorage.removeItem('isLoggedIn');
+                }
+            }
+        }
+
+        // Check login status when page loads
+        checkLoginStatus();
+
+        // Load header and footer
+        loadHTML('header', 'header.html');
         loadHTML('footer', 'footer.html');
     </script>
 

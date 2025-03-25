@@ -198,6 +198,10 @@
     // Function to check and update authentication status
     function checkAuthStatus() {
         const token = localStorage.getItem('token');
+        const isLoggedIn = localStorage.getItem('isLoggedIn');
+        const userName = localStorage.getItem('userName');
+        const userRole = localStorage.getItem('userRole');
+        
         const signupLink = document.getElementById('signup-link');
         const profileLink = document.getElementById('profile-link');
         const adminLink = document.getElementById('admin-link');
@@ -208,7 +212,7 @@
             return;
         }
 
-        if (token) {
+        if (token && isLoggedIn === 'true') {
             try {
                 // Decode the token
                 const tokenPayload = JSON.parse(atob(token.split('.')[1]));
@@ -216,8 +220,11 @@
                 // Check if token is expired
                 const currentTime = Math.floor(Date.now() / 1000);
                 if (tokenPayload.exp && tokenPayload.exp < currentTime) {
-                    // Token is expired, clear it and show signup
+                    // Token is expired, clear session
                     localStorage.removeItem('token');
+                    localStorage.removeItem('userName');
+                    localStorage.removeItem('userRole');
+                    localStorage.removeItem('isLoggedIn');
                     signupLink.style.display = 'block';
                     profileLink.style.display = 'none';
                     adminLink.style.display = 'none';
@@ -229,23 +236,26 @@
                 profileLink.style.display = 'block';
                 
                 // Update welcome text with user's name
-                if (tokenPayload.name) {
-                    welcomeText.textContent = `Welcome, ${tokenPayload.name}!`;
+                if (userName) {
+                    welcomeText.textContent = `Welcome, ${userName}!`;
                 }
 
                 // Show admin link if user is admin
-                if (tokenPayload.role === 'admin') {
+                if (userRole === 'admin') {
                     adminLink.style.display = 'block';
                 }
 
-                console.log('Logged in as:', tokenPayload.name, 'Role:', tokenPayload.role);
+                console.log('Logged in as:', userName, 'Role:', userRole);
             } catch (error) {
                 console.error('Invalid token:', error);
-                // If token is invalid, show only signup
+                // If token is invalid, clear session
+                localStorage.removeItem('token');
+                localStorage.removeItem('userName');
+                localStorage.removeItem('userRole');
+                localStorage.removeItem('isLoggedIn');
                 signupLink.style.display = 'block';
                 profileLink.style.display = 'none';
                 adminLink.style.display = 'none';
-                localStorage.removeItem('token'); // Clear invalid token
             }
         } else {
             // Not logged in, show only signup
@@ -266,7 +276,7 @@
         
         // Check when storage changes
         window.addEventListener('storage', function(e) {
-            if (e.key === 'token') {
+            if (e.key === 'token' || e.key === 'isLoggedIn' || e.key === 'userName' || e.key === 'userRole') {
                 checkAuthStatus();
             }
         });
