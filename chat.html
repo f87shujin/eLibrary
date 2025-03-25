@@ -59,8 +59,11 @@
 
     <script src="script.js"></script>
     <script>
+        console.log('Chat page script starting...');
+
         // Function to load HTML content
         function loadHTML(elementId, filePath) {
+            console.log(`Loading ${filePath} into ${elementId}...`);
             fetch(filePath)
                 .then(response => {
                     if (!response.ok) {
@@ -69,7 +72,31 @@
                     return response.text();
                 })
                 .then(data => {
-                    document.getElementById(elementId).innerHTML = data;
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = data;
+                    
+                    // Extract and execute scripts
+                    const scripts = tempDiv.getElementsByTagName('script');
+                    for (let script of scripts) {
+                        const newScript = document.createElement('script');
+                        newScript.textContent = script.textContent;
+                        document.body.appendChild(newScript);
+                    }
+                    
+                    // Remove scripts from the content before inserting
+                    const scriptsToRemove = tempDiv.getElementsByTagName('script');
+                    while (scriptsToRemove.length > 0) {
+                        scriptsToRemove[0].remove();
+                    }
+                    
+                    // Insert the remaining content
+                    document.getElementById(elementId).innerHTML = tempDiv.innerHTML;
+                    console.log(`${filePath} loaded successfully`);
+                    
+                    // Dispatch a custom event when header is loaded
+                    if (elementId === 'header') {
+                        window.dispatchEvent(new Event('headerLoaded'));
+                    }
                 })
                 .catch(error => {
                     console.error('Error loading HTML:', error);
@@ -79,6 +106,8 @@
         // Load header and footer
         loadHTML('header', 'header.html');
         loadHTML('footer', 'footer.html');
+
+        // Your existing chat.html scripts here
     </script>
 </body>
 </html>
