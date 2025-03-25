@@ -312,6 +312,12 @@
             console.log('Header loaded event received');
             updateHeaderUI();
         });
+
+        // Listen for token changes
+        window.addEventListener('tokenChanged', () => {
+            console.log('Token changed event received');
+            updateHeaderUI();
+        });
     })();
 </script>
 
