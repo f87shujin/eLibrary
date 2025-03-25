@@ -49,7 +49,12 @@ async function sendMessage() {
             },
             body: JSON.stringify({
                 model: "Toshokan",
-                messages: [{ role: "user", content: message }],
+                messages: [
+                    { 
+                        role: "user", 
+                        content: message 
+                    }
+                ]
             }),
         });
 
@@ -60,7 +65,8 @@ async function sendMessage() {
         }
 
         const data = await response.json();
-        const aiResponse = data.message || "No response received.";
+        // Extract the message from the response
+        const aiResponse = data.message?.content || data.content || "No response received.";
         appendMessage('ai', aiResponse);
     } catch (error) {
         loadingDiv.remove();
