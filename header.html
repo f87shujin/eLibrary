@@ -256,13 +256,28 @@
         }
     }
 
-    // Wait for DOM to be fully loaded
+    // Function to load header content
+    function loadHeader() {
+        fetch('header.html')
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('header').innerHTML = html;
+                // Check auth status immediately after header loads
+                checkAuthStatus();
+            })
+            .catch(error => console.error('Error loading header:', error));
+    }
+
+    // Run immediately when script loads
+    checkAuthStatus();
+
+    // Also run when DOM is fully loaded
     document.addEventListener('DOMContentLoaded', function() {
         // Initial check
         checkAuthStatus();
         
         // Set up periodic checks
-        setInterval(checkAuthStatus, 1000); // Check every second instead of every minute
+        setInterval(checkAuthStatus, 1000);
         
         // Check when storage changes
         window.addEventListener('storage', function(e) {
