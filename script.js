@@ -13,11 +13,11 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
-let API_BASE_URL = "http://107.159.209.164:11434"; // Use HTTP instead of HTTPS
+let API_BASE_URL = "http://107.159.209.164:11434"; // Force HTTP
 
 async function checkAPIAvailability() {
     try {
-        // Try local API first with HTTP
+        // Try local API first
         const localResponse = await fetch('http://127.0.0.1:11434/api/chat', {
             method: 'HEAD',
             mode: 'cors',
@@ -36,7 +36,7 @@ async function checkAPIAvailability() {
     }
 
     try {
-        // Try remote API with HTTP
+        // Try remote API
         const remoteResponse = await fetch('http://107.159.209.164:11434/api/chat', {
             method: 'HEAD',
             mode: 'cors',
@@ -68,53 +68,76 @@ async function sendMessage() {
     const loadingDiv = showLoading();
 
     try {
-        const response = await fetch(`${API_BASE_URL}/api/chat`, {
+        // Force HTTP in the URL
+        const apiUrl = API_BASE_URL.replace('https://', 'http://');
+        console.log('Sending request to:', apiUrl); // Debug log
+
+        const response = await fetch(`${apiUrl}/api/chat`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             mode: 'cors',
             body: JSON.stringify({
-                model: "Toshokan",
+                model: "toshokan",  // lowercase model name
                 messages: [
                     { 
                         role: "user", 
                         content: message 
                     }
-                ]
+                ],
+                stream: true  // Enable streaming
             }),
         });
-
-        loadingDiv.remove();
 
         if (!response.ok) {
             throw new Error(`API Error: ${response.status}`);
         }
 
+        console.log('Response received:', response); // Debug log
+
         // Handle streaming response
         const reader = response.body.getReader();
         let aiResponse = '';
+        let hasReceivedResponse = false;
 
         while (true) {
             const { done, value } = await reader.read();
-            if (done) break;
+            
+            if (done) {
+                console.log('Stream complete'); // Debug log
+                break;
+            }
 
             // Convert the chunk to text
             const chunk = new TextDecoder().decode(value);
-            try {
-                const jsonResponse = JSON.parse(chunk);
-                if (jsonResponse.response) {
-                    aiResponse += jsonResponse.response;
-                    // Update the message in real-time
-                    updateLastAIMessage(aiResponse);
+            console.log('Received chunk:', chunk); // Debug log
+
+            // Split the chunk into lines in case multiple JSON objects are received
+            const lines = chunk.split('\n').filter(line => line.trim());
+            
+            for (const line of lines) {
+                try {
+                    const jsonResponse = JSON.parse(line);
+                    console.log('Parsed JSON:', jsonResponse); // Debug log
+
+                    if (jsonResponse.response) {
+                        hasReceivedResponse = true;
+                        aiResponse += jsonResponse.response;
+                        // Update the message in real-time
+                        updateLastAIMessage(aiResponse);
+                    }
+                } catch (e) {
+                    console.error('Error parsing chunk:', e, 'Raw chunk:', line);
                 }
-            } catch (e) {
-                console.error('Error parsing chunk:', e);
             }
         }
 
-        if (!aiResponse) {
-            throw new Error('No response received from AI');
+        loadingDiv.remove();
+
+        if (!hasReceivedResponse) {
+            console.error('No response content received'); // Debug log
+            throw new Error('No response content received from AI');
         }
 
     } catch (error) {
@@ -152,43 +175,7 @@ function showError(message) {
     chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-// Add this function to help with debugging
-async function testAPI() {
-    try {
-        const response = await fetch(`${API_BASE_URL}/api/chat`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*',
-            },
-            mode: 'cors',
-            body: JSON.stringify({
-                model: "Toshokan",
-                messages: [
-                    { 
-                        role: "user", 
-                        content: "Test message" 
-                    }
-                ]
-            }),
-        });
-
-        console.log('Response status:', response.status);
-        const text = await response.text();
-        console.log('Raw response:', text);
-        
-        try {
-            const json = JSON.parse(text);
-            console.log('Parsed response:', json);
-        } catch (e) {
-            console.error('Failed to parse JSON:', e);
-        }
-    } catch (error) {
-        console.error('Test failed:', error);
-    }
-}
-
-// Add this new function to update the AI message in real-time
+// Update the updateLastAIMessage function to handle HTML content
 function updateLastAIMessage(content) {
     const chatBox = document.getElementById('chat-box');
     let lastAIMessage = chatBox.querySelector('.ai-message:last-child');
@@ -200,6 +187,46 @@ function updateLastAIMessage(content) {
         chatBox.appendChild(lastAIMessage);
     }
     
-    lastAIMessage.querySelector('p').textContent = content;
+    // Safely set the content
+    const p = lastAIMessage.querySelector('p');
+    p.textContent = content;
     chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+// Add this function to help with debugging
+function testAPI() {
+    console.log('Testing API connection...');
+    fetch(`${API_BASE_URL}/api/chat`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        mode: 'cors',
+        body: JSON.stringify({
+            model: "toshokan",
+            messages: [{ role: "user", content: "Hello" }],
+            stream: true
+        })
+    })
+    .then(response => {
+        console.log('Response:', response);
+        return response.body.getReader();
+    })
+    .then(reader => {
+        function push() {
+            return reader.read().then(({done, value}) => {
+                if (done) {
+                    console.log('Stream complete');
+                    return;
+                }
+                const chunk = new TextDecoder().decode(value);
+                console.log('Chunk received:', chunk);
+                return push();
+            });
+        }
+        return push();
+    })
+    .catch(error => {
+        console.error('Test failed:', error);
+    });
 }
