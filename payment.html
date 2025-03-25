@@ -9,6 +9,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Add PayPal SDK -->
+    <script src="https://www.paypal.com/sdk/js?client-id=YOUR_PAYPAL_CLIENT_ID&currency=USD"></script>
     <style>
         .payment-method {
             border: 2px solid var(--library-accent);
@@ -200,9 +202,7 @@
 
             <!-- PayPal Button -->
             <div id="paypal-button" style="display: none;">
-                <button class="paypal-button w-100">
-                    <i class="fab fa-paypal me-2"></i>Pay with PayPal
-                </button>
+                <div id="paypal-button-container"></div>
             </div>
         </div>
     </div>
@@ -366,6 +366,7 @@
         // Load cart items when page loads
         document.addEventListener('DOMContentLoaded', () => {
             updateCartItems();
+            initializePayPal();
         });
 
         // Payment method selection
@@ -446,6 +447,44 @@
             alert('Redirecting to PayPal...');
             // Redirect to PayPal checkout
         });
+
+        // Initialize PayPal
+        function initializePayPal() {
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const subtotal = cart.reduce((sum, item) => sum + item.price, 0);
+            const tax = subtotal * 0.15;
+            const total = subtotal + tax;
+
+            paypal.Buttons({
+                createOrder: function(data, actions) {
+                    // Set up the transaction
+                    return actions.order.create({
+                        purchase_units: [{
+                            amount: {
+                                value: total.toFixed(2),
+                                currency_code: "USD"
+                            },
+                            description: "eLibrary Purchase"
+                        }]
+                    });
+                },
+                onApprove: function(data, actions) {
+                    // Capture the funds
+                    return actions.order.capture().then(function(details) {
+                        // Show success message
+                        alert('Transaction completed by ' + details.payer.name.given_name);
+                        // Clear the cart
+                        localStorage.removeItem('cart');
+                        // Redirect to success page or home
+                        window.location.href = 'index.html';
+                    });
+                },
+                onError: function(err) {
+                    // Handle errors
+                    alert('An error occurred during the payment process.');
+                }
+            }).render('#paypal-button-container');
+        }
     </script>
 </body>
 </html> 
