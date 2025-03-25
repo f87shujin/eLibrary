@@ -71,7 +71,7 @@
                         } else {
                             window.location.href = 'index.html';
                         }
-                    }, 500); // Wait 500ms before redirecting
+                    }, 1000); // Wait 1 second before redirecting
                 } else {
                     const errorData = await response.json();
                     console.error('Login failed:', errorData.message);

@@ -216,7 +216,8 @@
 </header>
 
 <script>
-    (function() {
+    // Make sure the script runs immediately
+    (function initializeHeaderScript() {
         console.log('Header script starting...');
 
         // Simple function to check if user is logged in
@@ -247,70 +248,43 @@
         function updateHeaderUI() {
             console.log('Updating header UI...');
             
-            // First, let's check if we can find the header container
-            const headerContainer = document.querySelector('#header');
-            console.log('Header container found:', !!headerContainer);
-            
-            // Then, let's check if we can find the navbar
-            const navbar = document.querySelector('.navbar');
-            console.log('Navbar found:', !!navbar);
-            
-            // Now let's try to find our elements in different ways
+            // Find elements in the current document
             const signupLink = document.getElementById('signup-link');
             const profileLink = document.getElementById('profile-link');
             const adminLink = document.getElementById('admin-link');
             const logoutLink = document.getElementById('logout-link');
 
-            console.log('Elements found by ID:', {
+            console.log('Elements found:', {
                 signupLink: !!signupLink,
                 profileLink: !!profileLink,
                 adminLink: !!adminLink,
                 logoutLink: !!logoutLink
             });
 
-            // Let's also try finding them through the navbar
-            const navbarSignup = navbar?.querySelector('#signup-link');
-            const navbarProfile = navbar?.querySelector('#profile-link');
-            const navbarAdmin = navbar?.querySelector('#admin-link');
-            const navbarLogout = navbar?.querySelector('#logout-link');
-
-            console.log('Elements found in navbar:', {
-                navbarSignup: !!navbarSignup,
-                navbarProfile: !!navbarProfile,
-                navbarAdmin: !!navbarAdmin,
-                navbarLogout: !!navbarLogout
-            });
-
-            // Use whichever elements we found
-            const signup = signupLink || navbarSignup;
-            const profile = profileLink || navbarProfile;
-            const admin = adminLink || navbarAdmin;
-            const logout = logoutLink || navbarLogout;
-
-            if (!signup || !profile || !admin || !logout) {
+            if (!signupLink || !profileLink || !adminLink || !logoutLink) {
                 console.error('Could not find all required elements!');
                 return;
             }
 
             if (isLoggedIn()) {
                 console.log('User is logged in, updating UI...');
-                signup.style.display = 'none';
-                profile.style.display = 'block';
-                logout.style.display = 'block';
+                signupLink.style.display = 'none';
+                profileLink.style.display = 'block';
+                logoutLink.style.display = 'block';
                 
                 if (isAdmin()) {
                     console.log('User is admin, showing admin link');
-                    admin.style.display = 'block';
+                    adminLink.style.display = 'block';
                 } else {
                     console.log('User is not admin, hiding admin link');
-                    admin.style.display = 'none';
+                    adminLink.style.display = 'none';
                 }
             } else {
                 console.log('User is not logged in, updating UI...');
-                signup.style.display = 'block';
-                profile.style.display = 'none';
-                admin.style.display = 'none';
-                logout.style.display = 'none';
+                signupLink.style.display = 'block';
+                profileLink.style.display = 'none';
+                adminLink.style.display = 'none';
+                logoutLink.style.display = 'none';
             }
         }
 
@@ -321,19 +295,11 @@
             window.location.href = 'index.html';
         };
 
-        // Update header UI when page loads
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initializeHeader);
-        } else {
-            initializeHeader();
-        }
+        // Update header UI immediately
+        updateHeaderUI();
 
-        function initializeHeader() {
-            console.log('Initializing header...');
-            updateHeaderUI();
-            // Set up periodic checks
-            setInterval(updateHeaderUI, 1000);
-        }
+        // Set up periodic checks
+        setInterval(updateHeaderUI, 1000);
 
         // Listen for storage changes
         window.addEventListener('storage', (e) => {
@@ -346,12 +312,6 @@
             console.log('Header loaded event received');
             updateHeaderUI();
         });
-
-        // Force an update after a short delay to ensure header is loaded
-        setTimeout(() => {
-            console.log('Running delayed header update...');
-            updateHeaderUI();
-        }, 1000);
     })();
 </script>
 
