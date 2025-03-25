@@ -5,6 +5,7 @@ const cors = require('cors'); // Import CORS
 const jwt = require('jsonwebtoken');
 const User = require('./models/User'); // Import the User model
 const bcrypt = require('bcrypt');
+const Order = require('./models/Order');
 const app = express();
 const PORT = process.env.PORT || 10000;
 
@@ -202,6 +203,48 @@ app.get('/api/user', async (req, res) => {
             res.status(500).json({ message: 'Internal Server Error' });
         }
     });
+});
+
+// Add this new endpoint
+app.post('/api/orders', async (req, res) => {
+    const token = req.headers['authorization']?.split(' ')[1];
+    if (!token) return res.status(403).json({ message: 'No token provided' });
+
+    try {
+        const decoded = jwt.verify(token, 'your_jwt_secret');
+        const { items, totalAmount } = req.body;
+
+        const order = new Order({
+            userId: decoded.id,
+            userName: decoded.name,
+            items: items,
+            totalAmount: totalAmount
+        });
+
+        await order.save();
+        res.status(201).json({ 
+            message: 'Order created successfully', 
+            orderId: order._id 
+        });
+    } catch (error) {
+        console.error('Error creating order:', error);
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+});
+
+// Add endpoint to get user's orders
+app.get('/api/orders', async (req, res) => {
+    const token = req.headers['authorization']?.split(' ')[1];
+    if (!token) return res.status(403).json({ message: 'No token provided' });
+
+    try {
+        const decoded = jwt.verify(token, 'your_jwt_secret');
+        const orders = await Order.find({ userId: decoded.id }).sort({ orderDate: -1 });
+        res.json(orders);
+    } catch (error) {
+        console.error('Error fetching orders:', error);
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
 });
 
 // Start the server

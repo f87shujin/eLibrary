@@ -386,10 +386,8 @@
                     });
                 },
                 onApprove: function(data, actions) {
-                    return actions.order.capture().then(function(details) {
-                        alert('Transaction completed by ' + details.payer.name.given_name);
-                        localStorage.removeItem('cart');
-                        window.location.href = 'index.html';
+                    return actions.order.capture().then(async function(details) {
+                        await createOrder();
                     });
                 },
                 onError: function(err) {
@@ -463,17 +461,58 @@
         });
 
         // Form submission
-        cardForm.addEventListener('submit', (e) => {
+        cardForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            // Here you would typically send the payment details to your payment processor
-            alert('Payment processing...');
-            // Redirect to success page or handle response
+            // Here you would typically validate the card details
+            // For now, we'll just create the order
+            await createOrder();
         });
 
         // Load cart items when page loads
         document.addEventListener('DOMContentLoaded', () => {
             updateCartItems();
         });
+
+        // Add this function after the updateOrderSummary function
+        async function createOrder() {
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const subtotal = cart.reduce((sum, item) => sum + item.price, 0);
+            const tax = subtotal * 0.15;
+            const total = subtotal + tax;
+
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    alert('Please log in to complete your purchase');
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                const response = await fetch('/api/orders', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        items: cart,
+                        totalAmount: total
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to create order');
+                }
+
+                const data = await response.json();
+                localStorage.removeItem('cart');
+                alert('Order placed successfully! Order ID: ' + data.orderId);
+                window.location.href = 'index.html';
+            } catch (error) {
+                console.error('Error creating order:', error);
+                alert('Failed to place order. Please try again.');
+            }
+        }
     </script>
 </body>
 </html> 
