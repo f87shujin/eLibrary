@@ -38,8 +38,14 @@
             <!-- Cart items will be dynamically inserted here -->
         </div>
         <div class="cart-summary">
-            <h4>Total: $<span id="cart-total">0.00</span></h4>
-            <button id="checkout-btn" class="library-btn w-100 mt-3">Proceed to Checkout</button>
+            <div class="d-flex justify-content-between align-items-center mt-4">
+                <div>
+                    <h5>Total: $<span id="cart-total">0.00</span></h5>
+                </div>
+                <button class="library-btn" id="checkout-btn" onclick="window.location.href='payment.html'">
+                    Proceed to Checkout
+                </button>
+            </div>
         </div>
     </div>
 
@@ -127,12 +133,6 @@
                 cartCount.textContent = count;
             }
         }
-
-        // Checkout button handler
-        document.getElementById('checkout-btn').addEventListener('click', () => {
-            // Add checkout logic here
-            alert('Checkout functionality coming soon!');
-        });
 
         // Load cart when page loads
         document.addEventListener('DOMContentLoaded', () => {
