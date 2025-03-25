@@ -161,6 +161,13 @@
                     </li>
                 </ul>
                 <ul class="navbar-nav">
+                    <!-- TEST BUTTON -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" style="color: red !important;">
+                            <i class="fas fa-bug me-1"></i>TEST BUTTON
+                        </a>
+                    </li>
+
                     <!-- Show when user is NOT logged in -->
                     <li class="nav-item" id="signup-link">
                         <a class="nav-link" href="register.html">
@@ -186,6 +193,13 @@
                     <li class="nav-item" id="logout-link" style="display: none;">
                         <a class="nav-link" href="#" onclick="logout()">
                             <i class="fas fa-sign-out-alt me-1"></i>Logout
+                        </a>
+                    </li>
+
+                    <!-- TEST BUTTON 2 -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" style="color: yellow !important;">
+                            <i class="fas fa-star me-1"></i>TEST BUTTON 2
                         </a>
                     </li>
 
@@ -231,51 +245,71 @@
     // Function to update header UI
     function updateHeaderUI() {
         console.log('Updating header UI...');
-        const header = document.querySelector('#header');
-        if (!header) {
-            console.error('Header container not found!');
-            return;
-        }
+        
+        // First, let's check if we can find the header container
+        const headerContainer = document.querySelector('#header');
+        console.log('Header container found:', !!headerContainer);
+        
+        // Then, let's check if we can find the navbar
+        const navbar = document.querySelector('.navbar');
+        console.log('Navbar found:', !!navbar);
+        
+        // Now let's try to find our elements in different ways
+        const signupLink = document.getElementById('signup-link');
+        const profileLink = document.getElementById('profile-link');
+        const adminLink = document.getElementById('admin-link');
+        const logoutLink = document.getElementById('logout-link');
 
-        const signupLink = header.querySelector('#signup-link');
-        const profileLink = header.querySelector('#profile-link');
-        const adminLink = header.querySelector('#admin-link');
-        const logoutLink = header.querySelector('#logout-link');
-
-        console.log('Found elements:', {
+        console.log('Elements found by ID:', {
             signupLink: !!signupLink,
             profileLink: !!profileLink,
             adminLink: !!adminLink,
             logoutLink: !!logoutLink
         });
 
-        if (!signupLink || !profileLink || !adminLink || !logoutLink) {
-            console.error('Some header elements not found!');
+        // Let's also try finding them through the navbar
+        const navbarSignup = navbar?.querySelector('#signup-link');
+        const navbarProfile = navbar?.querySelector('#profile-link');
+        const navbarAdmin = navbar?.querySelector('#admin-link');
+        const navbarLogout = navbar?.querySelector('#logout-link');
+
+        console.log('Elements found in navbar:', {
+            navbarSignup: !!navbarSignup,
+            navbarProfile: !!navbarProfile,
+            navbarAdmin: !!navbarAdmin,
+            navbarLogout: !!navbarLogout
+        });
+
+        // Use whichever elements we found
+        const signup = signupLink || navbarSignup;
+        const profile = profileLink || navbarProfile;
+        const admin = adminLink || navbarAdmin;
+        const logout = logoutLink || navbarLogout;
+
+        if (!signup || !profile || !admin || !logout) {
+            console.error('Could not find all required elements!');
             return;
         }
 
         if (isLoggedIn()) {
             console.log('User is logged in, updating UI...');
-            // User is logged in
-            signupLink.style.display = 'none';
-            profileLink.style.display = 'block';
-            logoutLink.style.display = 'block';
+            signup.style.display = 'none';
+            profile.style.display = 'block';
+            logout.style.display = 'block';
             
-            // Show admin link if user is admin
             if (isAdmin()) {
                 console.log('User is admin, showing admin link');
-                adminLink.style.display = 'block';
+                admin.style.display = 'block';
             } else {
                 console.log('User is not admin, hiding admin link');
-                adminLink.style.display = 'none';
+                admin.style.display = 'none';
             }
         } else {
             console.log('User is not logged in, updating UI...');
-            // User is not logged in
-            signupLink.style.display = 'block';
-            profileLink.style.display = 'none';
-            adminLink.style.display = 'none';
-            logoutLink.style.display = 'none';
+            signup.style.display = 'block';
+            profile.style.display = 'none';
+            admin.style.display = 'none';
+            logout.style.display = 'none';
         }
     }
 
