@@ -161,13 +161,6 @@
                     </li>
                 </ul>
                 <ul class="navbar-nav">
-                    <!-- TEST BUTTON -->
-                    <li class="nav-item">
-                        <a class="nav-link" href="#" style="color: red !important;">
-                            <i class="fas fa-bug me-1"></i>TEST BUTTON
-                        </a>
-                    </li>
-
                     <!-- Show when user is NOT logged in -->
                     <li class="nav-item" id="signin-link">
                         <a class="nav-link" href="login.html">
@@ -198,13 +191,6 @@
                     <li class="nav-item" id="logout-link" style="display: none;">
                         <a class="nav-link" href="#" onclick="logout()">
                             <i class="fas fa-sign-out-alt me-1"></i>Logout
-                        </a>
-                    </li>
-
-                    <!-- TEST BUTTON 2 -->
-                    <li class="nav-item">
-                        <a class="nav-link" href="#" style="color: yellow !important;">
-                            <i class="fas fa-star me-1"></i>TEST BUTTON 2
                         </a>
                     </li>
 
@@ -327,6 +313,13 @@
             console.log('Token changed event received');
             updateHeaderUI();
         });
+
+        // Listen for DOMContentLoaded to ensure elements are available
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', updateHeaderUI);
+        } else {
+            updateHeaderUI();
+        }
     })();
 </script>
 
