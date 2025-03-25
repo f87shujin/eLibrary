@@ -202,7 +202,9 @@
 
             <!-- PayPal Button -->
             <div id="paypal-button" style="display: none;">
-                <div id="paypal-button-container"></div>
+                <button class="paypal-button w-100" onclick="connectWithPayPal()">
+                    <i class="fab fa-paypal me-2"></i>Connect with PayPal
+                </button>
             </div>
         </div>
     </div>
@@ -363,6 +365,39 @@
             document.querySelector('.library-btn').textContent = `Pay $${total.toFixed(2)}`;
         }
 
+        // Initialize PayPal
+        function connectWithPayPal() {
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const subtotal = cart.reduce((sum, item) => sum + item.price, 0);
+            const tax = subtotal * 0.15;
+            const total = subtotal + tax;
+
+            // Create PayPal order
+            paypal.Buttons({
+                createOrder: function(data, actions) {
+                    return actions.order.create({
+                        purchase_units: [{
+                            amount: {
+                                value: total.toFixed(2),
+                                currency_code: "USD"
+                            },
+                            description: "eLibrary Purchase"
+                        }]
+                    });
+                },
+                onApprove: function(data, actions) {
+                    return actions.order.capture().then(function(details) {
+                        alert('Transaction completed by ' + details.payer.name.given_name);
+                        localStorage.removeItem('cart');
+                        window.location.href = 'index.html';
+                    });
+                },
+                onError: function(err) {
+                    alert('An error occurred during the payment process.');
+                }
+            }).render('#paypal-button');
+        }
+
         // Payment method selection
         const paymentMethods = document.querySelectorAll('.payment-method');
         const cardForm = document.getElementById('card-payment-form');
@@ -382,8 +417,6 @@
                 } else {
                     cardForm.style.display = 'none';
                     paypalButton.style.display = 'block';
-                    // Initialize PayPal when PayPal payment method is selected
-                    initializePayPal();
                 }
             });
         });
@@ -436,48 +469,6 @@
             alert('Payment processing...');
             // Redirect to success page or handle response
         });
-
-        // Initialize PayPal
-        function initializePayPal() {
-            const cart = JSON.parse(localStorage.getItem('cart')) || [];
-            const subtotal = cart.reduce((sum, item) => sum + item.price, 0);
-            const tax = subtotal * 0.15;
-            const total = subtotal + tax;
-
-            // Clear any existing buttons
-            const container = document.getElementById('paypal-button-container');
-            container.innerHTML = '';
-
-            paypal.Buttons({
-                createOrder: function(data, actions) {
-                    // Set up the transaction
-                    return actions.order.create({
-                        purchase_units: [{
-                            amount: {
-                                value: total.toFixed(2),
-                                currency_code: "USD"
-                            },
-                            description: "eLibrary Purchase"
-                        }]
-                    });
-                },
-                onApprove: function(data, actions) {
-                    // Capture the funds
-                    return actions.order.capture().then(function(details) {
-                        // Show success message
-                        alert('Transaction completed by ' + details.payer.name.given_name);
-                        // Clear the cart
-                        localStorage.removeItem('cart');
-                        // Redirect to success page or home
-                        window.location.href = 'index.html';
-                    });
-                },
-                onError: function(err) {
-                    // Handle errors
-                    alert('An error occurred during the payment process.');
-                }
-            }).render('#paypal-button-container');
-        }
 
         // Load cart items when page loads
         document.addEventListener('DOMContentLoaded', () => {
