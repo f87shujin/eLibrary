@@ -367,67 +367,26 @@
 
         // Initialize PayPal
         function connectWithPayPal() {
-            const cart = JSON.parse(localStorage.getItem('cart')) || [];
-            const subtotal = cart.reduce((sum, item) => sum + item.price, 0);
-            const tax = subtotal * 0.15;
-            const total = subtotal + tax;
-
-            // Create PayPal order
             paypal.Buttons({
                 createOrder: function(data, actions) {
+                    const cart = JSON.parse(localStorage.getItem('cart')) || [];
+                    const subtotal = cart.reduce((sum, item) => sum + item.price, 0);
+                    const tax = subtotal * 0.15;
+                    const total = subtotal + tax;
+
                     return actions.order.create({
                         purchase_units: [{
                             amount: {
-                                value: total.toFixed(2),
-                                currency_code: "USD"
-                            },
-                            description: "eLibrary Purchase"
+                                value: total.toFixed(2)
+                            }
                         }]
                     });
                 },
-                onApprove: async function(data, actions) {
-                    return actions.order.capture().then(async function(details) {
-                        try {
-                            const cart = JSON.parse(localStorage.getItem('cart')) || [];
-                            const subtotal = cart.reduce((sum, item) => sum + item.price, 0);
-                            const tax = subtotal * 0.15;
-                            const total = subtotal + tax;
-
-                            const token = localStorage.getItem('token');
-                            if (!token) {
-                                alert('Please log in to complete your purchase');
-                                window.location.href = 'login.html';
-                                return;
-                            }
-
-                            // Create order
-                            const response = await fetch('http://localhost:10000/api/orders', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    'Authorization': `Bearer ${token}`
-                                },
-                                body: JSON.stringify({
-                                    items: cart,
-                                    totalAmount: total
-                                })
-                            });
-
-                            if (!response.ok) {
-                                throw new Error('Failed to create order');
-                            }
-
-                            const data = await response.json();
-                            
-                            // Clear cart
-                            localStorage.removeItem('cart');
-                            
-                            // Redirect to receipt page
-                            window.location.href = `receipt.html?orderId=${data.orderId}`;
-                        } catch (error) {
-                            console.error('Error processing PayPal payment:', error);
-                            alert('Failed to process payment. Please try again.');
-                        }
+                onApprove: function(data, actions) {
+                    return actions.order.capture().then(function(details) {
+                        alert('Transaction completed by ' + details.payer.name.given_name);
+                        localStorage.removeItem('cart');
+                        window.location.href = 'receipt.html';
                     });
                 },
                 onError: function(err) {
@@ -501,50 +460,12 @@
         });
 
         // Form submission
-        cardForm.addEventListener('submit', async (e) => {
+        cardForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            
-            try {
-                const cart = JSON.parse(localStorage.getItem('cart')) || [];
-                const subtotal = cart.reduce((sum, item) => sum + item.price, 0);
-                const tax = subtotal * 0.15;
-                const total = subtotal + tax;
-
-                const token = localStorage.getItem('token');
-                if (!token) {
-                    alert('Please log in to complete your purchase');
-                    window.location.href = 'login.html';
-                    return;
-                }
-
-                // Create order
-                const response = await fetch('http://localhost:10000/api/orders', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({
-                        items: cart,
-                        totalAmount: total
-                    })
-                });
-
-                if (!response.ok) {
-                    throw new Error('Failed to create order');
-                }
-
-                const data = await response.json();
-                
-                // Clear cart
-                localStorage.removeItem('cart');
-                
-                // Redirect to receipt page
-                window.location.href = `receipt.html?orderId=${data.orderId}`;
-            } catch (error) {
-                console.error('Error processing payment:', error);
-                alert('Failed to process payment. Please try again.');
-            }
+            // Simulate payment processing
+            alert('Payment processing...');
+            // Redirect to success page or handle response
+            window.location.href = 'receipt.html';
         });
 
         // Load cart items when page loads
