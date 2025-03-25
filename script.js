@@ -68,9 +68,8 @@ async function sendMessage() {
     const loadingDiv = showLoading();
 
     try {
-        // Force HTTP in the URL
         const apiUrl = API_BASE_URL.replace('https://', 'http://');
-        console.log('Sending request to:', apiUrl); // Debug log
+        console.log('Sending request to:', apiUrl);
 
         const response = await fetch(`${apiUrl}/api/chat`, {
             method: 'POST',
@@ -79,22 +78,20 @@ async function sendMessage() {
             },
             mode: 'cors',
             body: JSON.stringify({
-                model: "toshokan",  // lowercase model name
+                model: "toshokan",
                 messages: [
                     { 
                         role: "user", 
                         content: message 
                     }
                 ],
-                stream: true  // Enable streaming
+                stream: true
             }),
         });
 
         if (!response.ok) {
             throw new Error(`API Error: ${response.status}`);
         }
-
-        console.log('Response received:', response); // Debug log
 
         // Handle streaming response
         const reader = response.body.getReader();
@@ -105,13 +102,13 @@ async function sendMessage() {
             const { done, value } = await reader.read();
             
             if (done) {
-                console.log('Stream complete'); // Debug log
+                console.log('Stream complete');
                 break;
             }
 
             // Convert the chunk to text
             const chunk = new TextDecoder().decode(value);
-            console.log('Received chunk:', chunk); // Debug log
+            console.log('Received chunk:', chunk);
 
             // Split the chunk into lines in case multiple JSON objects are received
             const lines = chunk.split('\n').filter(line => line.trim());
@@ -119,11 +116,12 @@ async function sendMessage() {
             for (const line of lines) {
                 try {
                     const jsonResponse = JSON.parse(line);
-                    console.log('Parsed JSON:', jsonResponse); // Debug log
+                    console.log('Parsed JSON:', jsonResponse);
 
-                    if (jsonResponse.response) {
+                    // Check for message.content in the response
+                    if (jsonResponse.message?.content) {
                         hasReceivedResponse = true;
-                        aiResponse += jsonResponse.response;
+                        aiResponse += jsonResponse.message.content;
                         // Update the message in real-time
                         updateLastAIMessage(aiResponse);
                     }
@@ -136,7 +134,7 @@ async function sendMessage() {
         loadingDiv.remove();
 
         if (!hasReceivedResponse) {
-            console.error('No response content received'); // Debug log
+            console.error('No response content received');
             throw new Error('No response content received from AI');
         }
 
