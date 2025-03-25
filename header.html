@@ -169,9 +169,14 @@
                     </li>
 
                     <!-- Show when user is NOT logged in -->
-                    <li class="nav-item" id="signup-link">
+                    <li class="nav-item" id="signin-link">
+                        <a class="nav-link" href="login.html">
+                            <i class="fas fa-sign-in-alt me-1"></i>Sign In
+                        </a>
+                    </li>
+                    <li class="nav-item" id="register-link">
                         <a class="nav-link" href="register.html">
-                            <i class="fas fa-user-plus me-1"></i>Sign Up
+                            <i class="fas fa-user-plus me-1"></i>Register
                         </a>
                     </li>
                     
@@ -249,26 +254,29 @@
             console.log('Updating header UI...');
             
             // Find elements in the current document
-            const signupLink = document.getElementById('signup-link');
+            const signinLink = document.getElementById('signin-link');
+            const registerLink = document.getElementById('register-link');
             const profileLink = document.getElementById('profile-link');
             const adminLink = document.getElementById('admin-link');
             const logoutLink = document.getElementById('logout-link');
 
             console.log('Elements found:', {
-                signupLink: !!signupLink,
+                signinLink: !!signinLink,
+                registerLink: !!registerLink,
                 profileLink: !!profileLink,
                 adminLink: !!adminLink,
                 logoutLink: !!logoutLink
             });
 
-            if (!signupLink || !profileLink || !adminLink || !logoutLink) {
+            if (!signinLink || !registerLink || !profileLink || !adminLink || !logoutLink) {
                 console.error('Could not find all required elements!');
                 return;
             }
 
             if (isLoggedIn()) {
                 console.log('User is logged in, updating UI...');
-                signupLink.style.display = 'none';
+                signinLink.style.display = 'none';
+                registerLink.style.display = 'none';
                 profileLink.style.display = 'block';
                 logoutLink.style.display = 'block';
                 
@@ -281,7 +289,8 @@
                 }
             } else {
                 console.log('User is not logged in, updating UI...');
-                signupLink.style.display = 'block';
+                signinLink.style.display = 'block';
+                registerLink.style.display = 'block';
                 profileLink.style.display = 'none';
                 adminLink.style.display = 'none';
                 logoutLink.style.display = 'none';
