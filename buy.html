@@ -229,15 +229,16 @@
         }
 
         const quantity = parseInt(document.getElementById("quantity").value);
-        const total = bookData.price * quantity;
+        const unitPrice = bookData.price; // Store the original unit price
 
         const cartItem = {
           _id: bookData._id,
           name: bookData.name,
           image: bookData.image,
-          price: bookData.price,
+          price: unitPrice * quantity, // Calculate total price based on quantity
           quantity: quantity,
           type: "purchase",
+          unitPrice: unitPrice // Store the unit price for later calculations
         };
 
         const cart = JSON.parse(localStorage.getItem("cart")) || [];

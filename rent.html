@@ -186,11 +186,14 @@
                 const response = await fetch(`https://elibrary-1rh1.onrender.com/api/books/${bookId}`);
                 bookData = await response.json();
                 
+                // Calculate daily rental rate (10% of buy price)
+                const dailyRate = bookData.price * 0.1;
+                
                 // Update UI with book details
                 document.getElementById('book-image').src = bookData.image;
                 document.getElementById('book-title').textContent = bookData.name;
-                document.getElementById('book-price').textContent = bookData.price.toFixed(2);
-                document.getElementById('daily-rate').textContent = bookData.price.toFixed(2);
+                document.getElementById('book-price').textContent = dailyRate.toFixed(2);
+                document.getElementById('daily-rate').textContent = dailyRate.toFixed(2);
                 updateTotalPrice();
             } catch (error) {
                 console.error('Error fetching book details:', error);
@@ -213,18 +216,19 @@
             e.preventDefault();
             
             const days = parseInt(document.getElementById('rental-days').value);
-            const total = parseFloat(document.getElementById('total-price').textContent);
+            const dailyRate = bookData.price * 0.1; // 10% of buy price
+            const total = dailyRate * days;
 
             // Create rental item for cart
             const rentalItem = {
                 _id: bookData._id,
                 name: bookData.name,
                 image: bookData.image,
-                price: bookData.price * days,
+                price: total,
                 quantity: 1,
                 rentalDays: days,
                 type: 'rental',
-                dailyRate: bookData.price
+                dailyRate: dailyRate
             };
 
             // Add to cart

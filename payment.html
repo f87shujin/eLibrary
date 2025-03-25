@@ -320,9 +320,9 @@
         function updateQuantity(index, change) {
             const cart = JSON.parse(localStorage.getItem('cart')) || [];
             if (cart[index].type === 'purchase') {
-                const originalPrice = cart[index].price / cart[index].quantity; // Get the original price per unit
+                const unitPrice = cart[index].unitPrice; // Get the original unit price
                 cart[index].quantity = Math.max(1, cart[index].quantity + change);
-                cart[index].price = originalPrice * cart[index].quantity; // Calculate new total price
+                cart[index].price = unitPrice * cart[index].quantity; // Calculate new total price
                 localStorage.setItem('cart', JSON.stringify(cart));
                 updateCartItems();
             }
