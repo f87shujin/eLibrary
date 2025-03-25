@@ -122,3 +122,5 @@ function showError(message) {
     chatBox.appendChild(errorDiv);
     chatBox.scrollTop = chatBox.scrollHeight;
 }
+
+window.addEventListener('storage', (e) => console.log('Storage changed:', e.key));

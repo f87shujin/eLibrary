@@ -222,10 +222,15 @@
 
     // Function to update header UI
     function updateHeaderUI() {
-        const signupLink = document.getElementById('signup-link');
-        const profileLink = document.getElementById('profile-link');
-        const adminLink = document.getElementById('admin-link');
-        const logoutLink = document.getElementById('logout-link');
+        const header = document.querySelector('#header');
+        if (!header) return;
+
+        const signupLink = header.querySelector('#signup-link');
+        const profileLink = header.querySelector('#profile-link');
+        const adminLink = header.querySelector('#admin-link');
+        const logoutLink = header.querySelector('#logout-link');
+
+        if (!signupLink || !profileLink || !adminLink || !logoutLink) return;
 
         if (isLoggedIn()) {
             // User is logged in
@@ -255,9 +260,13 @@
     }
 
     // Update header UI when page loads
-    updateHeaderUI();
+    document.addEventListener('DOMContentLoaded', () => {
+        updateHeaderUI();
+        // Set up periodic checks
+        setInterval(updateHeaderUI, 1000);
+    });
 
-    // Update header UI when storage changes
+    // Listen for storage changes
     window.addEventListener('storage', updateHeaderUI);
 </script>
 
