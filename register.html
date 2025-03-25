@@ -48,6 +48,8 @@
     </footer>
 
     <script>
+        console.log('Register page script starting...');
+
         const registerForm = document.getElementById('register-form');
         registerForm.addEventListener('submit', async (event) => {
             event.preventDefault();
@@ -79,6 +81,7 @@
 
         // Function to load HTML content
         function loadHTML(elementId, filePath) {
+            console.log(`Loading ${filePath} into ${elementId}...`);
             fetch(filePath)
                 .then(response => {
                     if (!response.ok) {
@@ -88,6 +91,11 @@
                 })
                 .then(data => {
                     document.getElementById(elementId).innerHTML = data;
+                    console.log(`${filePath} loaded successfully`);
+                    // Dispatch a custom event when header is loaded
+                    if (elementId === 'header') {
+                        window.dispatchEvent(new Event('headerLoaded'));
+                    }
                 })
                 .catch(error => {
                     console.error('Error loading HTML:', error);
