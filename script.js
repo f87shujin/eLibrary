@@ -13,23 +13,21 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
-let API_BASE_URL = "https://107.159.209.164:11434"; // Use HTTPS
+let API_BASE_URL = "http://107.159.209.164:11434"; // Use HTTP instead of HTTPS
 
 async function checkAPIAvailability() {
     try {
-        // Try local API first with HTTPS
-        const localResponse = await fetch('https://127.0.0.1:11434/api/chat', {
+        // Try local API first with HTTP
+        const localResponse = await fetch('http://127.0.0.1:11434/api/chat', {
             method: 'HEAD',
             mode: 'cors',
             headers: {
                 'Content-Type': 'application/json'
-            },
-            // Add this to accept self-signed certificates
-            rejectUnauthorized: false
+            }
         });
         
         if (localResponse.ok) {
-            API_BASE_URL = "https://127.0.0.1:11434";
+            API_BASE_URL = "http://127.0.0.1:11434";
             console.log("Using local API:", API_BASE_URL);
             return;
         }
@@ -38,19 +36,17 @@ async function checkAPIAvailability() {
     }
 
     try {
-        // Try remote API with HTTPS
-        const remoteResponse = await fetch('https://107.159.209.164:11434/api/chat', {
+        // Try remote API with HTTP
+        const remoteResponse = await fetch('http://107.159.209.164:11434/api/chat', {
             method: 'HEAD',
             mode: 'cors',
             headers: {
                 'Content-Type': 'application/json'
-            },
-            // Add this to accept self-signed certificates
-            rejectUnauthorized: false
+            }
         });
         
         if (remoteResponse.ok) {
-            API_BASE_URL = "https://107.159.209.164:11434";
+            API_BASE_URL = "http://107.159.209.164:11434";
             console.log("Using remote API:", API_BASE_URL);
         } else {
             console.error("Remote API not responding correctly");
@@ -77,7 +73,7 @@ async function sendMessage() {
             headers: {
                 'Content-Type': 'application/json',
             },
-            mode: 'cors', // Keep CORS mode
+            mode: 'cors',
             body: JSON.stringify({
                 model: "Toshokan",
                 messages: [
