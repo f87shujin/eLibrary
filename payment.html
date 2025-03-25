@@ -222,6 +222,27 @@
         loadHTML('header', 'header.html');
         loadHTML('footer', 'footer.html');
 
+        // Calculate and display cart total
+        function updateOrderSummary() {
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const tax = subtotal * 0.15; // 15% tax
+            const total = subtotal + tax;
+
+            // Update the order summary section
+            document.querySelector('.d-flex.justify-content-between.mb-2 span:last-child').textContent = `$${subtotal.toFixed(2)}`;
+            document.querySelector('.d-flex.justify-content-between.mb-2:nth-child(2) span:last-child').textContent = `$${tax.toFixed(2)}`;
+            document.querySelector('.d-flex.justify-content-between strong:last-child').textContent = `$${total.toFixed(2)}`;
+            
+            // Update the pay button text
+            document.querySelector('.library-btn').textContent = `Pay $${total.toFixed(2)}`;
+        }
+
+        // Update order summary when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            updateOrderSummary();
+        });
+
         // Payment method selection
         const paymentMethods = document.querySelectorAll('.payment-method');
         const cardForm = document.getElementById('card-payment-form');
