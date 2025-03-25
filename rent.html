@@ -6,32 +6,117 @@
     <title>Rent Book - eLibrary</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="dark-theme.css">
+    <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
     <style>
         .rent-container {
+            background-color: var(--library-secondary);
+            border-radius: 15px;
             padding: 40px;
-            background-color: var(--dark-secondary);
-            border-radius: 10px;
-            margin-top: 20px;
-        }  
+            margin-top: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
         .book-preview {
             display: flex;
             align-items: center;
-            margin-bottom: 30px;
+            margin-bottom: 40px;
+            gap: 30px;
         }
+
         .book-preview img {
-            max-width: 200px;
-            margin-right: 20px;
+            max-width: 250px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease;
         }
+
+        .book-preview img:hover {
+            transform: scale(1.05);
+        }
+
+        .book-preview h3 {
+            color: var(--library-accent);
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            margin-bottom: 15px;
+        }
+
+        .book-preview p {
+            color: var(--library-text);
+            font-size: 1.2rem;
+        }
+
         .rent-form {
-            background-color: var(--dark-input);
-            padding: 20px;
-            border-radius: 8px;
+            background-color: var(--library-primary);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
         }
+
+        .form-label {
+            color: var(--library-text);
+            font-family: 'Libre Baskerville', serif;
+            font-size: 1.1rem;
+        }
+
+        .form-control {
+            background-color: var(--library-secondary);
+            border: none;
+            color: var(--library-text);
+            padding: 12px;
+            font-size: 1.1rem;
+        }
+
+        .form-control:focus {
+            background-color: var(--library-secondary);
+            color: var(--library-text);
+            box-shadow: 0 0 0 0.25rem rgba(162, 123, 92, 0.25);
+        }
+
         .price-preview {
-            margin-top: 20px;
-            padding: 15px;
-            background-color: var(--dark-input);
-            border-radius: 8px;
+            background-color: var(--library-secondary);
+            padding: 25px;
+            border-radius: 10px;
+            margin-top: 30px;
+        }
+
+        .price-preview h4 {
+            color: var(--library-accent);
+            font-family: 'Playfair Display', serif;
+            margin-bottom: 20px;
+        }
+
+        .price-preview .d-flex {
+            color: var(--library-text);
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+        }
+
+        .price-preview hr {
+            border-color: var(--library-accent);
+            opacity: 0.3;
+            margin: 20px 0;
+        }
+
+        .btn-primary {
+            background-color: var(--library-accent);
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            font-family: 'Libre Baskerville', serif;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--library-primary);
+            transform: translateY(-3px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .text-muted {
+            color: var(--library-text) !important;
+            opacity: 0.7;
         }
     </style>
 </head>
@@ -41,11 +126,11 @@
         <div id="header"></div>
     </header>
 
-    <div class="container">
+    <div class="library-container">
         <div class="rent-container">
-            <h2>Rent Book</h2>
+            <h2 class="library-title">Rent Book</h2>
             <div class="book-preview">
-                <img id="book-image" src="" alt="Book Cover">
+                <img id="book-image" src="placeholder.jpg" alt="Book Cover" />
                 <div>
                     <h3 id="book-title"></h3>
                     <p>Daily Rate: $<span id="book-price"></span></p>
@@ -154,15 +239,6 @@
         // Update calculations when rental days change
         document.getElementById('rental-days').addEventListener('input', updateTotalPrice);
 
-        // Load book details when page loads
-        document.addEventListener('DOMContentLoaded', () => {
-            fetchBookDetails();
-            
-            // Load header and footer
-            loadHTML('header', 'header.html');
-            loadHTML('footer', 'footer.html');
-        });
-
         // Function to load HTML content
         function loadHTML(elementId, filePath) {
             console.log(`Loading ${filePath} into ${elementId}...`);
@@ -204,6 +280,15 @@
                     console.error('Error loading HTML:', error);
                 });
         }
+
+        // Load header and footer
+        loadHTML('header', 'header.html');
+        loadHTML('footer', 'footer.html');
+
+        // Load book details when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchBookDetails();
+        });
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
