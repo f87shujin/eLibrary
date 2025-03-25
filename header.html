@@ -300,6 +300,12 @@
         updateHeaderUI();
     });
 
+    // Listen for our custom headerLoaded event
+    window.addEventListener('headerLoaded', () => {
+        console.log('Header loaded event received');
+        updateHeaderUI();
+    });
+
     // Force an update after a short delay to ensure header is loaded
     setTimeout(() => {
         console.log('Running delayed header update...');

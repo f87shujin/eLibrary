@@ -54,23 +54,24 @@
                 if (response.ok) {
                     const data = await response.json();
                     localStorage.setItem('token', data.token);
-                    
-                    // Decode the JWT token to get user role
-                    const tokenPayload = JSON.parse(atob(data.token.split('.')[1]));
-                    console.log('Login successful:', tokenPayload);
+                    console.log('Login successful:', data);
                     
                     // Force a storage event to trigger header update
-                    window.dispatchEvent(new StorageEvent('storage', { key: 'token', newValue: data.token }));
+                    window.dispatchEvent(new Event('storage'));
                     
-                    // Wait a brief moment to ensure token is set and header is updated
-                    await new Promise(resolve => setTimeout(resolve, 500));
-                    
-                    // Redirect based on user role
-                    if (tokenPayload.role === 'admin') {
-                        window.location.href = 'admin.html';
-                    } else {
-                        window.location.href = 'index.html';
-                    }
+                    // Add a delay before redirecting
+                    setTimeout(() => {
+                        // Decode the token to get the role
+                        const tokenPayload = JSON.parse(atob(data.token.split('.')[1]));
+                        const userRole = tokenPayload.role;
+                        
+                        // Redirect based on role
+                        if (userRole === 'admin') {
+                            window.location.href = 'admin.html';
+                        } else {
+                            window.location.href = 'index.html';
+                        }
+                    }, 500); // Wait 500ms before redirecting
                 } else {
                     const errorData = await response.json();
                     console.error('Login failed:', errorData.message);
