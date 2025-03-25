@@ -245,15 +245,28 @@
         }
     }
 
-    // Check auth status when page loads
-    checkAuthStatus();
+    // Initialize header
+    function initializeHeader() {
+        // Check auth status immediately
+        checkAuthStatus();
+        
+        // Set up periodic checks
+        setInterval(checkAuthStatus, 1000);
+        
+        // Check when storage changes
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'token') {
+                checkAuthStatus();
+            }
+        });
+    }
 
-    // Check when storage changes
-    window.addEventListener('storage', function(e) {
-        if (e.key === 'token') {
-            checkAuthStatus();
-        }
-    });
+    // Run initialization when DOM is loaded
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initializeHeader);
+    } else {
+        initializeHeader();
+    }
 </script>
 
 <div class="content-container">

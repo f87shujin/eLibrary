@@ -59,6 +59,12 @@
                     const tokenPayload = JSON.parse(atob(data.token.split('.')[1]));
                     console.log('Login successful:', tokenPayload);
                     
+                    // Force a storage event to trigger header update
+                    window.dispatchEvent(new StorageEvent('storage', { key: 'token', newValue: data.token }));
+                    
+                    // Wait a brief moment to ensure token is set and header is updated
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    
                     // Redirect based on user role
                     if (tokenPayload.role === 'admin') {
                         window.location.href = 'admin.html';
