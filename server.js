@@ -11,9 +11,10 @@ const PORT = process.env.PORT || 10000;
 
 // Middleware
 app.use(cors({
-    origin: '*', // Be more specific in production
+    origin: ['http://localhost:8000', 'http://127.0.0.1:8000'], // Allow your Python server
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+    credentials: true
 }));
 app.use(express.json()); // Parse JSON bodies
 

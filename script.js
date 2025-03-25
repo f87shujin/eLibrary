@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 let API_BASE_URL = "http://107.159.209.164:11434"; // Force HTTP
+let SERVER_URL = "http://localhost:10000";
 
 async function checkAPIAvailability() {
     try {
@@ -56,18 +57,35 @@ async function checkAPIAvailability() {
     }
 }
 
-// Add this function to fetch books
+// Update the fetchBooks function
 async function fetchBooks() {
     try {
-        const response = await fetch('http://localhost:10000/api/books');
+        console.log('Fetching books from:', `${SERVER_URL}/api/books`);
+        const response = await fetch(`${SERVER_URL}/api/books`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            mode: 'cors' // Enable CORS
+        });
+
         if (!response.ok) {
-            throw new Error('Failed to fetch books');
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
         const books = await response.json();
+        console.log('Fetched books:', books); // Debug log
         return books;
     } catch (error) {
         console.error('Error fetching books:', error);
-        return [];
+        // Return some default books if server is not available
+        return [
+            { 
+                name: "Unable to fetch books from server", 
+                price: 0, 
+                description: "Please make sure the server is running on port 10000" 
+            }
+        ];
     }
 }
 
@@ -86,11 +104,17 @@ async function sendMessage() {
     try {
         // Fetch books first
         const books = await fetchBooks();
-        const booksContext = books.map(book => 
-            `"${book.name}" (Price: $${book.price}) - ${book.description || 'No description available'}`
-        ).join('\n');
+        let contextPrompt;
 
-        const contextPrompt = `Here are the books available in our library:\n${booksContext}\n\nUser question: ${message}`;
+        if (books.length === 0 || (books.length === 1 && books[0].name === "Unable to fetch books from server")) {
+            contextPrompt = `I apologize, but I'm currently unable to access the library's book database. I'll try to help you with general information. User question: ${message}`;
+        } else {
+            const booksContext = books.map(book => 
+                `"${book.name}" (Price: $${book.price}) - ${book.description || 'No description available'}`
+            ).join('\n');
+            contextPrompt = `Here are the books available in our library:\n${booksContext}\n\nUser question: ${message}`;
+        }
+
         console.log('Sending context:', contextPrompt);
 
         const apiUrl = API_BASE_URL.replace('https://', 'http://');
