@@ -198,10 +198,6 @@
     // Function to check and update authentication status
     function checkAuthStatus() {
         const token = localStorage.getItem('token');
-        const isLoggedIn = localStorage.getItem('isLoggedIn');
-        const userName = localStorage.getItem('userName');
-        const userRole = localStorage.getItem('userRole');
-        
         const signupLink = document.getElementById('signup-link');
         const profileLink = document.getElementById('profile-link');
         const adminLink = document.getElementById('admin-link');
@@ -212,50 +208,33 @@
             return;
         }
 
-        if (token && isLoggedIn === 'true') {
+        if (token) {
             try {
                 // Decode the token
                 const tokenPayload = JSON.parse(atob(token.split('.')[1]));
-                
-                // Check if token is expired
-                const currentTime = Math.floor(Date.now() / 1000);
-                if (tokenPayload.exp && tokenPayload.exp < currentTime) {
-                    // Token is expired, clear session
-                    localStorage.removeItem('token');
-                    localStorage.removeItem('userName');
-                    localStorage.removeItem('userRole');
-                    localStorage.removeItem('isLoggedIn');
-                    signupLink.style.display = 'block';
-                    profileLink.style.display = 'none';
-                    adminLink.style.display = 'none';
-                    return;
-                }
                 
                 // Hide signup, show profile
                 signupLink.style.display = 'none';
                 profileLink.style.display = 'block';
                 
                 // Update welcome text with user's name
-                if (userName) {
-                    welcomeText.textContent = `Welcome, ${userName}!`;
+                if (tokenPayload.name) {
+                    welcomeText.textContent = `Welcome, ${tokenPayload.name}!`;
                 }
 
                 // Show admin link if user is admin
-                if (userRole === 'admin') {
+                if (tokenPayload.role === 'admin') {
                     adminLink.style.display = 'block';
                 }
 
-                console.log('Logged in as:', userName, 'Role:', userRole);
+                console.log('Logged in as:', tokenPayload.name, 'Role:', tokenPayload.role);
             } catch (error) {
                 console.error('Invalid token:', error);
-                // If token is invalid, clear session
-                localStorage.removeItem('token');
-                localStorage.removeItem('userName');
-                localStorage.removeItem('userRole');
-                localStorage.removeItem('isLoggedIn');
+                // If token is invalid, show only signup
                 signupLink.style.display = 'block';
                 profileLink.style.display = 'none';
                 adminLink.style.display = 'none';
+                localStorage.removeItem('token'); // Clear invalid token
             }
         } else {
             // Not logged in, show only signup
@@ -266,35 +245,15 @@
         }
     }
 
-    // Initialize header
-    function initializeHeader() {
-        // Check auth status immediately
-        checkAuthStatus();
-        
-        // Set up periodic checks
-        setInterval(checkAuthStatus, 1000);
-        
-        // Check when storage changes
-        window.addEventListener('storage', function(e) {
-            if (e.key === 'token' || e.key === 'isLoggedIn' || e.key === 'userName' || e.key === 'userRole') {
-                checkAuthStatus();
-            }
-        });
+    // Check auth status when page loads
+    checkAuthStatus();
 
-        // Also check when the page becomes visible
-        document.addEventListener('visibilitychange', function() {
-            if (document.visibilityState === 'visible') {
-                checkAuthStatus();
-            }
-        });
-    }
-
-    // Run initialization when DOM is loaded
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initializeHeader);
-    } else {
-        initializeHeader();
-    }
+    // Check when storage changes
+    window.addEventListener('storage', function(e) {
+        if (e.key === 'token') {
+            checkAuthStatus();
+        }
+    });
 </script>
 
 <div class="content-container">
