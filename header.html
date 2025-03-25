@@ -202,51 +202,49 @@
 </header>
 
 <script>
-    // Function to check and update authentication status
-    function checkAuthStatus() {
+    // Simple function to check if user is logged in
+    function isLoggedIn() {
         const token = localStorage.getItem('token');
+        return !!token;
+    }
+
+    // Simple function to check if user is admin
+    function isAdmin() {
+        const token = localStorage.getItem('token');
+        if (!token) return false;
+        try {
+            const tokenPayload = JSON.parse(atob(token.split('.')[1]));
+            return tokenPayload.role === 'admin';
+        } catch (error) {
+            return false;
+        }
+    }
+
+    // Function to update header UI
+    function updateHeaderUI() {
         const signupLink = document.getElementById('signup-link');
         const profileLink = document.getElementById('profile-link');
         const adminLink = document.getElementById('admin-link');
         const logoutLink = document.getElementById('logout-link');
 
-        if (!signupLink || !profileLink || !adminLink || !logoutLink) {
-            console.log('Header elements not loaded yet');
-            return;
-        }
-
-        if (token) {
-            try {
-                // Decode the token
-                const tokenPayload = JSON.parse(atob(token.split('.')[1]));
-                
-                // Hide signup, show profile and logout
-                signupLink.style.display = 'none';
-                profileLink.style.display = 'block';
-                logoutLink.style.display = 'block';
-                
-                // Show admin link if user is admin
-                if (tokenPayload.role === 'admin') {
-                    adminLink.style.display = 'block';
-                }
-
-                console.log('Logged in as:', tokenPayload.name, 'Role:', tokenPayload.role);
-            } catch (error) {
-                console.error('Invalid token:', error);
-                // If token is invalid, show only signup
-                signupLink.style.display = 'block';
-                profileLink.style.display = 'none';
+        if (isLoggedIn()) {
+            // User is logged in
+            signupLink.style.display = 'none';
+            profileLink.style.display = 'block';
+            logoutLink.style.display = 'block';
+            
+            // Show admin link if user is admin
+            if (isAdmin()) {
+                adminLink.style.display = 'block';
+            } else {
                 adminLink.style.display = 'none';
-                logoutLink.style.display = 'none';
-                localStorage.removeItem('token'); // Clear invalid token
             }
         } else {
-            // Not logged in, show only signup
+            // User is not logged in
             signupLink.style.display = 'block';
             profileLink.style.display = 'none';
             adminLink.style.display = 'none';
             logoutLink.style.display = 'none';
-            console.log('Not logged in');
         }
     }
 
@@ -256,28 +254,11 @@
         window.location.href = 'index.html';
     }
 
-    // Initialize header
-    function initializeHeader() {
-        // Check auth status immediately
-        checkAuthStatus();
-        
-        // Set up periodic checks
-        setInterval(checkAuthStatus, 1000);
-        
-        // Check when storage changes
-        window.addEventListener('storage', function(e) {
-            if (e.key === 'token') {
-                checkAuthStatus();
-            }
-        });
-    }
+    // Update header UI when page loads
+    updateHeaderUI();
 
-    // Run initialization when DOM is loaded
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initializeHeader);
-    } else {
-        initializeHeader();
-    }
+    // Update header UI when storage changes
+    window.addEventListener('storage', updateHeaderUI);
 </script>
 
 <div class="content-container">
