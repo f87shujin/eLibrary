@@ -10,7 +10,11 @@ const app = express();
 const PORT = process.env.PORT || 10000;
 
 // Middleware
-app.use(cors()); // Enable CORS for all routes
+app.use(cors({
+    origin: '*', // Be more specific in production
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json()); // Parse JSON bodies
 
 // Connect to MongoDB
@@ -36,17 +40,14 @@ app.get('/api/books', async (req, res) => {
     try {
         let query = {};
         
-        // Add search filter if provided
         if (search) {
             query.name = { $regex: search, $options: 'i' };
         }
         
-        // Add category filter if provided
         if (category && category !== 'all') {
             query.category = category;
         }
 
-        // Build sort object
         let sortObj = {};
         if (sort) {
             switch (sort) {
@@ -65,7 +66,10 @@ app.get('/api/books', async (req, res) => {
             }
         }
 
-        const books = await Book.find(query).sort(sortObj);
+        const books = await Book.find(query)
+            .select('name price description image category') // Select specific fields
+            .sort(sortObj);
+        
         res.json(books);
     } catch (error) {
         console.error('Error fetching books:', error);

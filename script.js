@@ -56,6 +56,22 @@ async function checkAPIAvailability() {
     }
 }
 
+// Add this function to fetch books
+async function fetchBooks() {
+    try {
+        const response = await fetch('http://localhost:10000/api/books');
+        if (!response.ok) {
+            throw new Error('Failed to fetch books');
+        }
+        const books = await response.json();
+        return books;
+    } catch (error) {
+        console.error('Error fetching books:', error);
+        return [];
+    }
+}
+
+// Modify the sendMessage function to include books context
 async function sendMessage() {
     const userInput = document.getElementById('user-input');
     const message = userInput.value.trim();
@@ -68,9 +84,16 @@ async function sendMessage() {
     const loadingDiv = showLoading();
 
     try {
-        const apiUrl = API_BASE_URL.replace('https://', 'http://');
-        console.log('Sending request to:', apiUrl);
+        // Fetch books first
+        const books = await fetchBooks();
+        const booksContext = books.map(book => 
+            `"${book.name}" (Price: $${book.price}) - ${book.description || 'No description available'}`
+        ).join('\n');
 
+        const contextPrompt = `Here are the books available in our library:\n${booksContext}\n\nUser question: ${message}`;
+        console.log('Sending context:', contextPrompt);
+
+        const apiUrl = API_BASE_URL.replace('https://', 'http://');
         const response = await fetch(`${apiUrl}/api/chat`, {
             method: 'POST',
             headers: {
@@ -80,9 +103,13 @@ async function sendMessage() {
             body: JSON.stringify({
                 model: "toshokan",
                 messages: [
+                    {
+                        role: "system",
+                        content: "You are a helpful library assistant. You have access to information about our library's books and can help users find books, understand their content, and make recommendations."
+                    },
                     { 
                         role: "user", 
-                        content: message 
+                        content: contextPrompt 
                     }
                 ],
                 stream: true
@@ -106,23 +133,15 @@ async function sendMessage() {
                 break;
             }
 
-            // Convert the chunk to text
             const chunk = new TextDecoder().decode(value);
-            console.log('Received chunk:', chunk);
-
-            // Split the chunk into lines in case multiple JSON objects are received
             const lines = chunk.split('\n').filter(line => line.trim());
             
             for (const line of lines) {
                 try {
                     const jsonResponse = JSON.parse(line);
-                    console.log('Parsed JSON:', jsonResponse);
-
-                    // Check for message.content in the response
                     if (jsonResponse.message?.content) {
                         hasReceivedResponse = true;
                         aiResponse += jsonResponse.message.content;
-                        // Update the message in real-time
                         updateLastAIMessage(aiResponse);
                     }
                 } catch (e) {
@@ -134,7 +153,6 @@ async function sendMessage() {
         loadingDiv.remove();
 
         if (!hasReceivedResponse) {
-            console.error('No response content received');
             throw new Error('No response content received from AI');
         }
 
