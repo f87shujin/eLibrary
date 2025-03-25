@@ -1,97 +1,73 @@
-// Remove unused API key
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const sendButton = document.getElementById('send-button');
     const userInput = document.getElementById('user-input');
-    
-    // Add a check for local API availability on load
-    checkLibrarianAPI();
-    
+
+    // Auto-detect if using localhost or public API
+    checkAPIAvailability();
+
     sendButton.addEventListener('click', sendMessage);
-    userInput.addEventListener('keypress', function(e) {
+    userInput.addEventListener('keypress', function (e) {
         if (e.key === 'Enter') {
             sendMessage();
         }
     });
 });
 
-// Function to check if the librarian API is available
-async function checkLibrarianAPI() {
+let API_BASE_URL = "http://107.159.209.164:11434"; // Default to public API
+
+async function checkAPIAvailability() {
     try {
-        const response = await fetch('http://127.0.0.1:3000/health');
-        const data = await response.json();
-        if (data.status === 'ok') {
-            console.log('Librarian API is available:', data.ollama_version);
+        // Check if local API is available
+        const response = await fetch('http://127.0.0.1:11434/api/chat');
+        if (response.ok) {
+            API_BASE_URL = "http://127.0.0.1:11434"; // Switch to local API if available
+            console.log("Using local API:", API_BASE_URL);
+        } else {
+            console.log("Using public API:", API_BASE_URL);
         }
     } catch (error) {
-        console.error('Librarian API is not available:', error);
-        showError(`
-            Please follow these steps to connect to the local API:
-            1. Make sure the Librarian API is running (node librarian.js)
-            2. In Opera, click the shield icon in the address bar
-            3. Select "Site Settings"
-            4. Find "Insecure content" and set it to "Allow"
-            5. Refresh the page
-            
-            If you still see this error, check if the API is running at http://127.0.0.1:3000
-        `);
+        console.log("Using public API:", API_BASE_URL);
     }
 }
 
 async function sendMessage() {
     const userInput = document.getElementById('user-input');
-    const chatBox = document.getElementById('chat-box');
     const message = userInput.value.trim();
 
     if (!message) return;
 
+    appendMessage('user', message);
+    userInput.value = '';
+
+    const loadingDiv = showLoading();
+
     try {
-        appendMessage('user', message);
-        userInput.value = '';
+        const response = await fetch(`${API_BASE_URL}/api/chat`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                model: "Toshokan",
+                messages: [{ role: "user", content: message }],
+            }),
+        });
 
-        const loadingDiv = showLoading();
+        loadingDiv.remove();
 
-        try {
-            const response = await fetch('http://127.0.0.1:3000/api/librarian', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ message }),
-                // Add these settings for Opera
-                mode: 'cors',
-                cache: 'no-cache',
-            });
-
-            loadingDiv.remove();
-
-            if (!response.ok) {
-                throw new Error(`API Error: ${response.status}`);
-            }
-
-            const data = await response.json();
-            const aiResponse = data.response || 'No response received';
-            appendMessage('ai', aiResponse);
-
-        } catch (apiError) {
-            loadingDiv.remove();
-            console.error('API Error:', apiError);
-            showError(`
-                Unable to connect to the Librarian API. For Opera users:
-                1. Click the shield icon in the address bar
-                2. Select "Site Settings"
-                3. Find "Insecure content" and set it to "Allow"
-                4. Refresh the page
-                
-                Also ensure:
-                - The librarian server is running on your computer
-                - You're running 'node librarian.js' in your terminal
-                - Port 3000 is available
-            `);
+        if (!response.ok) {
+            throw new Error(`API Error: ${response.status}`);
         }
 
+        const data = await response.json();
+        const aiResponse = data.message || "No response received.";
+        appendMessage('ai', aiResponse);
     } catch (error) {
-        console.error('Chat Error:', error);
-        showError('An unexpected error occurred. Please check the console for details.');
+        loadingDiv.remove();
+        console.error('API Error:', error);
+        showError(`Failed to connect to the API. Please ensure:
+        - The API is running at ${API_BASE_URL}
+        - Your internet connection is stable`);
     }
 }
 
@@ -121,47 +97,4 @@ function showError(message) {
     errorDiv.innerHTML = `<p>${message}</p>`;
     chatBox.appendChild(errorDiv);
     chatBox.scrollTop = chatBox.scrollHeight;
-}
-
-window.addEventListener('storage', (e) => console.log('Storage changed:', e.key));
-
-function loadHTML(elementId, filePath) {
-    console.log(`Loading ${filePath} into ${elementId}...`);
-    fetch(filePath)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.text();
-        })
-        .then(data => {
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = data;
-            
-            // Extract and execute scripts
-            const scripts = tempDiv.getElementsByTagName('script');
-            for (let script of scripts) {
-                const newScript = document.createElement('script');
-                newScript.textContent = script.textContent;
-                document.body.appendChild(newScript);
-            }
-            
-            // Remove scripts from the content before inserting
-            const scriptsToRemove = tempDiv.getElementsByTagName('script');
-            while (scriptsToRemove.length > 0) {
-                scriptsToRemove[0].remove();
-            }
-            
-            // Insert the remaining content
-            document.getElementById(elementId).innerHTML = tempDiv.innerHTML;
-            console.log(`${filePath} loaded successfully`);
-            
-            // Dispatch a custom event when header is loaded
-            if (elementId === 'header') {
-                window.dispatchEvent(new Event('headerLoaded'));
-            }
-        })
-        .catch(error => {
-            console.error('Error loading HTML:', error);
-        });
 }
