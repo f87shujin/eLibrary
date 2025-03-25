@@ -252,6 +252,29 @@ app.get('/api/orders', async (req, res) => {
     }
 });
 
+// Add this new endpoint to get a specific order
+app.get('/api/orders/:orderId', async (req, res) => {
+    const token = req.headers['authorization']?.split(' ')[1];
+    if (!token) return res.status(403).json({ message: 'No token provided' });
+
+    try {
+        const decoded = jwt.verify(token, 'your_jwt_secret');
+        const order = await Order.findOne({ 
+            _id: req.params.orderId,
+            userId: decoded.id 
+        });
+
+        if (!order) {
+            return res.status(404).json({ message: 'Order not found' });
+        }
+
+        res.json(order);
+    } catch (error) {
+        console.error('Error fetching order:', error);
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+});
+
 // Start the server
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);

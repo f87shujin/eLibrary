@@ -385,9 +385,49 @@
                         }]
                     });
                 },
-                onApprove: function(data, actions) {
+                onApprove: async function(data, actions) {
                     return actions.order.capture().then(async function(details) {
-                        await createOrder();
+                        try {
+                            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+                            const subtotal = cart.reduce((sum, item) => sum + item.price, 0);
+                            const tax = subtotal * 0.15;
+                            const total = subtotal + tax;
+
+                            const token = localStorage.getItem('token');
+                            if (!token) {
+                                alert('Please log in to complete your purchase');
+                                window.location.href = 'login.html';
+                                return;
+                            }
+
+                            // Create order
+                            const response = await fetch('http://localhost:10000/api/orders', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${token}`
+                                },
+                                body: JSON.stringify({
+                                    items: cart,
+                                    totalAmount: total
+                                })
+                            });
+
+                            if (!response.ok) {
+                                throw new Error('Failed to create order');
+                            }
+
+                            const data = await response.json();
+                            
+                            // Clear cart
+                            localStorage.removeItem('cart');
+                            
+                            // Redirect to receipt page
+                            window.location.href = `receipt.html?orderId=${data.orderId}`;
+                        } catch (error) {
+                            console.error('Error processing PayPal payment:', error);
+                            alert('Failed to process payment. Please try again.');
+                        }
                     });
                 },
                 onError: function(err) {
@@ -463,24 +503,13 @@
         // Form submission
         cardForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            // Here you would typically validate the card details
-            // For now, we'll just create the order
-            await createOrder();
-        });
-
-        // Load cart items when page loads
-        document.addEventListener('DOMContentLoaded', () => {
-            updateCartItems();
-        });
-
-        // Add this function after the updateOrderSummary function
-        async function createOrder() {
-            const cart = JSON.parse(localStorage.getItem('cart')) || [];
-            const subtotal = cart.reduce((sum, item) => sum + item.price, 0);
-            const tax = subtotal * 0.15;
-            const total = subtotal + tax;
-
+            
             try {
+                const cart = JSON.parse(localStorage.getItem('cart')) || [];
+                const subtotal = cart.reduce((sum, item) => sum + item.price, 0);
+                const tax = subtotal * 0.15;
+                const total = subtotal + tax;
+
                 const token = localStorage.getItem('token');
                 if (!token) {
                     alert('Please log in to complete your purchase');
@@ -488,7 +517,8 @@
                     return;
                 }
 
-                const response = await fetch('/api/orders', {
+                // Create order
+                const response = await fetch('http://localhost:10000/api/orders', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -505,14 +535,22 @@
                 }
 
                 const data = await response.json();
+                
+                // Clear cart
                 localStorage.removeItem('cart');
-                alert('Order placed successfully! Order ID: ' + data.orderId);
-                window.location.href = 'index.html';
+                
+                // Redirect to receipt page
+                window.location.href = `receipt.html?orderId=${data.orderId}`;
             } catch (error) {
-                console.error('Error creating order:', error);
-                alert('Failed to place order. Please try again.');
+                console.error('Error processing payment:', error);
+                alert('Failed to process payment. Please try again.');
             }
-        }
+        });
+
+        // Load cart items when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            updateCartItems();
+        });
     </script>
 </body>
 </html> 
