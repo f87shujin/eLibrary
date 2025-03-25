@@ -112,11 +112,20 @@
 
             if (cart.length === 0) {
                 cartItemsContainer.innerHTML = '<p>Your cart is empty</p>';
+                cartTotal.textContent = '0.00';
                 return;
             }
 
             cartItemsContainer.innerHTML = cart.map(item => {
-                total += item.price * item.quantity;
+                // Calculate item total based on type (purchase or rental)
+                let itemTotal = 0;
+                if (item.type === 'purchase') {
+                    itemTotal = item.price * item.quantity;
+                } else if (item.type === 'rental') {
+                    itemTotal = item.price; // For rentals, price is already the total
+                }
+                total += itemTotal;
+
                 return `
                     <div class="card mb-3">
                         <div class="card-body">
@@ -126,16 +135,19 @@
                                 </div>
                                 <div class="col-md-4">
                                     <h5 class="card-title">${item.name}</h5>
+                                    ${item.type === 'rental' ? `<small class="text-muted">Rental Period: ${item.rentalDays} days</small>` : ''}
                                 </div>
                                 <div class="col-md-2">
-                                    <div class="input-group">
-                                        <button class="btn btn-outline-secondary" onclick="updateQuantity('${item._id}', -1)">-</button>
-                                        <input type="text" class="form-control text-center" value="${item.quantity}" readonly>
-                                        <button class="btn btn-outline-secondary" onclick="updateQuantity('${item._id}', 1)">+</button>
-                                    </div>
+                                    ${item.type === 'purchase' ? `
+                                        <div class="input-group">
+                                            <button class="btn btn-outline-secondary" onclick="updateQuantity('${item._id}', -1)">-</button>
+                                            <input type="text" class="form-control text-center" value="${item.quantity}" readonly>
+                                            <button class="btn btn-outline-secondary" onclick="updateQuantity('${item._id}', 1)">+</button>
+                                        </div>
+                                    ` : ''}
                                 </div>
                                 <div class="col-md-2">
-                                    $${item.price.toFixed(2)}
+                                    $${itemTotal.toFixed(2)}
                                 </div>
                                 <div class="col-md-2">
                                     <button class="btn btn-danger" onclick="removeItem('${item._id}')">
@@ -157,7 +169,7 @@
             const cart = JSON.parse(localStorage.getItem('cart')) || [];
             const itemIndex = cart.findIndex(item => item._id === itemId);
             
-            if (itemIndex > -1) {
+            if (itemIndex > -1 && cart[itemIndex].type === 'purchase') {
                 cart[itemIndex].quantity = Math.max(1, cart[itemIndex].quantity + change);
                 localStorage.setItem('cart', JSON.stringify(cart));
                 loadCart();
