@@ -363,12 +363,6 @@
             document.querySelector('.library-btn').textContent = `Pay $${total.toFixed(2)}`;
         }
 
-        // Load cart items when page loads
-        document.addEventListener('DOMContentLoaded', () => {
-            updateCartItems();
-            initializePayPal();
-        });
-
         // Payment method selection
         const paymentMethods = document.querySelectorAll('.payment-method');
         const cardForm = document.getElementById('card-payment-form');
@@ -388,6 +382,8 @@
                 } else {
                     cardForm.style.display = 'none';
                     paypalButton.style.display = 'block';
+                    // Initialize PayPal when PayPal payment method is selected
+                    initializePayPal();
                 }
             });
         });
@@ -441,19 +437,16 @@
             // Redirect to success page or handle response
         });
 
-        // PayPal button click handler
-        paypalButton.querySelector('button').addEventListener('click', () => {
-            // Here you would typically integrate with PayPal's SDK
-            alert('Redirecting to PayPal...');
-            // Redirect to PayPal checkout
-        });
-
         // Initialize PayPal
         function initializePayPal() {
             const cart = JSON.parse(localStorage.getItem('cart')) || [];
             const subtotal = cart.reduce((sum, item) => sum + item.price, 0);
             const tax = subtotal * 0.15;
             const total = subtotal + tax;
+
+            // Clear any existing buttons
+            const container = document.getElementById('paypal-button-container');
+            container.innerHTML = '';
 
             paypal.Buttons({
                 createOrder: function(data, actions) {
@@ -485,6 +478,11 @@
                 }
             }).render('#paypal-button-container');
         }
+
+        // Load cart items when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            updateCartItems();
+        });
     </script>
 </body>
 </html> 
