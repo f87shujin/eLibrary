@@ -14,7 +14,6 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 let API_BASE_URL = "http://107.159.209.164:11434"; // Force HTTP
-let SERVER_URL = "http://localhost:10000";
 
 async function checkAPIAvailability() {
     try {
@@ -57,39 +56,6 @@ async function checkAPIAvailability() {
     }
 }
 
-// Update the fetchBooks function
-async function fetchBooks() {
-    try {
-        console.log('Fetching books from:', `${SERVER_URL}/api/books`);
-        const response = await fetch(`${SERVER_URL}/api/books`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            mode: 'cors' // Enable CORS
-        });
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const books = await response.json();
-        console.log('Fetched books:', books); // Debug log
-        return books;
-    } catch (error) {
-        console.error('Error fetching books:', error);
-        // Return some default books if server is not available
-        return [
-            { 
-                name: "Unable to fetch books from server", 
-                price: 0, 
-                description: "Please make sure the server is running on port 10000" 
-            }
-        ];
-    }
-}
-
-// Modify the sendMessage function to include books context
 async function sendMessage() {
     const userInput = document.getElementById('user-input');
     const message = userInput.value.trim();
@@ -102,21 +68,6 @@ async function sendMessage() {
     const loadingDiv = showLoading();
 
     try {
-        // Fetch books first
-        const books = await fetchBooks();
-        let contextPrompt;
-
-        if (books.length === 0 || (books.length === 1 && books[0].name === "Unable to fetch books from server")) {
-            contextPrompt = `I apologize, but I'm currently unable to access the library's book database. I'll try to help you with general information. User question: ${message}`;
-        } else {
-            const booksContext = books.map(book => 
-                `"${book.name}" (Price: $${book.price}) - ${book.description || 'No description available'}`
-            ).join('\n');
-            contextPrompt = `Here are the books available in our library:\n${booksContext}\n\nUser question: ${message}`;
-        }
-
-        console.log('Sending context:', contextPrompt);
-
         const apiUrl = API_BASE_URL.replace('https://', 'http://');
         const response = await fetch(`${apiUrl}/api/chat`, {
             method: 'POST',
@@ -127,13 +78,9 @@ async function sendMessage() {
             body: JSON.stringify({
                 model: "toshokan",
                 messages: [
-                    {
-                        role: "system",
-                        content: "You are a helpful library assistant. You have access to information about our library's books and can help users find books, understand their content, and make recommendations."
-                    },
                     { 
                         role: "user", 
-                        content: contextPrompt 
+                        content: message 
                     }
                 ],
                 stream: true
@@ -222,8 +169,8 @@ function updateLastAIMessage(content) {
     
     if (!lastAIMessage) {
         lastAIMessage = document.createElement('div');
-        lastAIMessage.className = 'ai-message';
         lastAIMessage.innerHTML = '<p></p>';
+        lastAIMessage.className = 'ai-message';
         chatBox.appendChild(lastAIMessage);
     }
     
