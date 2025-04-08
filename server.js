@@ -144,6 +144,35 @@ app.get('/api/books/:id', async (req, res) => {
     }
 });
 
+// API endpoint to update a book by ID
+app.put('/api/books/:id', async (req, res) => {
+    const { id } = req.params; // Get the book ID from the request parameters
+    const { name, price, description, image } = req.body; // Get the updated book details from the request body
+
+    // Validate the input
+    if (!name || !price || !description || !image) {
+        return res.status(400).json({ message: 'All fields are required' });
+    }
+
+    try {
+        // Find the book by ID and update it
+        const updatedBook = await Book.findByIdAndUpdate(
+            id,
+            { name, price, description, image },
+            { new: true } // Return the updated document
+        );
+
+        if (!updatedBook) {
+            return res.status(404).json({ message: 'Book not found' });
+        }
+
+        res.json({ message: 'Book updated successfully', book: updatedBook });
+    } catch (error) {
+        console.error('Error updating book:', error);
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+});
+
 // User registration
 app.post('/api/register', async (req, res) => {
     try {
