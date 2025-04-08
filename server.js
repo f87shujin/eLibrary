@@ -11,12 +11,37 @@ const PORT = process.env.PORT || 10000;
 
 // Middleware
 app.use(cors({
-    origin: ['http://localhost:8000', 'http://127.0.0.1:8000'], // Allow your Python server
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    origin: ['http://localhost:8000', 'http://127.0.0.1:8000', 'https://f87shujin.github.io'], // Added GitHub Pages
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Added OPTIONS for preflight requests
     allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
     credentials: true
 }));
 app.use(express.json()); // Parse JSON bodies
+
+// Add a new endpoint for direct order creation without authentication
+app.post('/api/public/orders', async (req, res) => {
+    try {
+        const { items, totalAmount, customerName } = req.body;
+        
+        // Create a simplified order without requiring authentication
+        const order = new Order({
+            userId: 'guest-user',
+            userName: customerName || 'Guest User',
+            items: items,
+            totalAmount: totalAmount,
+            status: 'completed'
+        });
+
+        await order.save();
+        res.status(201).json({ 
+            message: 'Order created successfully', 
+            orderId: order._id 
+        });
+    } catch (error) {
+        console.error('Error creating public order:', error);
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+});
 
 // Connect to MongoDB
 mongoose.connect('mongodb+srv://f87study:admin1234@cluster0.fqatder.mongodb.net/eLibrary')
@@ -299,6 +324,40 @@ app.get('/api/orders/:orderId', async (req, res) => {
         res.json(order);
     } catch (error) {
         console.error('Error fetching order:', error);
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+});
+
+// Add a direct database insertion endpoint
+app.post('/api/db/insert', async (req, res) => {
+    try {
+        const { collection, document } = req.body;
+        
+        // Basic validation
+        if (!collection || !document) {
+            return res.status(400).json({ message: 'Collection name and document are required' });
+        }
+        
+        // Only allow specific collections for security
+        if (!['orders', 'feedback'].includes(collection)) {
+            return res.status(403).json({ message: 'Not allowed to insert into this collection' });
+        }
+        
+        let result;
+        
+        // Handle different collections
+        if (collection === 'orders') {
+            const order = new Order(document);
+            result = await order.save();
+        }
+        // Add other collections as needed
+        
+        res.status(201).json({ 
+            message: `Document inserted into ${collection} successfully`, 
+            id: result._id 
+        });
+    } catch (error) {
+        console.error(`Error inserting into ${req.body.collection}:`, error);
         res.status(500).json({ message: 'Internal Server Error' });
     }
 });
