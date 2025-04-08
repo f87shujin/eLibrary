@@ -9,8 +9,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <!-- Add PayPal SDK -->
-    <script src="https://www.paypal.com/sdk/js?client-id=YOUR_PAYPAL_CLIENT_ID&currency=USD"></script>
     <style>
         .payment-method {
             border: 2px solid var(--library-accent);
@@ -432,11 +430,64 @@
         // Form submission
         cardForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            // Simulate payment processing
-            alert('Payment processing...');
-            // Redirect to success page or handle response
-            window.location.href = 'receipt.html';
+            // Direct process without server call
+            processOrder('card');
         });
+
+        // PayPal button click handler
+        document.querySelector('.paypal-button').addEventListener('click', function(e) {
+            e.preventDefault();
+            // Direct process without server call
+            processOrder('paypal');
+        });
+
+        // Function to process order
+        function processOrder(paymentMethod) {
+            try {
+                // Get cart items
+                const cart = JSON.parse(localStorage.getItem('cart')) || [];
+                if (cart.length === 0) {
+                    alert('Your cart is empty!');
+                    return;
+                }
+                
+                const subtotal = cart.reduce((sum, item) => sum + item.price, 0);
+                const tax = subtotal * 0.15;
+                const total = subtotal + tax;
+                
+                // Get user information from localStorage if available
+                const user = JSON.parse(localStorage.getItem('user')) || {};
+                
+                // Create order object
+                const orderData = {
+                    id: 'order-' + Date.now(),
+                    userId: user._id || 'guest',
+                    customerName: user.name || document.getElementById('card-name')?.value || 'Guest User',
+                    items: cart,
+                    paymentMethod: paymentMethod,
+                    subtotal: subtotal,
+                    tax: tax,
+                    total: total,
+                    status: 'completed',
+                    orderDate: new Date().toISOString()
+                };
+                
+                // Save order to localStorage for receipt page
+                localStorage.setItem('lastOrder', JSON.stringify(orderData));
+                
+                // Clear the cart
+                localStorage.removeItem('cart');
+                
+                // Log success for debugging
+                console.log('Order processed successfully:', orderData);
+                
+                // Redirect to receipt page
+                window.location.href = 'receipt.html';
+            } catch (error) {
+                console.error('Error processing order:', error);
+                alert('There was an error processing your order. Please try again.');
+            }
+        }
 
         // Load cart items when page loads
         document.addEventListener('DOMContentLoaded', () => {
