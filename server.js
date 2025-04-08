@@ -534,6 +534,27 @@ app.delete('/api/orders/:orderId', async (req, res) => {
     }
 });
 
+// Add this new endpoint to get all orders (for admin)
+app.get('/api/orders/all', async (req, res) => {
+    const token = req.headers['authorization']?.split(' ')[1];
+    if (!token) return res.status(403).json({ message: 'No token provided' });
+
+    try {
+        const decoded = jwt.verify(token, 'your_jwt_secret');
+
+        // Check if the user is an admin (assuming you have a role field in your user model)
+        if (decoded.role !== 'admin') {
+            return res.status(403).json({ message: 'Access denied' });
+        }
+
+        const orders = await Order.find().sort({ orderDate: -1 }); // Fetch all orders
+        res.json(orders);
+    } catch (error) {
+        console.error('Error fetching all orders:', error);
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+});
+
 // Start the server
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
