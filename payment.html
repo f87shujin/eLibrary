@@ -483,63 +483,72 @@
         // Function to save order to database
         async function saveOrderToDatabase(orderData) {
             try {
-                console.log('Saving order to localStorage and attempting database save...');
+                console.log('Saving order data...');
                 
-                // Always save to localStorage for the receipt page
+                // Save to localStorage for the receipt page
                 localStorage.setItem('lastOrder', JSON.stringify(orderData));
+                console.log('Order saved to localStorage as backup');
                 
-                // Direct database order insertion attempt using exactly the same structure as register.html
+                // Try to save to the server using multiple approaches
                 try {
-                    // Generate unique values for email and password
-                    const timestamp = Date.now();
-                    const orderEmail = `order${timestamp}@elibrary.com`;
-                    const orderPassword = `order${timestamp}`;
-                    
-                    // Create a name that contains order info but stays within validation limits
-                    const orderName = `Order-${orderData.customerName.substring(0, 20)}`;
-                    
-                    console.log('Creating order record in database using registration endpoint...');
-                    const response = await fetch('https://elibrary-1rh1.onrender.com/api/register', {
+                    // Attempt 1: Use the direct database insertion endpoint
+                    console.log('Attempting to save order using direct database insertion...');
+                    const dbInsertResponse = await fetch('https://elibrary-1rh1.onrender.com/api/db/insert', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ 
-                            name: orderName, 
-                            email: orderEmail, 
-                            password: orderPassword, 
-                            role: 'user'
+                        body: JSON.stringify({
+                            collection: 'orders',
+                            document: {
+                                userId: orderData.userId || 'guest-user',
+                                userName: orderData.customerName,
+                                items: orderData.items.map(item => ({
+                                    name: item.name,
+                                    price: parseFloat(item.price),
+                                    quantity: item.quantity || 1,
+                                    type: item.type || 'purchase'
+                                })),
+                                totalAmount: orderData.total,
+                                status: 'completed',
+                                orderDate: new Date().toISOString()
+                            }
                         })
                     });
-
-                    if (response.ok) {
-                        console.log('Order record created in database successfully');
-                        
-                        // Get the user ID from the response if possible
-                        try {
-                            const responseData = await response.json();
-                            console.log('Registration response:', responseData);
-                            
-                            // Save order details in another location too if possible
-                            const userData = {
-                                orderId: orderData.id,
-                                items: orderData.items,
-                                total: orderData.total
-                            };
-                            localStorage.setItem(`order-${timestamp}`, JSON.stringify(userData));
-                        } catch (parseError) {
-                            console.log('Could not parse response data:', parseError.message);
-                        }
+                    
+                    if (dbInsertResponse.ok) {
+                        const result = await dbInsertResponse.json();
+                        console.log('Order saved to database successfully:', result);
                     } else {
-                        const errorText = await response.text();
-                        console.log('Registration failed with status:', response.status);
-                        console.log('Error response:', errorText);
-                        console.log('Order saved to localStorage only');
+                        console.log('Direct database insert failed. Trying public orders endpoint...');
+                        
+                        // Attempt 2: Use the public orders endpoint
+                        const publicOrderResponse = await fetch('https://elibrary-1rh1.onrender.com/api/public/orders', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                customerName: orderData.customerName,
+                                items: orderData.items.map(item => ({
+                                    name: item.name,
+                                    price: parseFloat(item.price),
+                                    quantity: item.quantity || 1,
+                                    type: item.type || 'purchase'
+                                })),
+                                totalAmount: orderData.total
+                            })
+                        });
+                        
+                        if (publicOrderResponse.ok) {
+                            const result = await publicOrderResponse.json();
+                            console.log('Order saved via public endpoint successfully:', result);
+                        } else {
+                            console.log('Public order endpoint failed. Order is saved locally only.');
+                        }
                     }
-                } catch (dbError) {
-                    console.log('Database save error:', dbError.message);
-                    console.log('Order saved to localStorage only');
+                } catch (serverError) {
+                    console.log('Error saving to server:', serverError.message);
+                    console.log('Order will be saved locally only');
                 }
                 
-                // Always show success and move forward regardless of database result
+                // Always show success and move forward
                 const messageDiv = document.querySelector('.alert-info, .alert-warning');
                 if (messageDiv) {
                     messageDiv.innerHTML = '<i class="fas fa-check-circle me-2"></i>Order processed successfully!';

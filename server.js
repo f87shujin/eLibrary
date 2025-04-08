@@ -303,6 +303,40 @@ app.get('/api/orders/:orderId', async (req, res) => {
     }
 });
 
+// Add a direct database insertion endpoint
+app.post('/api/db/insert', async (req, res) => {
+    try {
+        const { collection, document } = req.body;
+        
+        // Basic validation
+        if (!collection || !document) {
+            return res.status(400).json({ message: 'Collection name and document are required' });
+        }
+        
+        // Only allow specific collections for security
+        if (!['orders', 'feedback'].includes(collection)) {
+            return res.status(403).json({ message: 'Not allowed to insert into this collection' });
+        }
+        
+        let result;
+        
+        // Handle different collections
+        if (collection === 'orders') {
+            const order = new Order(document);
+            result = await order.save();
+        }
+        // Add other collections as needed
+        
+        res.status(201).json({ 
+            message: `Document inserted into ${collection} successfully`, 
+            id: result._id 
+        });
+    } catch (error) {
+        console.error(`Error inserting into ${req.body.collection}:`, error);
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+});
+
 // Start the server
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
