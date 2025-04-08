@@ -489,9 +489,19 @@
                 localStorage.setItem('lastOrder', JSON.stringify(orderData));
                 console.log('Order saved to localStorage as backup');
                 
-                // Prepare the order data for the API
-                const orderForDb = {
-                    userId: orderData.userId,
+                // Get the authentication token if available
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    console.log('No authentication token available. Cannot save to database.');
+                    completeOrderProcess(orderData);
+                    return;
+                }
+                
+                // Looking at server.js, the expected format for orders is:
+                // userId, userName, items, totalAmount
+                const simplifiedOrder = {
+                    // Use the userId from the local user object
+                    userId: JSON.parse(localStorage.getItem('user'))?._id || 'guest-user',
                     userName: orderData.customerName,
                     items: orderData.items.map(item => ({
                         name: item.name,
@@ -499,25 +509,20 @@
                         quantity: item.quantity || 1,
                         type: item.type || 'purchase'
                     })),
-                    totalAmount: orderData.total,
-                    paymentMethod: orderData.paymentMethod,
-                    status: 'completed',
-                    orderDate: new Date().toISOString()
+                    totalAmount: orderData.total
                 };
                 
-                console.log('Saving order to database...');
+                console.log('Saving order to database with data:', JSON.stringify(simplifiedOrder, null, 2));
+                console.log('Using token:', token.substring(0, 10) + '...');
                 
-                // Get the authentication token if available
-                const token = localStorage.getItem('token');
-                
-                // Send the order to the server
+                // Send the order to the server, exactly matching the API endpoint in server.js
                 const response = await fetch('https://elibrary-1rh1.onrender.com/api/orders', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': token ? `Bearer ${token}` : ''
+                        'Authorization': `Bearer ${token}`
                     },
-                    body: JSON.stringify(orderForDb)
+                    body: JSON.stringify(simplifiedOrder)
                 });
                 
                 if (response.ok) {
@@ -536,7 +541,9 @@
                     messageDiv.innerHTML = '<i class="fas fa-check-circle me-2"></i>Order saved to database successfully!';
                     messageDiv.className = 'alert alert-success mt-3';
                 } else {
+                    const errorText = await response.text();
                     console.log('Failed to save order to database. Status:', response.status);
+                    console.log('Error response:', errorText);
                     
                     // Show warning message
                     const messageDiv = document.querySelector('.alert-info') || 
