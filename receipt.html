@@ -54,10 +54,10 @@
             return new Date(dateString).toLocaleString();
         }
 
-        // Load and display order details from localStorage
-        function loadOrderDetails() {
+        // Load and display order details
+        async function loadOrderDetails() {
             try {
-                // Get the last order from localStorage
+                // First try to get the order from localStorage
                 const orderData = localStorage.getItem('lastOrder');
                 
                 if (!orderData) {
@@ -74,53 +74,29 @@
                 
                 const order = JSON.parse(orderData);
                 
-                // Display receipt
-                document.getElementById('receipt-details').innerHTML = `
-                    <div class="mb-4">
-                        <h4>Order Information</h4>
-                        <p><strong>Order ID:</strong> ${order.id}</p>
-                        <p><strong>Order Date:</strong> ${formatDate(order.orderDate)}</p>
-                        <p><strong>Customer Name:</strong> ${order.customerName}</p>
-                        <p><strong>Payment Method:</strong> ${order.paymentMethod === 'card' ? 'Credit/Debit Card' : 'PayPal'}</p>
-                    </div>
-
-                    <div class="mb-4">
-                        <h4>Items</h4>
-                        <div class="table-responsive">
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th>Item</th>
-                                        <th>Type</th>
-                                        <th>Duration/Quantity</th>
-                                        <th>Price</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    ${order.items.map(item => `
-                                        <tr>
-                                            <td>${item.name}</td>
-                                            <td>${item.type}</td>
-                                            <td>${item.type === 'rental' ? item.rentalDays + ' days' : item.quantity}</td>
-                                            <td>$${item.price.toFixed(2)}</td>
-                                        </tr>
-                                    `).join('')}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <div class="text-end">
-                        <p><strong>Subtotal:</strong> $${order.subtotal.toFixed(2)}</p>
-                        <p><strong>Tax (15%):</strong> $${order.tax.toFixed(2)}</p>
-                        <h4>Total Amount: $${order.total.toFixed(2)}</h4>
-                    </div>
-
-                    <div class="mt-4 text-center">
-                        <button class="library-btn" onclick="window.print()">Print Receipt</button>
-                        <a href="index.html" class="library-btn">Return to Home</a>
-                    </div>
-                `;
+                // If we have an orderId from URL and user is logged in, try to fetch from database
+                if (orderId && localStorage.getItem('token')) {
+                    try {
+                        const token = localStorage.getItem('token');
+                        const response = await fetch(`https://elibrary-1rh1.onrender.com/api/orders/${orderId}`, {
+                            headers: {
+                                'Authorization': `Bearer ${token}`
+                            }
+                        });
+                        
+                        if (response.ok) {
+                            // If we successfully fetched from database, use that data
+                            const dbOrder = await response.json();
+                            displayOrderDetails(dbOrder);
+                            return;
+                        }
+                    } catch (error) {
+                        console.log('Could not fetch from database, using localStorage data');
+                    }
+                }
+                
+                // If we couldn't fetch from database or no orderId, use localStorage data
+                displayOrderDetails(order);
             } catch (error) {
                 console.error('Error loading order details:', error);
                 document.getElementById('receipt-details').innerHTML = `
@@ -132,6 +108,56 @@
                     </div>
                 `;
             }
+        }
+        
+        // Function to display order details
+        function displayOrderDetails(order) {
+            document.getElementById('receipt-details').innerHTML = `
+                <div class="mb-4">
+                    <h4>Order Information</h4>
+                    <p><strong>Order ID:</strong> ${order.id || order._id}</p>
+                    <p><strong>Order Date:</strong> ${formatDate(order.orderDate)}</p>
+                    <p><strong>Customer Name:</strong> ${order.customerName || order.userName}</p>
+                    <p><strong>Payment Method:</strong> ${order.paymentMethod === 'card' ? 'Credit/Debit Card' : 'PayPal'}</p>
+                </div>
+
+                <div class="mb-4">
+                    <h4>Items</h4>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Item</th>
+                                    <th>Type</th>
+                                    <th>Duration/Quantity</th>
+                                    <th>Price</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${order.items.map(item => `
+                                    <tr>
+                                        <td>${item.name}</td>
+                                        <td>${item.type}</td>
+                                        <td>${item.type === 'rental' ? item.rentalDays + ' days' : item.quantity}</td>
+                                        <td>$${item.price.toFixed(2)}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="text-end">
+                    <p><strong>Subtotal:</strong> $${order.subtotal.toFixed(2)}</p>
+                    <p><strong>Tax (15%):</strong> $${order.tax.toFixed(2)}</p>
+                    <h4>Total Amount: $${order.total.toFixed(2)}</h4>
+                </div>
+
+                <div class="mt-4 text-center">
+                    <button class="library-btn" onclick="window.print()">Print Receipt</button>
+                    <a href="index.html" class="library-btn">Return to Home</a>
+                </div>
+            `;
         }
 
         // Load order details when page loads

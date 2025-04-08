@@ -453,6 +453,7 @@
                 
                 // Get user information from localStorage if available
                 const user = JSON.parse(localStorage.getItem('user')) || {};
+                const token = localStorage.getItem('token');
                 
                 // Create order object
                 const orderData = {
@@ -468,11 +469,13 @@
                     orderDate: new Date().toISOString()
                 };
                 
-                // Try to save to database if user is logged in
-                if (user._id && user.token) {
-                    saveOrderToDatabase(orderData, user.token);
+                // Try to save to database if user is logged in and has a token
+                if (user._id && token) {
+                    console.log('Attempting to save order to database...');
+                    saveOrderToDatabase(orderData, token);
                 } else {
                     // If not logged in, just save to localStorage and proceed
+                    console.log('User not logged in, saving to localStorage only');
                     completeOrderProcess(orderData);
                 }
             } catch (error) {
@@ -483,6 +486,7 @@
         // Function to save order to database
         async function saveOrderToDatabase(orderData, token) {
             try {
+                // First, try to save to the database
                 const response = await fetch('https://elibrary-1rh1.onrender.com/api/orders', {
                     method: 'POST',
                     headers: {
@@ -494,6 +498,7 @@
 
                 if (response.ok) {
                     // Successfully saved to database
+                    console.log('Order saved to database successfully');
                     completeOrderProcess(orderData);
                 } else {
                     // If database save fails, still complete the order process
