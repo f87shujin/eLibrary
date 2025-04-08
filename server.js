@@ -262,20 +262,24 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
-// Middleware to check if user is admin
-const isAdmin = (req, res, next) => {
-    const token = req.headers['authorization']?.split(' ')[1];
+// Middleware to check if the user is authenticated
+const authenticateToken = (req, res, next) => {
+    const token = req.headers['authorization']?.split(' ')[1]; // Get token from Authorization header
     if (!token) return res.status(403).json({ message: 'No token provided' });
+
     jwt.verify(token, 'your_jwt_secret', (err, decoded) => {
-        if (err) return res.status(500).json({ message: 'Failed to authenticate token' });
-        if (decoded.role !== 'admin') return res.status(403).json({ message: 'Access denied' });
-        req.userId = decoded.id;
-        next();
+        if (err) return res.status(403).json({ message: 'Failed to authenticate token' });
+        req.user = decoded; // Attach the decoded user info to the request
+        next(); // Proceed to the next middleware or route handler
     });
 };
 
-// Admin route
-app.get('/api/admin', isAdmin, (req, res) => {
+// Example of a protected route
+app.get('/api/admin', authenticateToken, (req, res) => {
+    // Check if the user is an admin
+    if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: 'Access denied' });
+    }
     res.json({ message: 'Welcome to the admin page!' });
 });
 
