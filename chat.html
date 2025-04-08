@@ -34,6 +34,15 @@
             background-color: rgba(220, 215, 201, 0.1);
             margin-right: auto;
         }
+
+        .loading {
+            font-style: italic;
+            color: gray;
+        }
+
+        .error-message {
+            color: red;
+        }
     </style>
 </head>
 <body>
@@ -45,7 +54,7 @@
     <div class="library-container">
         <h2 class="library-title">AI Library Assistant</h2>
         <div class="decorative-line"></div>
-        <div id="chat-box"></div>
+        <div id="chat-box" aria-live="polite"></div>
         <div class="input-group">
             <input type="text" id="user-input" class="library-input" placeholder="Ask me anything about books...">
             <button id="send-button" class="library-btn">Send</button>

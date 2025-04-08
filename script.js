@@ -2,8 +2,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const sendButton = document.getElementById('send-button');
     const userInput = document.getElementById('user-input');
 
-    // Auto-detect if using localhost or public API
-    checkAPIAvailability();
+    // Set API_BASE_URL based on the current location
+    let API_BASE_URL = window.location.origin + ":11434"; // Adjust port if necessary
 
     sendButton.addEventListener('click', sendMessage);
     userInput.addEventListener('keypress', function (e) {
@@ -13,65 +13,33 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
-let API_BASE_URL = "http://198.16.179.173:11434"; // Force HTTP
-
-async function checkAPIAvailability() {
-    try {
-        // Try local API first
-        const localResponse = await fetch('http://127.0.0.1:11434/api/chat', {
-            method: 'HEAD',
-            mode: 'cors',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-        
-        if (localResponse.ok) {
-            API_BASE_URL = "http://127.0.0.1:11434";
-            console.log("Using local API:", API_BASE_URL);
-            return;
-        }
-    } catch (error) {
-        console.log("Local API not available, trying remote API...");
-    }
-
-    try {
-        // Try remote API
-        const remoteResponse = await fetch('http://107.159.209.164:11434/api/chat', {
-            method: 'HEAD',
-            mode: 'cors',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-        
-        if (remoteResponse.ok) {
-            API_BASE_URL = "http://107.159.209.164:11434";
-            console.log("Using remote API:", API_BASE_URL);
-        } else {
-            console.error("Remote API not responding correctly");
-        }
-    } catch (error) {
-        console.error("Error checking remote API:", error);
-    }
-}
-
 async function sendMessage() {
-    const userInput = document.getElementById('user-input').value;
-    const response = await fetch('http://198.16.179.173:11434/api/chat', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ prompt: userInput }),
-    });
+    const userInput = document.getElementById('user-input');
+    const message = userInput.value.trim();
+    if (!message) return; // Prevent sending empty messages
 
-    if (!response.ok) {
-        throw new Error('Network response was not ok');
+    appendMessage('user', message); // Display user message
+    userInput.value = ''; // Clear input field
+    showLoading(); // Show loading indicator
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/chat`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ prompt: message }),
+        });
+
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+
+        const data = await response.json();
+        appendMessage('ai', data.response); // Display AI response
+    } catch (error) {
+        showError('Error: ' + error.message); // Show error message
     }
-
-    const data = await response.json();
-    // Handle the response data
 }
 
 function appendMessage(type, content) {
@@ -90,7 +58,6 @@ function showLoading() {
     loadingDiv.textContent = 'AI is thinking...';
     chatBox.appendChild(loadingDiv);
     chatBox.scrollTop = chatBox.scrollHeight;
-    return loadingDiv;
 }
 
 function showError(message) {
