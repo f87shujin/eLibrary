@@ -19,17 +19,16 @@ document.addEventListener('DOMContentLoaded', () => {
         appendMessage('ai', 'Thinking...');
 
         try {
-            const res = await fetch(API_URL, {
+            const response = await fetch(API_URL, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     model: 'toshokan',
                     prompt: prompt,
                     stream: false
-                })
+                }) // no content-type header!
             });
 
-            const data = await res.json();
+            const data = await response.json();
             updateLastAIMessage(data.response.trim());
         } catch (err) {
             updateLastAIMessage('Error: ' + err.message);
