@@ -1,8 +1,8 @@
 -get rid of rent function          |  X
 -hash  password                    |  X
 -admin page                        |
--email verification                |
 -receipt + databasee               |
+-email verification                |
 -audio  recognition                |
 -make  images img and not a link   |
 -paypal                            |
