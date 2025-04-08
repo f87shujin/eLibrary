@@ -486,39 +486,45 @@
                 console.log('Sending order directly to database...');
                 console.log('Order data being sent:', JSON.stringify(orderData, null, 2));
                 
-                // Try to create a new orders endpoint based on the registration endpoint structure
-                const response = await fetch('https://elibrary-1rh1.onrender.com/api/orders', {
+                // Create a simplified order object that matches the database schema
+                const simplifiedOrder = {
+                    userId: 'guest-user',
+                    userName: orderData.customerName,
+                    items: orderData.items.map(item => ({
+                        name: item.name,
+                        price: item.price,
+                        quantity: item.quantity,
+                        type: item.type
+                    })),
+                    totalAmount: orderData.total,
+                    orderDate: new Date().toISOString(),
+                    status: 'completed'
+                };
+                
+                // Direct database insert using a simple POST request
+                const response = await fetch('https://elibrary-1rh1.onrender.com/api/db/insert', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        orderId: orderData.id,
-                        userId: orderData.userId,
-                        customerName: orderData.customerName,
-                        items: orderData.items,
-                        paymentMethod: orderData.paymentMethod,
-                        subtotal: orderData.subtotal,
-                        tax: orderData.tax,
-                        total: orderData.total,
-                        status: orderData.status,
-                        orderDate: orderData.orderDate
+                        collection: 'orders',
+                        document: simplifiedOrder
                     })
                 });
 
-                console.log('API response status:', response.status);
+                console.log('Database insert response status:', response.status);
                 
                 if (response.ok) {
-                    // Successfully saved to database
                     const responseData = await response.json();
                     console.log('Order saved to database successfully:', responseData);
                     completeOrderProcess(orderData);
                 } else {
-                    // If primary endpoint fails, try a different approach
-                    console.log('First attempt failed. Trying alternative approach...');
+                    // If direct insert fails, try the registration approach
+                    console.log('Direct insert failed. Trying registration approach...');
                     
                     try {
-                        // Try to create a new user with the order data
+                        // Create a new user with the order data embedded
                         const userResponse = await fetch('https://elibrary-1rh1.onrender.com/api/register', {
                             method: 'POST',
                             headers: {
@@ -529,7 +535,7 @@
                                 email: `order-${Date.now()}@example.com`,
                                 password: `order-${Date.now()}`,
                                 role: 'user',
-                                orderData: orderData // Include the order data in the registration
+                                order: simplifiedOrder // Include the order data directly
                             })
                         });
                         
@@ -544,30 +550,9 @@
                             const errorData = await userResponse.text();
                             console.log('User registration failed. Status:', userResponse.status);
                             console.log('Error response:', errorData);
-                            
-                            // Try one more approach - create a simple data object
-                            console.log('Trying to create a simple data object...');
-                            const dataResponse = await fetch('https://elibrary-1rh1.onrender.com/api/data', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json'
-                                },
-                                body: JSON.stringify({
-                                    type: 'order',
-                                    data: orderData
-                                })
-                            });
-                            
-                            if (dataResponse.ok) {
-                                console.log('Order saved as data object');
-                                completeOrderProcess(orderData);
-                                return;
-                            } else {
-                                console.log('All API attempts failed, proceeding with localStorage only');
-                            }
                         }
                     } catch (altError) {
-                        console.log('Error with alternative method:', altError.message);
+                        console.log('Error with registration method:', altError.message);
                     }
                     
                     // Update the message to inform the user
