@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
-let API_BASE_URL = "http://107.159.209.164:11434"; // Force HTTP
+let API_BASE_URL = "http://198.16.179.173:11434"; // Force HTTP
 
 async function checkAPIAvailability() {
     try {
