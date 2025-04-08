@@ -186,6 +186,11 @@
                             <i class="fas fa-user-shield me-1"></i>Admin
                         </a>
                     </li>
+                    <li class="nav-item" id="orders-link" style="display: none;">
+                        <a class="nav-link" href="order.html">
+                            <i class="fas fa-shopping-bag me-1"></i>Orders
+                        </a>
+                    </li>
 
                     <!-- Show only when user is logged in -->
                     <li class="nav-item" id="logout-link" style="display: none;">
@@ -236,9 +241,10 @@
             const registerLink = document.getElementById('register-link');
             const profileLink = document.getElementById('profile-link');
             const adminLink = document.getElementById('admin-link');
+            const ordersLink = document.getElementById('orders-link');
             const logoutLink = document.getElementById('logout-link');
 
-            if (!signinLink || !registerLink || !profileLink || !adminLink || !logoutLink) {
+            if (!signinLink || !registerLink || !profileLink || !adminLink || !ordersLink || !logoutLink) {
                 return;
             }
 
@@ -250,14 +256,17 @@
                 
                 if (isAdmin()) {
                     adminLink.style.display = 'block';
+                    ordersLink.style.display = 'block';
                 } else {
                     adminLink.style.display = 'none';
+                    ordersLink.style.display = 'none';
                 }
             } else {
                 signinLink.style.display = 'block';
                 registerLink.style.display = 'block';
                 profileLink.style.display = 'none';
                 adminLink.style.display = 'none';
+                ordersLink.style.display = 'none';
                 logoutLink.style.display = 'none';
             }
         }
