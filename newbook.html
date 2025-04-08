@@ -42,6 +42,32 @@
     <script>
         console.log('New Book page script starting...');
 
+        // Function to load HTML content
+        function loadHTML(elementId, filePath) {
+            console.log(`Loading ${filePath} into ${elementId}...`);
+            fetch(filePath)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.text();
+                })
+                .then(data => {
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = data;
+
+                    // Insert the remaining content
+                    document.getElementById(elementId).innerHTML = tempDiv.innerHTML;
+                    console.log(`${filePath} loaded successfully`);
+                })
+                .catch(error => {
+                    console.error('Error loading HTML:', error);
+                });
+        }
+
+        // Load header
+        loadHTML('header', 'header.html');
+
         // Handle form submission
         const newBookForm = document.getElementById('new-book-form');
         newBookForm.addEventListener('submit', async (event) => {
