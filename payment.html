@@ -432,61 +432,88 @@
         // Form submission
         cardForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            // Save order to database
-            saveOrderToDatabase('card')
-                .then(() => {
-                    // Clear cart and redirect
-                    localStorage.removeItem('cart');
-                    window.location.href = 'receipt.html';
-                })
-                .catch(error => {
-                    console.error('Error saving order:', error);
-                    alert('There was an error processing your payment. Please try again.');
-                });
+            processPayment('card');
         });
 
         // PayPal button click handler
         document.querySelector('.paypal-button').addEventListener('click', function(e) {
             e.preventDefault();
-            // Save order to database
-            saveOrderToDatabase('paypal')
-                .then(() => {
-                    // Clear cart and redirect
-                    localStorage.removeItem('cart');
-                    window.location.href = 'receipt.html';
-                })
-                .catch(error => {
-                    console.error('Error saving order:', error);
-                    alert('There was an error processing your payment. Please try again.');
-                });
+            processPayment('paypal');
         });
 
-        // Function to save order data to MongoDB
-        async function saveOrderToDatabase(paymentMethod) {
-            const cart = JSON.parse(localStorage.getItem('cart')) || [];
-            const subtotal = cart.reduce((sum, item) => sum + item.price, 0);
-            const tax = subtotal * 0.15;
-            const total = subtotal + tax;
-            
-            // Get user information from localStorage if available
-            const user = JSON.parse(localStorage.getItem('user')) || {};
-            
-            const orderData = {
-                userId: user._id || 'guest',
-                items: cart,
-                paymentMethod: paymentMethod,
-                subtotal: subtotal,
-                tax: tax,
-                total: total,
-                status: 'completed',
-                orderDate: new Date().toISOString()
-            };
-            
+        // Function to process payment
+        function processPayment(paymentMethod) {
             try {
-                console.log('Sending order data:', JSON.stringify(orderData));
+                // Save order locally first
+                const cart = JSON.parse(localStorage.getItem('cart')) || [];
+                if (cart.length === 0) {
+                    alert('Your cart is empty!');
+                    return;
+                }
                 
-                // First try your custom endpoint
-                const response = await fetch('https://elibrary-1rh1.onrender.com/api/orders', {
+                const subtotal = cart.reduce((sum, item) => sum + item.price, 0);
+                const tax = subtotal * 0.15;
+                const total = subtotal + tax;
+                
+                // Get user information from localStorage if available
+                const user = JSON.parse(localStorage.getItem('user')) || {};
+                
+                const orderData = {
+                    id: 'order-' + Date.now(),
+                    userId: user._id || 'guest',
+                    customerName: user.name || document.getElementById('card-name').value || 'Guest User',
+                    items: cart,
+                    paymentMethod: paymentMethod,
+                    subtotal: subtotal,
+                    tax: tax,
+                    total: total,
+                    status: 'completed',
+                    orderDate: new Date().toISOString()
+                };
+                
+                // Store order in localStorage
+                localStorage.setItem('lastOrder', JSON.stringify(orderData));
+                
+                // Clear the cart
+                localStorage.removeItem('cart');
+                
+                // Log successful order
+                console.log('Order saved successfully:', orderData);
+                
+                // Redirect to receipt page
+                window.location.href = 'receipt.html';
+            } catch (error) {
+                console.error('Error processing payment:', error);
+                alert('There was an error processing your payment. Please try again.');
+            }
+        }
+
+        // Function to save order data to MongoDB - disabled for now due to server issues
+        async function saveOrderToDatabase(paymentMethod) {
+            // This function is kept for reference but not used
+            try {
+                const cart = JSON.parse(localStorage.getItem('cart')) || [];
+                const subtotal = cart.reduce((sum, item) => sum + item.price, 0);
+                const tax = subtotal * 0.15;
+                const total = subtotal + tax;
+                
+                // Get user information from localStorage if available
+                const user = JSON.parse(localStorage.getItem('user')) || {};
+                
+                const orderData = {
+                    userId: user._id || 'guest',
+                    items: cart,
+                    paymentMethod: paymentMethod,
+                    subtotal: subtotal,
+                    tax: tax,
+                    total: total,
+                    status: 'completed',
+                    orderDate: new Date().toISOString()
+                };
+                
+                // Attempt to save to server - not used currently due to server issues
+                /*
+                const response = await fetch('YOUR_ACTUAL_API_ENDPOINT', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -496,47 +523,18 @@
                 });
                 
                 if (!response.ok) {
-                    // If the first attempt fails, try the direct MongoDB connection endpoint
-                    console.log('First attempt failed, trying alternative endpoint');
-                    
-                    const directResponse = await fetch('https://elibrary-1rh1.onrender.com/api/direct-orders', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-                            'Connection-String': 'mongodb+srv://f87study:admin1234@cluster0.fqatder.mongodb.net/eLibrary'
-                        },
-                        body: JSON.stringify(orderData)
-                    });
-                    
-                    if (!directResponse.ok) {
-                        const errorData = await directResponse.json();
-                        throw new Error(errorData.message || 'Failed to save order');
-                    }
-                    
-                    const data = await directResponse.json();
-                    localStorage.setItem('lastOrder', JSON.stringify(data.order));
-                    return data;
+                    throw new Error('Server error');
                 }
                 
-                // First endpoint was successful
                 const data = await response.json();
-                localStorage.setItem('lastOrder', JSON.stringify(data.order));
-                return data;
+                */
+                
+                // For now, just save locally
+                localStorage.setItem('lastOrder', JSON.stringify(orderData));
+                return orderData;
             } catch (error) {
                 console.error('Error saving order:', error);
-                
-                // Save locally if both server attempts fail
-                console.log('Server saving failed, storing locally');
-                const localOrder = {
-                    ...orderData,
-                    _id: 'local-' + Date.now(),
-                    createdAt: new Date().toISOString()
-                };
-                localStorage.setItem('lastOrder', JSON.stringify(localOrder));
-                
-                // Don't throw error, allow the payment flow to continue
-                return localOrder;
+                throw error;
             }
         }
 
