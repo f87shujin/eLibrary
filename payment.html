@@ -213,11 +213,8 @@
     </footer>
 
     <script>
-        console.log('Payment page script starting...');
-
         // Function to load HTML content
         function loadHTML(elementId, filePath) {
-            console.log(`Loading ${filePath} into ${elementId}...`);
             fetch(filePath)
                 .then(response => {
                     if (!response.ok) {
@@ -245,7 +242,6 @@
                     
                     // Insert the remaining content
                     document.getElementById(elementId).innerHTML = tempDiv.innerHTML;
-                    console.log(`${filePath} loaded successfully`);
                     
                     // Dispatch a custom event when header is loaded
                     if (elementId === 'header') {
@@ -253,7 +249,7 @@
                     }
                 })
                 .catch(error => {
-                    console.error('Error loading HTML:', error);
+                    // Silent error handling
                 });
         }
 
@@ -478,13 +474,9 @@
                 // Clear the cart
                 localStorage.removeItem('cart');
                 
-                // Log success for debugging
-                console.log('Order processed successfully:', orderData);
-                
                 // Redirect to receipt page
                 window.location.href = 'receipt.html';
             } catch (error) {
-                console.error('Error processing order:', error);
                 alert('There was an error processing your order. Please try again.');
             }
         }
