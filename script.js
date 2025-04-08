@@ -3,14 +3,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const userInput = document.getElementById('user-input');
     const chatBox = document.getElementById('chat-box');
 
-    // Add function to fetch books
+    // Add function to fetch books with debug logging
     async function fetchBooks() {
+        console.log('Attempting to fetch books...');
         try {
             const response = await fetch('https://elibrary-1rh1.onrender.com/api/books');
+            console.log('API Response:', response);
+            
             if (!response.ok) {
-                throw new Error('Failed to fetch books');
+                throw new Error(`Failed to fetch books: ${response.status}`);
             }
-            return await response.json();
+            
+            const books = await response.json();
+            console.log('Fetched books:', books);
+            return books;
         } catch (error) {
             console.error('Error fetching books:', error);
             return null;
@@ -32,7 +38,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             // First fetch books
+            console.log('Fetching books for message context...');
             const books = await fetchBooks();
+            
+            // Debug log for books data
+            console.log('Books data for context:', books);
             
             // Prepare context with books information
             let bookContext = '';
@@ -40,6 +50,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 bookContext = 'Available books:\n' + books.map(book => 
                     `- ${book.name} (Price: $${book.price}) - ${book.description}`
                 ).join('\n');
+                console.log('Created book context:', bookContext);
+            } else {
+                console.log('No books available or failed to fetch books');
             }
 
             // Send to AI with books context
@@ -58,6 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await res.json();
             updateLastAIMessage(data.response.trim());
         } catch (err) {
+            console.error('Error in sendMessage:', err);
             updateLastAIMessage('Error: ' + err.message);
         }
     }
@@ -77,8 +91,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initial greeting with book information
     async function initialize() {
+        console.log('Initializing chatbot...');
         try {
             const books = await fetchBooks();
+            console.log('Initial books fetch:', books);
+            
             if (books && books.length > 0) {
                 const greeting = "Hello! I'm your library assistant. I can help you find books and answer questions about our collection. Here are some of our available books:\n\n" +
                     books.slice(0, 5).map(book => `- ${book.name} ($${book.price})`).join('\n');
@@ -87,9 +104,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 appendMessage('ai', "Hello! I'm your library assistant. How can I help you today?");
             }
         } catch (error) {
+            console.error('Error in initialize:', error);
             appendMessage('ai', "Hello! I'm your library assistant. How can I help you today?");
         }
     }
 
-    initialize();
+    // Call initialize and log when it's done
+    initialize().then(() => {
+        console.log('Initialization complete');
+    });
 });
