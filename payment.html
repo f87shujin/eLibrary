@@ -202,8 +202,8 @@
 
             <!-- PayPal Button -->
             <div id="paypal-button" style="display: none;">
-                <button class="paypal-button w-100" onclick="connectWithPayPal()">
-                    <i class="fab fa-paypal me-2"></i>Connect with PayPal
+                <button class="paypal-button w-100" onclick="window.location.href='receipt.html';">
+                    <i class="fab fa-paypal me-2"></i>Pay with PayPal
                 </button>
             </div>
         </div>
@@ -363,36 +363,6 @@
             
             // Update the pay button text
             document.querySelector('.library-btn').textContent = `Pay $${total.toFixed(2)}`;
-        }
-
-        // Initialize PayPal
-        function connectWithPayPal() {
-            paypal.Buttons({
-                createOrder: function(data, actions) {
-                    const cart = JSON.parse(localStorage.getItem('cart')) || [];
-                    const subtotal = cart.reduce((sum, item) => sum + item.price, 0);
-                    const tax = subtotal * 0.15;
-                    const total = subtotal + tax;
-
-                    return actions.order.create({
-                        purchase_units: [{
-                            amount: {
-                                value: total.toFixed(2)
-                            }
-                        }]
-                    });
-                },
-                onApprove: function(data, actions) {
-                    return actions.order.capture().then(function(details) {
-                        alert('Transaction completed by ' + details.payer.name.given_name);
-                        localStorage.removeItem('cart');
-                        window.location.href = 'receipt.html';
-                    });
-                },
-                onError: function(err) {
-                    alert('An error occurred during the payment process.');
-                }
-            }).render('#paypal-button');
         }
 
         // Payment method selection
