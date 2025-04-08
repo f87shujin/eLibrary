@@ -4,6 +4,9 @@ const http = require('http');
 const app = express();
 const PORT = process.env.PORT || 3000;
 const OLLAMA_PORT = 11434; // Default Ollama API port
+const cors = require('cors');
+app.use(cors());
+
 
 // Configure Express
 app.use(express.json());
