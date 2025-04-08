@@ -4,7 +4,6 @@ const mongoose = require('mongoose');
 const cors = require('cors'); // Import CORS
 const jwt = require('jsonwebtoken');
 const User = require('./models/User'); // Import the User model
-const bcrypt = require('bcrypt');
 const Order = require('./models/Order'); // Ensure this path is correct
 const app = express();
 const PORT = process.env.PORT || 10000;
@@ -86,8 +85,8 @@ app.post('/api/addbooks', async (req, res) => {
     }
 });
 
-// API endpoint to get books with optional search query
-app.get('/api/books', async (req, res) => {
+app.use(express.static('public'));
+et('/api/books', async (req, res) => {
     const { search, sort, category } = req.query;
     try {
         let query = {};
@@ -144,13 +143,15 @@ app.get('/api/books/:id', async (req, res) => {
     }
 });
 
-// API endpoint to update a book by ID
+// Registration endpoint
+
+// API endpoint to update a book by IDY
 app.put('/api/books/:id', async (req, res) => {
     const { id } = req.params; // Get the book ID from the request parameters
     const { name, price, description, image } = req.body; // Get the updated book details from the request body
 
     // Validate the input
-    if (!name || !price || !description || !image) {
+    if (!name || !price || !description || !image) {Y
         return res.status(400).json({ message: 'All fields are required' });
     }
 
@@ -176,57 +177,92 @@ app.put('/api/books/:id', async (req, res) => {
 // User registration
 app.post('/api/register', async (req, res) => {
     try {
-        const { name, email, password, role } = req.body;
+        const { name, email, password } = req.body;
         
         // Check if user already exists
         const existingUser = await User.findOne({ email });
         if (existingUser) {
-            return res.status(400).json({ message: 'User already exists with this email' });
+            return res.status(400).json({ message: 'User already exists' });
         }
 
-        // Hash the password before saving
-        const hashedPassword = await bcrypt.hash(password, 10); // Hashing with 10 salt rounds
-        const user = new User({ name, email, password: hashedPassword, role });
+        // Create new user without password hashing
+        const user = new User({
+            name,
+            email,
+            password // Store password directly without hashing
+        });
+
         await user.save();
-        
-        res.status(201).json({ message: 'User registered successfully' });
+
+        // Generate token
+        const token = jwt.sign(
+            { userId: user._id, role: user.role },
+            process.env.JWT_SECRET || 'your-secret-key',
+            { expiresIn: '24h' }
+        );
+
+        res.status(201).json({
+            message: 'User registered successfully',
+            token,
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                role: user.role
+            }
+        });
     } catch (error) {
         console.error('Registration error:', error);
-        res.status(500).json({ message: 'Internal Server Error' });
+        res.status(500).json({ message: 'Error registering user' });
     }
 });
 
-// User login
+// Login endpoint
 app.post('/api/login', async (req, res) => {
-    const { email, password } = req.body;
-    const trimmedEmail = email.trim();
-    const trimmedPassword = password.trim();
-    const user = await User.findOne({ email: trimmedEmail });
+    try {
+        const { email, password } = req.body;
+        const trimmedEmail = email.trim();
+        const trimmedPassword = password.trim();
+        
+        // Find user
+        const user = await User.findOne({ email: trimmedEmail });
+        if (!user) {
+            console.log('User not found:', trimmedEmail);
+            return res.status(401).json({ message: 'Invalid credentials' });
+        }
 
-    if (!user) {
-        console.log('User not found:', trimmedEmail);
-        return res.status(401).json({ message: 'Invalid credentials' });
+        // Direct password comparison without hashing
+        if (trimmedPassword !== user.password) {
+            console.log('Password does not match for user:', trimmedEmail);
+            return res.status(401).json({ message: 'Invalid credentials' });
+        }
+
+        // Generate token
+        const token = jwt.sign(
+            { 
+                id: user._id, 
+                name: user.name, 
+                email: user.email, 
+                role: user.role  
+            }, 
+            'your_jwt_secret', 
+            { expiresIn: '1h' }
+        );
+
+        res.json({ 
+            message: 'Login successful',
+            token,
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                role: user.role
+            }
+        });
+    } catch (error) {
+        console.error('Login error:', error);
+        res.status(500).json({ message: 'Error logging in' });
     }
-
-    // Temporarily compare the plain text password directly
-    if (trimmedPassword !== user.password) {
-        console.log('Password does not match for user:', trimmedEmail);
-        return res.status(401).json({ message: 'Invalid credentials' });
-    }
-
-    // Create a token with name, email, and role
-    const token = jwt.sign(
-        { 
-            id: user._id, 
-            name: user.name, 
-            email: user.email, 
-            role: user.role  
-        }, 
-        'your_jwt_secret', 
-        { expiresIn: '1h' }
-    );
-
-    res.json({ token });
 });
 
 // Middleware to check if user is admin
@@ -259,7 +295,7 @@ app.put('/api/updateProfile', async (req, res) => {
 
         // Only update password if provided
         if (password) {
-            updates.password = await bcrypt.hash(password, 10);
+            updates.password = password;
         }
 
         try {
