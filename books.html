@@ -95,10 +95,20 @@
                     button.addEventListener('click', async (e) => {
                         const bookId = e.target.getAttribute('data-id');
                         if (confirm('Are you sure you want to delete this book?')) {
-                            await fetch(`https://elibrary-1rh1.onrender.com/api/books/${bookId}`, {
-                                method: 'DELETE',
-                            });
-                            fetchBooks(); // Refresh the book list
+                            try {
+                                const response = await fetch(`https://elibrary-1rh1.onrender.com/api/books/${bookId}`, {
+                                    method: 'DELETE',
+                                });
+                                if (response.ok) {
+                                    alert('Book deleted successfully');
+                                    fetchBooks(); // Refresh the book list
+                                } else {
+                                    const data = await response.json();
+                                    alert(data.message || 'Failed to delete book.');
+                                }
+                            } catch (error) {
+                                console.error('Error deleting book:', error);
+                            }
                         }
                     });
                 });

@@ -418,6 +418,21 @@ app.delete('/api/users/:id', async (req, res) => {
     }
 });
 
+// API endpoint to delete a book by ID
+app.delete('/api/books/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        const deletedBook = await Book.findByIdAndDelete(id);
+        if (!deletedBook) {
+            return res.status(404).json({ message: 'Book not found' });
+        }
+        res.json({ message: 'Book deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting book:', error);
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+});
+
 // Start the server
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
