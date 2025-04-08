@@ -54,34 +54,34 @@
             return new Date(dateString).toLocaleString();
         }
 
-        // Fetch and display order details
-        async function loadOrderDetails() {
+        // Load and display order details from localStorage
+        function loadOrderDetails() {
             try {
-                const token = localStorage.getItem('token');
-                if (!token) {
-                    window.location.href = 'login.html';
+                // Get the last order from localStorage
+                const orderData = localStorage.getItem('lastOrder');
+                
+                if (!orderData) {
+                    document.getElementById('receipt-details').innerHTML = `
+                        <div class="alert alert-warning">
+                            No order found. Please make a purchase first.
+                        </div>
+                        <div class="text-center mt-4">
+                            <a href="index.html" class="library-btn">Return to Home</a>
+                        </div>
+                    `;
                     return;
                 }
-
-                const response = await fetch(`http://localhost:10000/api/orders/${orderId}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-
-                if (!response.ok) {
-                    throw new Error('Failed to fetch order details');
-                }
-
-                const order = await response.json();
+                
+                const order = JSON.parse(orderData);
                 
                 // Display receipt
                 document.getElementById('receipt-details').innerHTML = `
                     <div class="mb-4">
                         <h4>Order Information</h4>
-                        <p><strong>Order ID:</strong> ${order._id}</p>
+                        <p><strong>Order ID:</strong> ${order.id}</p>
                         <p><strong>Order Date:</strong> ${formatDate(order.orderDate)}</p>
-                        <p><strong>Customer Name:</strong> ${order.userName}</p>
+                        <p><strong>Customer Name:</strong> ${order.customerName}</p>
+                        <p><strong>Payment Method:</strong> ${order.paymentMethod === 'card' ? 'Credit/Debit Card' : 'PayPal'}</p>
                     </div>
 
                     <div class="mb-4">
@@ -111,7 +111,9 @@
                     </div>
 
                     <div class="text-end">
-                        <h4>Total Amount: $${order.totalAmount.toFixed(2)}</h4>
+                        <p><strong>Subtotal:</strong> $${order.subtotal.toFixed(2)}</p>
+                        <p><strong>Tax (15%):</strong> $${order.tax.toFixed(2)}</p>
+                        <h4>Total Amount: $${order.total.toFixed(2)}</h4>
                     </div>
 
                     <div class="mt-4 text-center">
@@ -124,6 +126,9 @@
                 document.getElementById('receipt-details').innerHTML = `
                     <div class="alert alert-danger">
                         Failed to load order details. Please try again later.
+                    </div>
+                    <div class="text-center mt-4">
+                        <a href="index.html" class="library-btn">Return to Home</a>
                     </div>
                 `;
             }
