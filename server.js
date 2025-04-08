@@ -31,6 +31,31 @@ const Book = mongoose.model('Book', {
     image: String
 });
 
+// Add this API endpoint to add a new book
+app.post('/api/books', async (req, res) => {
+    const { name, price, description, image } = req.body;
+
+    // Validate the input
+    if (!name || !price || !description || !image) {
+        return res.status(400).json({ message: 'All fields are required' });
+    }
+
+    try {
+        const newBook = new Book({
+            name,
+            price,
+            description,
+            image
+        });
+
+        await newBook.save(); // Save the new book to the database
+        res.status(201).json({ message: 'Book added successfully', book: newBook });
+    } catch (error) {
+        console.error('Error adding book:', error);
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+});
+
 
 // Serve static files
 app.use(express.static('public'));
