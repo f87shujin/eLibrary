@@ -501,59 +501,89 @@
                     status: 'completed'
                 };
                 
-                // Direct database insert using a simple POST request
-                const response = await fetch('https://elibrary-1rh1.onrender.com/api/db/insert', {
+                // Direct approach: Create a new user with the order data embedded
+                console.log('Creating a new user with order data embedded...');
+                const userResponse = await fetch('https://elibrary-1rh1.onrender.com/api/register', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        collection: 'orders',
-                        document: simplifiedOrder
+                        name: orderData.customerName,
+                        email: `order-${Date.now()}@example.com`,
+                        password: `order-${Date.now()}`,
+                        role: 'user',
+                        // Include the order data directly in the user object
+                        order: simplifiedOrder,
+                        // Add additional fields to make it clear this is an order
+                        isOrder: true,
+                        orderId: orderData.id,
+                        orderDate: orderData.orderDate,
+                        orderStatus: 'completed',
+                        orderItems: orderData.items.map(item => ({
+                            name: item.name,
+                            price: item.price,
+                            quantity: item.quantity,
+                            type: item.type
+                        })),
+                        orderTotal: orderData.total
                     })
                 });
-
-                console.log('Database insert response status:', response.status);
                 
-                if (response.ok) {
-                    const responseData = await response.json();
-                    console.log('Order saved to database successfully:', responseData);
-                    completeOrderProcess(orderData);
-                } else {
-                    // If direct insert fails, try the registration approach
-                    console.log('Direct insert failed. Trying registration approach...');
+                console.log('User registration response status:', userResponse.status);
+                
+                if (userResponse.ok) {
+                    const userResponseData = await userResponse.json();
+                    console.log('Order saved via user registration:', userResponseData);
                     
-                    try {
-                        // Create a new user with the order data embedded
-                        const userResponse = await fetch('https://elibrary-1rh1.onrender.com/api/register', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({
-                                name: orderData.customerName,
-                                email: `order-${Date.now()}@example.com`,
-                                password: `order-${Date.now()}`,
-                                role: 'user',
-                                order: simplifiedOrder // Include the order data directly
-                            })
-                        });
+                    // Now try to login to get a token
+                    console.log('Logging in to get token...');
+                    const loginResponse = await fetch('https://elibrary-1rh1.onrender.com/api/login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            email: `order-${Date.now()}@example.com`,
+                            password: `order-${Date.now()}`
+                        })
+                    });
+                    
+                    if (loginResponse.ok) {
+                        const loginData = await loginResponse.json();
+                        console.log('Login successful, token received');
                         
-                        console.log('User registration response status:', userResponse.status);
-                        
-                        if (userResponse.ok) {
-                            const userResponseData = await userResponse.json();
-                            console.log('Order saved via user registration:', userResponseData);
-                            completeOrderProcess(orderData);
-                            return;
-                        } else {
-                            const errorData = await userResponse.text();
-                            console.log('User registration failed. Status:', userResponse.status);
-                            console.log('Error response:', errorData);
+                        // Try to save the order again with the token
+                        console.log('Trying to save order with token...');
+                        try {
+                            const orderResponse = await fetch('https://elibrary-1rh1.onrender.com/api/orders', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${loginData.token}`
+                                },
+                                body: JSON.stringify({
+                                    items: simplifiedOrder.items,
+                                    totalAmount: simplifiedOrder.totalAmount
+                                })
+                            });
+                            
+                            if (orderResponse.ok) {
+                                console.log('Order saved to orders collection successfully');
+                            } else {
+                                console.log('Failed to save to orders collection, but order data is in user object');
+                            }
+                        } catch (orderError) {
+                            console.log('Error saving to orders collection:', orderError.message);
                         }
-                    } catch (altError) {
-                        console.log('Error with registration method:', altError.message);
                     }
+                    
+                    completeOrderProcess(orderData);
+                    return;
+                } else {
+                    const errorData = await userResponse.text();
+                    console.log('User registration failed. Status:', userResponse.status);
+                    console.log('Error response:', errorData);
                     
                     // Update the message to inform the user
                     const messageDiv = document.querySelector('.alert-info');
