@@ -7,6 +7,14 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="dark-theme.css">
     <link rel="stylesheet" href="styles.css">
+    <style>
+        .order-card {
+            background-color: white; /* Set the background color to white */
+            border: 1px solid #dee2e6; /* Optional: Add a light border */
+            border-radius: 0.5rem; /* Rounded corners */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+        }
+    </style>
 </head>
 <body>
     <header id="header"></header> <!-- Placeholder for the header -->
@@ -67,7 +75,7 @@
 
             orders.forEach(order => {
                 const orderItem = document.createElement('div');
-                orderItem.className = 'card mb-3';
+                orderItem.className = 'card mb-3 order-card'; // Apply the new class for styling
                 orderItem.innerHTML = `
                     <div class="card-body">
                         <h5 class="card-title">Order ID: ${order._id}</h5>
@@ -92,8 +100,8 @@
             const token = localStorage.getItem('token'); // Assuming you store the token in local storage
             if (confirm('Are you sure you want to cancel this order?')) {
                 try {
-                    const response = await fetch(`https://elibrary-1rh1.onrender.com/api/orders/${orderId}/cancel`, {
-                        method: 'PUT',
+                    const response = await fetch(`https://elibrary-1rh1.onrender.com/api/orders/${orderId}`, {
+                        method: 'DELETE', // Use DELETE method
                         headers: {
                             'Authorization': `Bearer ${token}`
                         }

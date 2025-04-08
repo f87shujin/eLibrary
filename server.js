@@ -511,6 +511,29 @@ app.delete('/api/books/:id', async (req, res) => {
     }
 });
 
+// Add this new endpoint to delete an order
+app.delete('/api/orders/:orderId', async (req, res) => {
+    const token = req.headers['authorization']?.split(' ')[1];
+    if (!token) return res.status(403).json({ message: 'No token provided' });
+
+    try {
+        const decoded = jwt.verify(token, 'your_jwt_secret');
+        const { orderId } = req.params;
+
+        // Find the order by ID and delete it
+        const deletedOrder = await Order.findOneAndDelete({ _id: orderId, userId: decoded.id });
+        
+        if (!deletedOrder) {
+            return res.status(404).json({ message: 'Order not found or you do not have permission to delete this order' });
+        }
+
+        res.json({ message: 'Order deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting order:', error);
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+});
+
 // Start the server
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
