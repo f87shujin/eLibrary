@@ -104,8 +104,9 @@ app.post('/api/register', async (req, res) => {
             return res.status(400).json({ message: 'User already exists with this email' });
         }
 
-        // Create new user without hashing the password
-        const user = new User({ name, email, password, role });
+        // Hash the password before saving
+        const hashedPassword = await bcrypt.hash(password, 10); // Hashing with 10 salt rounds
+        const user = new User({ name, email, password: hashedPassword, role });
         await user.save();
         
         res.status(201).json({ message: 'User registered successfully' });
@@ -125,8 +126,9 @@ app.post('/api/login', async (req, res) => {
         return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    // Compare the plain text password directly
-    if (password !== user.password) {
+    // Compare the plain text password with the hashed password
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
         console.log('Password does not match for user:', email); // Log if password does not match
         return res.status(401).json({ message: 'Invalid credentials' });
     }
