@@ -9,8 +9,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <!-- Add PayPal SDK -->
-    <script src="https://www.paypal.com/sdk/js?client-id=YOUR_PAYPAL_CLIENT_ID&currency=USD"></script>
     <style>
         .payment-method {
             border: 2px solid var(--library-accent);
@@ -432,19 +430,21 @@
         // Form submission
         cardForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            processPayment('card');
+            // Direct process without server call
+            processOrder('card');
         });
 
         // PayPal button click handler
         document.querySelector('.paypal-button').addEventListener('click', function(e) {
             e.preventDefault();
-            processPayment('paypal');
+            // Direct process without server call
+            processOrder('paypal');
         });
 
-        // Function to process payment
-        function processPayment(paymentMethod) {
+        // Function to process order
+        function processOrder(paymentMethod) {
             try {
-                // Save order locally first
+                // Get cart items
                 const cart = JSON.parse(localStorage.getItem('cart')) || [];
                 if (cart.length === 0) {
                     alert('Your cart is empty!');
@@ -458,10 +458,11 @@
                 // Get user information from localStorage if available
                 const user = JSON.parse(localStorage.getItem('user')) || {};
                 
+                // Create order object
                 const orderData = {
                     id: 'order-' + Date.now(),
                     userId: user._id || 'guest',
-                    customerName: user.name || document.getElementById('card-name').value || 'Guest User',
+                    customerName: user.name || document.getElementById('card-name')?.value || 'Guest User',
                     items: cart,
                     paymentMethod: paymentMethod,
                     subtotal: subtotal,
@@ -471,70 +472,20 @@
                     orderDate: new Date().toISOString()
                 };
                 
-                // Store order in localStorage
+                // Save order to localStorage for receipt page
                 localStorage.setItem('lastOrder', JSON.stringify(orderData));
                 
                 // Clear the cart
                 localStorage.removeItem('cart');
                 
-                // Log successful order
-                console.log('Order saved successfully:', orderData);
+                // Log success for debugging
+                console.log('Order processed successfully:', orderData);
                 
                 // Redirect to receipt page
                 window.location.href = 'receipt.html';
             } catch (error) {
-                console.error('Error processing payment:', error);
-                alert('There was an error processing your payment. Please try again.');
-            }
-        }
-
-        // Function to save order data to MongoDB - disabled for now due to server issues
-        async function saveOrderToDatabase(paymentMethod) {
-            // This function is kept for reference but not used
-            try {
-                const cart = JSON.parse(localStorage.getItem('cart')) || [];
-                const subtotal = cart.reduce((sum, item) => sum + item.price, 0);
-                const tax = subtotal * 0.15;
-                const total = subtotal + tax;
-                
-                // Get user information from localStorage if available
-                const user = JSON.parse(localStorage.getItem('user')) || {};
-                
-                const orderData = {
-                    userId: user._id || 'guest',
-                    items: cart,
-                    paymentMethod: paymentMethod,
-                    subtotal: subtotal,
-                    tax: tax,
-                    total: total,
-                    status: 'completed',
-                    orderDate: new Date().toISOString()
-                };
-                
-                // Attempt to save to server - not used currently due to server issues
-                /*
-                const response = await fetch('YOUR_ACTUAL_API_ENDPOINT', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
-                    },
-                    body: JSON.stringify(orderData)
-                });
-                
-                if (!response.ok) {
-                    throw new Error('Server error');
-                }
-                
-                const data = await response.json();
-                */
-                
-                // For now, just save locally
-                localStorage.setItem('lastOrder', JSON.stringify(orderData));
-                return orderData;
-            } catch (error) {
-                console.error('Error saving order:', error);
-                throw error;
+                console.error('Error processing order:', error);
+                alert('There was an error processing your order. Please try again.');
             }
         }
 
