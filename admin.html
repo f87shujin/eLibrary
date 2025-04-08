@@ -24,6 +24,14 @@
             <div class="container">
                 <h2>Admin Page</h2>
                 <p>Welcome, admin!</p>
+                
+                <!-- New Buttons for Admin Actions -->
+                <div class="mb-3">
+                    <button id="manage-books" class="btn btn-primary">Manage Books</button>
+                    <button id="manage-users" class="btn btn-secondary">Manage Users</button>
+                    <button id="manage-orders" class="btn btn-success">Manage Orders</button>
+                </div>
+
                 <button id="logout" class="btn btn-danger">Logout</button>
             </div>
         </div>
@@ -109,6 +117,22 @@
         document.getElementById('logout').addEventListener('click', () => {
             localStorage.removeItem('token'); // Remove token from local storage
             window.location.href = 'login.html'; // Redirect to login page
+        });
+
+        // Add event listeners for new buttons (to be implemented)
+        document.getElementById('manage-books').addEventListener('click', () => {
+            // Logic to manage books
+            console.log('Manage Books clicked');
+        });
+
+        document.getElementById('manage-users').addEventListener('click', () => {
+            // Logic to manage users
+            console.log('Manage Users clicked');
+        });
+
+        document.getElementById('manage-orders').addEventListener('click', () => {
+            // Logic to manage orders
+            console.log('Manage Orders clicked');
         });
     </script>
 </body>

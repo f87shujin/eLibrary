@@ -1,0 +1,11 @@
+-get rid of rent function          |  X
+-hash  password                    |  X
+-admin page                        |
+-email verification                |
+-receipt + databasee               |
+-audio  recognition                |
+-make  images img and not a link   |
+-paypal                            |
+-add  book to library              |
+
+
