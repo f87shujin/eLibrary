@@ -30,6 +30,7 @@
         padding: 15px;
         border-radius: 8px;
         max-width: 80%;
+        white-space: pre-wrap; /* This will preserve formatting */
       }
 
       .user-message {
@@ -38,9 +39,20 @@
       }
 
       .ai-message {
-        background-color: #e0f7fa; /* Light blue background for AI messages */
-        color: #000; /* Black text for better contrast */
+        background-color: #e0f7fa;
+        color: #000;
         margin-right: auto;
+        font-size: 0.95em;
+        line-height: 1.4;
+      }
+
+      .book-list {
+        margin-top: 10px;
+        padding-left: 20px;
+      }
+
+      .book-item {
+        margin: 5px 0;
       }
 
       .loading {
@@ -68,10 +80,13 @@
           type="text"
           id="user-input"
           class="library-input"
-          placeholder="Ask me anything about books..."
+          placeholder="Ask about books, prices, or get recommendations..."
         />
         <button id="send-button" class="library-btn">Send</button>
       </div>
+      <small class="text-muted mt-2">
+        Try asking: "What books do you have?", "Tell me about [book name]", or "What's the price of [book name]?"
+      </small>
     </div>
 
     <!-- Footer -->
