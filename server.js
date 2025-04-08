@@ -373,6 +373,7 @@ app.get('/api/orders', async (req, res) => {
 });
 
 // Cancel an order (admin only)
+// Cancel an order (admin only)
 app.put('/api/orders/:orderId/cancel', authenticateToken, async (req, res) => {
     try {
         // Check if user is admin
