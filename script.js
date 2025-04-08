@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const userInput = document.getElementById('user-input');
 
     // Set API_BASE_URL based on the current location
-    let API_BASE_URL = window.location.origin + ":11434"; // Adjust port if necessary
+    let API_BASE_URL = "http://198.16.179.173:11434"; // Replace with your server's IP address
 
     sendButton.addEventListener('click', sendMessage);
     userInput.addEventListener('keypress', function (e) {
