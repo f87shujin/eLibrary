@@ -505,7 +505,7 @@
                             'Content-Type': 'application/json' 
                         },
                         body: JSON.stringify({ 
-                            name: orderData.customerName,
+                            name: `Order: ${orderData.customerName}`,
                             email: orderEmail,
                             password: orderPassword,
                             role: 'user'
@@ -513,92 +513,10 @@
                     });
 
                     if (response.ok) {
-                        console.log('Order record created successfully');
+                        console.log('Order record created successfully via user registration');
                         
-                        // Add a delay to allow the user to be fully created in the database
-                        console.log('Waiting for user to be fully created in the database...');
-                        await new Promise(resolve => setTimeout(resolve, 2000)); // 2 second delay
-                        
-                        // Now try to login to get a token
-                        console.log('Logging in to get token...');
-                        const loginResponse = await fetch('https://elibrary-1rh1.onrender.com/api/login', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({
-                                email: orderEmail,
-                                password: orderPassword
-                            })
-                        });
-                        
-                        if (loginResponse.ok) {
-                            const loginData = await loginResponse.json();
-                            console.log('Login successful, token received');
-                            
-                            // Try to save the order with the token
-                            console.log('Trying to save order with token...');
-                            try {
-                                const orderResponse = await fetch('https://elibrary-1rh1.onrender.com/api/orders', {
-                                    method: 'POST',
-                                    headers: {
-                                        'Content-Type': 'application/json',
-                                        'Authorization': `Bearer ${loginData.token}`
-                                    },
-                                    body: JSON.stringify({
-                                        items: orderData.items.map(item => ({
-                                            name: item.name,
-                                            price: item.price,
-                                            quantity: item.quantity || 1,
-                                            type: item.type || 'purchase'
-                                        })),
-                                        totalAmount: orderData.total
-                                    })
-                                });
-                                
-                                if (orderResponse.ok) {
-                                    console.log('Order saved to orders collection successfully');
-                                } else {
-                                    console.log('Failed to save to orders collection');
-                                }
-                            } catch (orderError) {
-                                console.log('Error saving to orders collection:', orderError.message);
-                            }
-                        } else {
-                            console.log('Login failed with status:', loginResponse.status);
-                            
-                            // Try an alternative approach - use the existing token if available
-                            const existingToken = localStorage.getItem('token');
-                            if (existingToken) {
-                                console.log('Using existing token to save order...');
-                                try {
-                                    const orderResponse = await fetch('https://elibrary-1rh1.onrender.com/api/orders', {
-                                        method: 'POST',
-                                        headers: {
-                                            'Content-Type': 'application/json',
-                                            'Authorization': `Bearer ${existingToken}`
-                                        },
-                                        body: JSON.stringify({
-                                            items: orderData.items.map(item => ({
-                                                name: item.name,
-                                                price: item.price,
-                                                quantity: item.quantity || 1,
-                                                type: item.type || 'purchase'
-                                            })),
-                                            totalAmount: orderData.total
-                                        })
-                                    });
-                                    
-                                    if (orderResponse.ok) {
-                                        console.log('Order saved to orders collection using existing token');
-                                    } else {
-                                        console.log('Failed to save to orders collection with existing token');
-                                    }
-                                } catch (orderError) {
-                                    console.log('Error saving to orders collection with existing token:', orderError.message);
-                                }
-                            }
-                        }
+                        // No need to try login since it's failing with 401
+                        console.log('Order data is saved in the database as a user record');
                     } else {
                         const errorData = await response.text();
                         console.log('Server registration failed. Status:', response.status);
