@@ -5,7 +5,7 @@ const cors = require('cors'); // Import CORS
 const jwt = require('jsonwebtoken');
 const User = require('./models/User'); // Import the User model
 const bcrypt = require('bcrypt');
-const Order = require('./models/Order');
+const Order = require('./models/Order'); // Ensure this path is correct
 const app = express();
 const PORT = process.env.PORT || 10000;
 
