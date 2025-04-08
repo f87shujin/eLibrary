@@ -262,10 +262,22 @@
             const cart = JSON.parse(localStorage.getItem('cart')) || [];
             const cartItemsContainer = document.getElementById('cart-items');
             
+            // Add debug logging
+            console.log('Retrieved cart from localStorage:', cart);
+            
             if (cart.length === 0) {
+                console.log('Cart is empty');
                 cartItemsContainer.innerHTML = '<p>Your cart is empty</p>';
                 return;
             }
+
+            // Debug each item
+            cart.forEach((item, index) => {
+                console.log(`Cart item ${index}:`, item);
+                console.log(`- Price: ${item.price}`);
+                console.log(`- Name: ${item.name}`);
+                console.log(`- Image: ${item.image}`);
+            });
 
             cartItemsContainer.innerHTML = cart.map((item, index) => {
                 // Ensure price is a valid number, if not use 0
@@ -274,6 +286,13 @@
                 const itemRentalDays = item.rentalDays || 1;
                 const itemName = item.name || 'Untitled Book';
                 const itemImage = item.image || 'placeholder.jpg';
+
+                console.log(`Rendering item ${index}:`, {
+                    price: itemPrice,
+                    quantity: itemQuantity,
+                    name: itemName,
+                    image: itemImage
+                });
 
                 return `
                     <div class="card mb-3">

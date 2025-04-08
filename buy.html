@@ -229,22 +229,26 @@
         }
 
         const quantity = parseInt(document.getElementById("quantity").value);
-        const unitPrice = bookData.price; // Store the original unit price
+        const unitPrice = bookData.price;
 
         const cartItem = {
           _id: bookData._id,
           name: bookData.name,
           image: bookData.image,
-          price: unitPrice * quantity, // Calculate total price based on quantity
+          price: unitPrice * quantity,
           quantity: quantity,
           type: "purchase",
-          unitPrice: unitPrice // Store the unit price for later calculations
+          unitPrice: unitPrice
         };
 
         const cart = JSON.parse(localStorage.getItem("cart")) || [];
         cart.push(cartItem);
+        
+        // Add debug logging
+        console.log('Adding item to cart:', cartItem);
+        console.log('Current cart:', cart);
+        
         localStorage.setItem("cart", JSON.stringify(cart));
-
         alert("Book added to cart!");
         window.location.href = "payment.html";
       }
