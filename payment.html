@@ -267,58 +267,91 @@
                 return;
             }
 
-            cartItemsContainer.innerHTML = cart.map((item, index) => `
-                <div class="card mb-3">
-                    <div class="card-body">
-                        <div class="row align-items-center">
-                            <div class="col-md-2">
-                                <img src="${item.image}" alt="${item.name}" class="img-fluid">
-                            </div>
-                            <div class="col-md-4">
-                                <h5 class="card-title">${item.name}</h5>
-                                ${item.type === 'rental' ? 
-                                    `<small class="text-muted">Rental Period: ${item.rentalDays} days</small>` : 
-                                    `<small class="text-muted">Quantity: ${item.quantity}</small>`
-                                }
-                            </div>
-                            <div class="col-md-2">
-                                ${item.type === 'purchase' ? `
-                                    <div class="input-group">
-                                        <button class="btn" onclick="updateQuantity(${index}, -1)">-</button>
-                                        <input type="text" class="form-control text-center" value="${item.quantity}" readonly>
-                                        <button class="btn" onclick="updateQuantity(${index}, 1)">+</button>
-                                    </div>
-                                ` : `
-                                    <div class="input-group">
-                                        <button class="btn" onclick="updateRentalDays(${index}, -1)">-</button>
-                                        <input type="text" class="form-control text-center" value="${item.rentalDays}" readonly>
-                                        <button class="btn" onclick="updateRentalDays(${index}, 1)">+</button>
-                                    </div>
-                                `}
-                            </div>
-                            <div class="col-md-2">
-                                $${item.price.toFixed(2)}
-                            </div>
-                            <div class="col-md-2">
-                                <button class="delete-btn" onclick="removeItem(${index})">
-                                    <i class="fas fa-trash"></i>
-                                </button>
+            cartItemsContainer.innerHTML = cart.map((item, index) => {
+                // Ensure price is a valid number, if not use 0
+                const itemPrice = item.price ? parseFloat(item.price) : 0;
+                const itemQuantity = item.quantity || 1;
+                const itemRentalDays = item.rentalDays || 1;
+                const itemName = item.name || 'Untitled Book';
+                const itemImage = item.image || 'placeholder.jpg';
+
+                return `
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-md-2">
+                                    <img src="${itemImage}" alt="${itemName}" class="img-fluid">
+                                </div>
+                                <div class="col-md-4">
+                                    <h5 class="card-title">${itemName}</h5>
+                                    ${item.type === 'rental' ? 
+                                        `<small class="text-muted">Rental Period: ${itemRentalDays} days</small>` : 
+                                        `<small class="text-muted">Quantity: ${itemQuantity}</small>`
+                                    }
+                                </div>
+                                <div class="col-md-2">
+                                    ${item.type === 'purchase' ? `
+                                        <div class="input-group">
+                                            <button class="btn" onclick="updateQuantity(${index}, -1)">-</button>
+                                            <input type="text" class="form-control text-center" value="${itemQuantity}" readonly>
+                                            <button class="btn" onclick="updateQuantity(${index}, 1)">+</button>
+                                        </div>
+                                    ` : `
+                                        <div class="input-group">
+                                            <button class="btn" onclick="updateRentalDays(${index}, -1)">-</button>
+                                            <input type="text" class="form-control text-center" value="${itemRentalDays}" readonly>
+                                            <button class="btn" onclick="updateRentalDays(${index}, 1)">+</button>
+                                        </div>
+                                    `}
+                                </div>
+                                <div class="col-md-2">
+                                    $${itemPrice.toFixed(2)}
+                                </div>
+                                <div class="col-md-2">
+                                    <button class="delete-btn" onclick="removeItem(${index})">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
 
             updateOrderSummary();
+        }
+
+        // Function to update order summary
+        function updateOrderSummary() {
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            // Safely calculate subtotal by ensuring each price is a valid number
+            const subtotal = cart.reduce((sum, item) => {
+                const itemPrice = item.price ? parseFloat(item.price) : 0;
+                return sum + itemPrice;
+            }, 0);
+            
+            const tax = subtotal * 0.15; // 15% tax
+            const total = subtotal + tax;
+
+            // Update display with proper number formatting
+            document.getElementById('subtotal').textContent = subtotal.toFixed(2);
+            document.getElementById('tax').textContent = tax.toFixed(2);
+            document.getElementById('total').textContent = total.toFixed(2);
+            
+            // Update the pay button text
+            const payButton = document.querySelector('.library-btn');
+            if (payButton) {
+                payButton.textContent = `Pay $${total.toFixed(2)}`;
+            }
         }
 
         // Function to update quantity for purchase items
         function updateQuantity(index, change) {
             const cart = JSON.parse(localStorage.getItem('cart')) || [];
-            if (cart[index].type === 'purchase') {
-                const unitPrice = cart[index].unitPrice; // Get the original unit price
-                cart[index].quantity = Math.max(1, cart[index].quantity + change);
-                cart[index].price = unitPrice * cart[index].quantity; // Calculate new total price
+            if (cart[index] && cart[index].type === 'purchase') {
+                const unitPrice = parseFloat(cart[index].unitPrice) || parseFloat(cart[index].price) || 0;
+                cart[index].quantity = Math.max(1, (cart[index].quantity || 1) + change);
+                cart[index].price = unitPrice * cart[index].quantity;
                 localStorage.setItem('cart', JSON.stringify(cart));
                 updateCartItems();
             }
@@ -327,10 +360,10 @@
         // Function to update rental days
         function updateRentalDays(index, change) {
             const cart = JSON.parse(localStorage.getItem('cart')) || [];
-            if (cart[index].type === 'rental') {
-                const dailyRate = cart[index].dailyRate; // Get the daily rate from the item
-                cart[index].rentalDays = Math.max(1, Math.min(30, cart[index].rentalDays + change));
-                cart[index].price = dailyRate * cart[index].rentalDays; // Calculate new total price
+            if (cart[index] && cart[index].type === 'rental') {
+                const dailyRate = parseFloat(cart[index].dailyRate) || parseFloat(cart[index].price) || 0;
+                cart[index].rentalDays = Math.max(1, Math.min(30, (cart[index].rentalDays || 1) + change));
+                cart[index].price = dailyRate * cart[index].rentalDays;
                 localStorage.setItem('cart', JSON.stringify(cart));
                 updateCartItems();
             }
@@ -342,21 +375,6 @@
             cart.splice(index, 1);
             localStorage.setItem('cart', JSON.stringify(cart));
             updateCartItems();
-        }
-
-        // Function to update order summary
-        function updateOrderSummary() {
-            const cart = JSON.parse(localStorage.getItem('cart')) || [];
-            const subtotal = cart.reduce((sum, item) => sum + item.price, 0);
-            const tax = subtotal * 0.15; // 15% tax
-            const total = subtotal + tax;
-
-            document.getElementById('subtotal').textContent = subtotal.toFixed(2);
-            document.getElementById('tax').textContent = tax.toFixed(2);
-            document.getElementById('total').textContent = total.toFixed(2);
-            
-            // Update the pay button text
-            document.querySelector('.library-btn').textContent = `Pay $${total.toFixed(2)}`;
         }
 
         // Payment method selection
