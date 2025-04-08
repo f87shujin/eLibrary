@@ -85,8 +85,7 @@ app.post('/api/addbooks', async (req, res) => {
     }
 });
 
-app.use(express.static('public'));
-et('/api/books', async (req, res) => {
+app.get('/api/books', async (req, res) => {
     const { search, sort, category } = req.query;
     try {
         let query = {};
@@ -142,8 +141,6 @@ app.get('/api/books/:id', async (req, res) => {
         res.status(500).json({ message: 'Internal Server Error' });
     }
 });
-
-// Registration endpoint
 
 // API endpoint to update a book by IDY
 app.put('/api/books/:id', async (req, res) => {
