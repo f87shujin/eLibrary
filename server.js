@@ -514,15 +514,10 @@ app.delete('/api/books/:id', async (req, res) => {
 // Updated endpoint to delete an order without authentication
 app.delete('/api/orders/:orderId', async (req, res) => {
     try {
-        const { orderId } = req.params;
-        
-        // Find the order by ID and delete it
-        const deletedOrder = await Order.findByIdAndDelete(orderId);
-        
+        const deletedOrder = await Order.findByIdAndDelete(req.params.orderId);
         if (!deletedOrder) {
             return res.status(404).json({ message: 'Order not found' });
         }
-
         res.json({ message: 'Order deleted successfully' });
     } catch (error) {
         console.error('Error deleting order:', error);
@@ -533,10 +528,25 @@ app.delete('/api/orders/:orderId', async (req, res) => {
 // Updated endpoint to get all orders without authentication
 app.get('/api/orders/all', async (req, res) => {
     try {
-        const orders = await Order.find().sort({ orderDate: -1 }); // Fetch all orders
+        // Simply fetch and return all orders
+        const orders = await Order.find().sort({ orderDate: -1 });
         res.json(orders);
     } catch (error) {
         console.error('Error fetching all orders:', error);
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+});
+
+// Updated endpoint to get a specific order without authentication
+app.get('/api/orders/:orderId', async (req, res) => {
+    try {
+        const order = await Order.findById(req.params.orderId);
+        if (!order) {
+            return res.status(404).json({ message: 'Order not found' });
+        }
+        res.json(order);
+    } catch (error) {
+        console.error('Error fetching order:', error);
         res.status(500).json({ message: 'Internal Server Error' });
     }
 });
