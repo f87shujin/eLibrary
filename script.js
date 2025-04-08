@@ -124,3 +124,6 @@ function testAPI() {
         console.error('Test failed:', error);
     });
 }
+
+loadHTML('header', 'http://localhost:8080/header.html');
+loadHTML('footer', 'http://localhost:8080/footer.html');
