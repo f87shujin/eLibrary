@@ -577,6 +577,25 @@
             // Clear the cart
             localStorage.removeItem('cart');
             
+            // Ensure the order data is properly formatted for the receipt page
+            const formattedOrder = {
+                ...orderData,
+                // Add any additional fields needed for the receipt page
+                orderNumber: orderData.id,
+                orderDate: new Date().toLocaleDateString(),
+                orderTime: new Date().toLocaleTimeString(),
+                // Format items for better display
+                formattedItems: orderData.items.map(item => ({
+                    name: item.name,
+                    price: item.price.toFixed(2),
+                    quantity: item.quantity || 1,
+                    type: item.type || 'purchase'
+                }))
+            };
+            
+            // Save the formatted order data
+            localStorage.setItem('lastOrder', JSON.stringify(formattedOrder));
+            
             // Add a delay before redirecting to receipt page
             console.log('Order processed successfully. Redirecting in 5 seconds...');
             setTimeout(() => {
