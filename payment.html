@@ -493,88 +493,74 @@
                 try {
                     console.log('Attempting to save order to server...');
                     
-                    // Create a simplified order object
-                    const simplifiedOrder = {
+                    // Create a simplified order object that matches the database schema
+                    const orderToSave = {
                         userId: 'guest-user',
-                        userName: orderData.customerName,
+                        customerName: orderData.customerName,
                         items: orderData.items.map(item => ({
                             name: item.name,
                             price: item.price,
-                            quantity: item.quantity,
-                            type: item.type
+                            quantity: item.quantity || 1,
+                            type: item.type || 'purchase'
                         })),
                         totalAmount: orderData.total,
                         orderDate: new Date().toISOString(),
                         status: 'completed'
                     };
                     
-                    // Create a unique email for this order
-                    const orderEmail = `order-${Date.now()}@elibrary.com`;
-                    
-                    // Try to save using the registration endpoint with a more explicit order structure
-                    const userResponse = await fetch('https://elibrary-1rh1.onrender.com/api/register', {
+                    // Try to directly insert into the orders collection
+                    console.log('Attempting to insert directly into orders collection...');
+                    const directInsertResponse = await fetch('https://elibrary-1rh1.onrender.com/api/db/insert', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
                         },
                         body: JSON.stringify({
-                            name: `Order: ${orderData.customerName}`,
-                            email: orderEmail,
-                            password: `order-${Date.now()}`,
-                            role: 'order', // Use a special role to identify orders
-                            // Include order data in a more structured way
-                            orderDetails: {
-                                orderId: orderData.id,
-                                customerName: orderData.customerName,
-                                items: orderData.items.map(item => ({
-                                    name: item.name,
-                                    price: item.price,
-                                    quantity: item.quantity,
-                                    type: item.type
-                                })),
-                                totalAmount: orderData.total,
-                                orderDate: orderData.orderDate,
-                                status: 'completed'
-                            },
-                            // Add metadata to make it easier to find orders
-                            isOrder: true,
-                            orderId: orderData.id,
-                            orderDate: orderData.orderDate,
-                            orderStatus: 'completed',
-                            orderItems: orderData.items.map(item => ({
-                                name: item.name,
-                                price: item.price,
-                                quantity: item.quantity,
-                                type: item.type
-                            })),
-                            orderTotal: orderData.total
+                            collection: 'orders',
+                            document: orderToSave
                         })
                     });
                     
-                    if (userResponse.ok) {
-                        const responseData = await userResponse.json();
-                        console.log('Order data saved to server via user registration:', responseData);
+                    if (directInsertResponse.ok) {
+                        console.log('Order successfully inserted into orders collection');
+                    } else {
+                        console.log('Direct insert failed, trying alternative approach...');
                         
-                        // Now try to login to get a token
-                        console.log('Logging in to get token...');
-                        const loginResponse = await fetch('https://elibrary-1rh1.onrender.com/api/login', {
+                        // Try to create a new user with minimal data
+                        const userResponse = await fetch('https://elibrary-1rh1.onrender.com/api/register', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json'
                             },
                             body: JSON.stringify({
-                                email: orderEmail,
-                                password: `order-${Date.now()}`
+                                name: orderData.customerName,
+                                email: `order-${Date.now()}@elibrary.com`,
+                                password: `order-${Date.now()}`,
+                                role: 'user'
                             })
                         });
                         
-                        if (loginResponse.ok) {
-                            const loginData = await loginResponse.json();
-                            console.log('Login successful, token received');
+                        if (userResponse.ok) {
+                            const userData = await userResponse.json();
+                            console.log('User created successfully, now trying to save order...');
                             
-                            // Try to save the order again with the token
-                            console.log('Trying to save order with token...');
-                            try {
+                            // Now try to login to get a token
+                            const loginResponse = await fetch('https://elibrary-1rh1.onrender.com/api/login', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({
+                                    email: `order-${Date.now()}@elibrary.com`,
+                                    password: `order-${Date.now()}`
+                                })
+                            });
+                            
+                            if (loginResponse.ok) {
+                                const loginData = await loginResponse.json();
+                                console.log('Login successful, token received');
+                                
+                                // Try to save the order with the token
                                 const orderResponse = await fetch('https://elibrary-1rh1.onrender.com/api/orders', {
                                     method: 'POST',
                                     headers: {
@@ -582,22 +568,20 @@
                                         'Authorization': `Bearer ${loginData.token}`
                                     },
                                     body: JSON.stringify({
-                                        items: simplifiedOrder.items,
-                                        totalAmount: simplifiedOrder.totalAmount
+                                        items: orderToSave.items,
+                                        totalAmount: orderToSave.totalAmount
                                     })
                                 });
                                 
                                 if (orderResponse.ok) {
                                     console.log('Order saved to orders collection successfully');
                                 } else {
-                                    console.log('Failed to save to orders collection, but order data is in user object');
+                                    console.log('Failed to save to orders collection');
                                 }
-                            } catch (orderError) {
-                                console.log('Error saving to orders collection:', orderError.message);
                             }
+                        } else {
+                            console.log('User registration failed');
                         }
-                    } else {
-                        console.log('Server registration failed, but order is saved locally');
                     }
                 } catch (serverError) {
                     // Log the error but don't block the order process
