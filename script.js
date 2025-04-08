@@ -3,51 +3,49 @@ document.addEventListener('DOMContentLoaded', () => {
     const userInput = document.getElementById('user-input');
     const chatBox = document.getElementById('chat-box');
 
-    const API_URL = "http://localhost:11434/api/generate";
-
     sendButton.addEventListener('click', sendMessage);
     userInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') sendMessage();
     });
 
     async function sendMessage() {
-        const prompt = userInput.value.trim();
-        if (!prompt) return;
+        const message = userInput.value.trim();
+        if (!message) return;
 
-        appendMessage('user', prompt);
+        appendMessage('user', message);
         userInput.value = '';
         appendMessage('ai', 'Thinking...');
 
         try {
-            const response = await fetch(API_URL, {
+            const res = await fetch('http://localhost:11434/api/generate', {
                 method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
                 body: JSON.stringify({
                     model: 'toshokan',
-                    prompt: prompt,
+                    prompt: message,
                     stream: false
-                }) // no content-type header!
+                })
             });
 
-            const data = await response.json();
+            const data = await res.json();
             updateLastAIMessage(data.response.trim());
         } catch (err) {
             updateLastAIMessage('Error: ' + err.message);
         }
     }
 
-    function appendMessage(role, text) {
-        const div = document.createElement('div');
-        div.className = role === 'user' ? 'user-message' : 'ai-message';
-        div.innerHTML = `<p>${text}</p>`;
-        chatBox.appendChild(div);
+    function appendMessage(type, content) {
+        const msgDiv = document.createElement('div');
+        msgDiv.className = `${type}-message`;
+        msgDiv.innerHTML = `<p>${content}</p>`;
+        chatBox.appendChild(msgDiv);
         chatBox.scrollTop = chatBox.scrollHeight;
     }
 
-    function updateLastAIMessage(text) {
-        const messages = chatBox.getElementsByClassName('ai-message');
-        if (messages.length > 0) {
-            messages[messages.length - 1].innerHTML = `<p>${text}</p>`;
-        }
-        chatBox.scrollTop = chatBox.scrollHeight;
+    function updateLastAIMessage(content) {
+        const lastAI = chatBox.querySelector('.ai-message:last-child p');
+        if (lastAI) lastAI.textContent = content;
     }
 });
