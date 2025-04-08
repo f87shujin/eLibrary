@@ -209,12 +209,9 @@
 <script>
     // Make sure the script runs immediately
     (function initializeHeaderScript() {
-        console.log('Header script starting...');
-
         // Simple function to check if user is logged in
         function isLoggedIn() {
             const token = localStorage.getItem('token');
-            console.log('Checking login status:', token ? 'Logged in' : 'Not logged in');
             return !!token;
         }
 
@@ -222,23 +219,18 @@
         function isAdmin() {
             const token = localStorage.getItem('token');
             if (!token) {
-                console.log('No token found, not admin');
                 return false;
             }
             try {
                 const tokenPayload = JSON.parse(atob(token.split('.')[1]));
-                console.log('Token payload:', tokenPayload);
                 return tokenPayload.role === 'admin';
             } catch (error) {
-                console.error('Error parsing token:', error);
                 return false;
             }
         }
 
         // Function to update header UI
         function updateHeaderUI() {
-            console.log('Updating header UI...');
-            
             // Find elements in the current document
             const signinLink = document.getElementById('signin-link');
             const registerLink = document.getElementById('register-link');
@@ -246,35 +238,22 @@
             const adminLink = document.getElementById('admin-link');
             const logoutLink = document.getElementById('logout-link');
 
-            console.log('Elements found:', {
-                signinLink: !!signinLink,
-                registerLink: !!registerLink,
-                profileLink: !!profileLink,
-                adminLink: !!adminLink,
-                logoutLink: !!logoutLink
-            });
-
             if (!signinLink || !registerLink || !profileLink || !adminLink || !logoutLink) {
-                console.error('Could not find all required elements!');
                 return;
             }
 
             if (isLoggedIn()) {
-                console.log('User is logged in, updating UI...');
                 signinLink.style.display = 'none';
                 registerLink.style.display = 'none';
                 profileLink.style.display = 'block';
                 logoutLink.style.display = 'block';
                 
                 if (isAdmin()) {
-                    console.log('User is admin, showing admin link');
                     adminLink.style.display = 'block';
                 } else {
-                    console.log('User is not admin, hiding admin link');
                     adminLink.style.display = 'none';
                 }
             } else {
-                console.log('User is not logged in, updating UI...');
                 signinLink.style.display = 'block';
                 registerLink.style.display = 'block';
                 profileLink.style.display = 'none';
@@ -285,7 +264,6 @@
 
         // Logout function
         window.logout = function() {
-            console.log('Logging out...');
             localStorage.removeItem('token');
             window.location.href = 'index.html';
         };
@@ -298,19 +276,16 @@
 
         // Listen for storage changes
         window.addEventListener('storage', (e) => {
-            console.log('Storage changed:', e.key);
             updateHeaderUI();
         });
 
         // Listen for our custom headerLoaded event
         window.addEventListener('headerLoaded', () => {
-            console.log('Header loaded event received');
             updateHeaderUI();
         });
 
         // Listen for token changes
         window.addEventListener('tokenChanged', () => {
-            console.log('Token changed event received');
             updateHeaderUI();
         });
 
