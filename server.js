@@ -170,17 +170,20 @@ app.post('/api/register', async (req, res) => {
 // User login
 app.post('/api/login', async (req, res) => {
     const { email, password } = req.body;
-    const user = await User.findOne({ email });
+    const trimmedEmail = email.trim();
+    const trimmedPassword = password.trim();
+    const user = await User.findOne({ email: trimmedEmail });
 
     if (!user) {
-        console.log('User not found:', email); // Log if user is not found
+        console.log('User not found:', trimmedEmail);
         return res.status(401).json({ message: 'Invalid credentials' });
     }
 
     // Compare the plain text password with the hashed password
-    const isMatch = await bcrypt.compare(password, user.password);
+    const isMatch = await bcrypt.compare(trimmedPassword, user.password);
+    console.log('Password match result:', isMatch); // Log the result of the password comparison
     if (!isMatch) {
-        console.log('Password does not match for user:', email); // Log if password does not match
+        console.log('Password does not match for user:', trimmedEmail);
         return res.status(401).json({ message: 'Invalid credentials' });
     }
 
