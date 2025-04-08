@@ -119,6 +119,26 @@
             }
         }
 
+        // Function to fetch all orders (for admin)
+        async function fetchAllOrders() {
+            const token = localStorage.getItem('token'); // Assuming you store the token in local storage
+            try {
+                const response = await fetch('https://elibrary-1rh1.onrender.com/api/orders/all', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                if (!response.ok) {
+                    throw new Error('Failed to fetch orders');
+                }
+                const orders = await response.json();
+                displayOrders(orders);
+            } catch (error) {
+                console.error('Error fetching orders:', error);
+                document.getElementById('orders-list').innerHTML = '<p>Error loading orders.</p>';
+            }
+        }
+
         // Load the header and fetch user's orders on page load
         loadHeader();
         fetchUserOrders();
