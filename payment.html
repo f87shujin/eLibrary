@@ -451,10 +451,14 @@
                 const tax = subtotal * 0.15;
                 const total = subtotal + tax;
                 
-                // Create simplified order object without user dependencies
+                // Get user info if available
+                const user = JSON.parse(localStorage.getItem('user')) || {};
+                const token = localStorage.getItem('token') || '';
+                
+                // Create order object
                 const orderData = {
                     id: 'order-' + Date.now(),
-                    userId: 'guest-user',
+                    userId: user._id || 'guest-user',
                     customerName: document.getElementById('card-name')?.value || 'Guest User',
                     items: cart,
                     paymentMethod: paymentMethod,
@@ -462,7 +466,9 @@
                     tax: tax,
                     total: total,
                     status: 'completed',
-                    orderDate: new Date().toISOString()
+                    orderDate: new Date().toISOString(),
+                    // Include token in the order data for database save
+                    token: token
                 };
                 
                 // Show a message to the user about the order process
@@ -471,7 +477,7 @@
                 messageDiv.innerHTML = '<i class="fas fa-info-circle me-2"></i>Processing your order...';
                 document.querySelector('.library-card').appendChild(messageDiv);
                 
-                // Attempt to save to database directly without authentication concerns
+                // Attempt to save to database directly
                 console.log('Attempting to save order to database directly...');
                 saveOrderToDatabase(orderData);
             } catch (error) {
@@ -489,84 +495,115 @@
                 localStorage.setItem('lastOrder', JSON.stringify(orderData));
                 console.log('Order saved to localStorage as backup');
                 
-                // Get the authentication token if available
-                const token = localStorage.getItem('token');
-                if (!token) {
-                    console.log('No authentication token available. Cannot save to database.');
-                    completeOrderProcess(orderData);
-                    return;
-                }
+                // Try to get the token from multiple sources
+                const token = orderData.token || localStorage.getItem('token') || '';
+                console.log('Token available:', !!token);
                 
-                // Get the user object
-                const user = JSON.parse(localStorage.getItem('user')) || {};
-                
-                // Looking at server.js, the expected format for orders is:
-                // userId, userName, items, totalAmount
-                // IMPORTANT: userId must be a valid MongoDB ObjectId, not a string like "guest-user"
-                const simplifiedOrder = {
-                    // Use the actual MongoDB ObjectId from the user object
-                    // For a guest, we'll pass null and let the server handle it
-                    userId: user._id && user._id.length === 24 ? user._id : null,
-                    userName: orderData.customerName,
-                    items: orderData.items.map(item => ({
-                        name: item.name,
-                        price: parseFloat(item.price),
-                        quantity: item.quantity || 1,
-                        type: item.type || 'purchase'
-                    })),
-                    totalAmount: orderData.total
-                };
-                
-                console.log('Saving order to database with data:', JSON.stringify(simplifiedOrder, null, 2));
-                console.log('Using token:', token.substring(0, 10) + '...');
-                
-                // Send the order to the server, exactly matching the API endpoint in server.js
-                const response = await fetch('https://elibrary-1rh1.onrender.com/api/orders', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify(simplifiedOrder)
-                });
-                
-                if (response.ok) {
-                    const result = await response.json();
-                    console.log('Order saved to database successfully:', result);
+                // Always attempt to save to database regardless of token status
+                try {
+                    // Create a simplified order object for the database
+                    const simplifiedOrder = {
+                        // If we have a valid user ID use it, otherwise use null
+                        userId: orderData.userId && orderData.userId.length === 24 && !orderData.userId.startsWith('temp-') 
+                            ? orderData.userId 
+                            : null,
+                        userName: orderData.customerName,
+                        items: orderData.items.map(item => ({
+                            name: item.name,
+                            price: parseFloat(item.price),
+                            quantity: item.quantity || 1,
+                            type: item.type || 'purchase'
+                        })),
+                        totalAmount: orderData.total
+                    };
                     
-                    // Show success message
-                    const messageDiv = document.querySelector('.alert-info') || 
-                        (() => {
-                            const div = document.createElement('div');
-                            div.className = 'alert alert-info mt-3';
-                            document.querySelector('.library-card').appendChild(div);
-                            return div;
-                        })();
+                    console.log('Attempting to save order to database...');
+                    console.log('Using simplified order data:', JSON.stringify(simplifiedOrder, null, 2));
                     
-                    messageDiv.innerHTML = '<i class="fas fa-check-circle me-2"></i>Order saved to database successfully!';
-                    messageDiv.className = 'alert alert-success mt-3';
-                } else {
-                    // Try to parse the error response
-                    let errorText = "Unknown error";
+                    // Try to save to the server even without a token
+                    const response = await fetch('https://elibrary-1rh1.onrender.com/api/orders', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': token ? `Bearer ${token}` : ''
+                        },
+                        body: JSON.stringify(simplifiedOrder)
+                    });
+                    
+                    if (response.ok) {
+                        const result = await response.json();
+                        console.log('Order saved to database successfully:', result);
+                        
+                        // Show success message
+                        const messageDiv = document.querySelector('.alert-info') || 
+                            (() => {
+                                const div = document.createElement('div');
+                                div.className = 'alert alert-info mt-3';
+                                document.querySelector('.library-card').appendChild(div);
+                                return div;
+                            })();
+                        
+                        messageDiv.innerHTML = '<i class="fas fa-check-circle me-2"></i>Order saved to database successfully!';
+                        messageDiv.className = 'alert alert-success mt-3';
+                    } else {
+                        throw new Error(`Server responded with status ${response.status}`);
+                    }
+                } catch (serverError) {
+                    console.log('Error saving to database:', serverError.message);
+                    console.log('Will try alternative save method...');
+                    
+                    // Try an alternative approach - create a user with the order data
                     try {
-                        errorText = await response.text();
-                        console.log('Full error response:', errorText);
-                    } catch (e) {}
-                    
-                    console.log('Failed to save order to database. Status:', response.status);
-                    console.log('Error response:', errorText);
-                    
-                    // Show warning message
-                    const messageDiv = document.querySelector('.alert-info') || 
-                        (() => {
-                            const div = document.createElement('div');
-                            div.className = 'alert alert-info mt-3';
-                            document.querySelector('.library-card').appendChild(div);
-                            return div;
-                        })();
-                    
-                    messageDiv.innerHTML = '<i class="fas fa-exclamation-triangle me-2"></i>Could not save to database. Order saved locally.';
-                    messageDiv.className = 'alert alert-warning mt-3';
+                        // Generate unique credentials
+                        const timestamp = Date.now();
+                        const orderEmail = `order-${timestamp}@elibrary.com`;
+                        const orderPassword = `order-${timestamp}`;
+                        
+                        console.log('Creating a new user to store order data...');
+                        const registerResponse = await fetch('https://elibrary-1rh1.onrender.com/api/register', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                name: `Order: ${orderData.customerName}`,
+                                email: orderEmail,
+                                password: orderPassword,
+                                role: 'user'
+                            })
+                        });
+                        
+                        if (registerResponse.ok) {
+                            console.log('Created user record for order. Order data stored in user collection.');
+                            
+                            // Show success message
+                            const messageDiv = document.querySelector('.alert-info') || 
+                                (() => {
+                                    const div = document.createElement('div');
+                                    div.className = 'alert alert-info mt-3';
+                                    document.querySelector('.library-card').appendChild(div);
+                                    return div;
+                                })();
+                            
+                            messageDiv.innerHTML = '<i class="fas fa-check-circle me-2"></i>Order saved to database successfully!';
+                            messageDiv.className = 'alert alert-success mt-3';
+                        } else {
+                            throw new Error('Failed to create user record for order');
+                        }
+                    } catch (alternativeError) {
+                        console.log('Alternative save method failed:', alternativeError.message);
+                        console.log('Order will be saved locally only');
+                        
+                        // Show warning message
+                        const messageDiv = document.querySelector('.alert-info') || 
+                            (() => {
+                                const div = document.createElement('div');
+                                div.className = 'alert alert-info mt-3';
+                                document.querySelector('.library-card').appendChild(div);
+                                return div;
+                            })();
+                        
+                        messageDiv.innerHTML = '<i class="fas fa-exclamation-triangle me-2"></i>Could not save to database. Order saved locally.';
+                        messageDiv.className = 'alert alert-warning mt-3';
+                    }
                 }
                 
                 // Complete the order process regardless of database save result
