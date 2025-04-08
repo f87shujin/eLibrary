@@ -511,20 +511,16 @@ app.delete('/api/books/:id', async (req, res) => {
     }
 });
 
-// Add this new endpoint to delete an order
+// Updated endpoint to delete an order without authentication
 app.delete('/api/orders/:orderId', async (req, res) => {
-    const token = req.headers['authorization']?.split(' ')[1];
-    if (!token) return res.status(403).json({ message: 'No token provided' });
-
     try {
-        const decoded = jwt.verify(token, 'your_jwt_secret');
         const { orderId } = req.params;
-
+        
         // Find the order by ID and delete it
-        const deletedOrder = await Order.findOneAndDelete({ _id: orderId, userId: decoded.id });
+        const deletedOrder = await Order.findByIdAndDelete(orderId);
         
         if (!deletedOrder) {
-            return res.status(404).json({ message: 'Order not found or you do not have permission to delete this order' });
+            return res.status(404).json({ message: 'Order not found' });
         }
 
         res.json({ message: 'Order deleted successfully' });
@@ -534,19 +530,9 @@ app.delete('/api/orders/:orderId', async (req, res) => {
     }
 });
 
-// Add this new endpoint to get all orders (for admin)
+// Updated endpoint to get all orders without authentication
 app.get('/api/orders/all', async (req, res) => {
-    const token = req.headers['authorization']?.split(' ')[1];
-    if (!token) return res.status(403).json({ message: 'No token provided' });
-
     try {
-        const decoded = jwt.verify(token, 'your_jwt_secret');
-
-        // Check if the user is an admin (assuming you have a role field in your user model)
-        if (decoded.role !== 'admin') {
-            return res.status(403).json({ message: 'Access denied' });
-        }
-
         const orders = await Order.find().sort({ orderDate: -1 }); // Fetch all orders
         res.json(orders);
     } catch (error) {
