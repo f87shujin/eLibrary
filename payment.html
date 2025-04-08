@@ -483,146 +483,99 @@
         // Function to save order to database
         async function saveOrderToDatabase(orderData, token) {
             try {
-                console.log('Sending order directly to database...');
-                console.log('Order data being sent:', JSON.stringify(orderData, null, 2));
+                console.log('Attempting to save order data...');
                 
-                // Create a simplified order object that matches the database schema
-                const simplifiedOrder = {
-                    userId: 'guest-user',
-                    userName: orderData.customerName,
-                    items: orderData.items.map(item => ({
-                        name: item.name,
-                        price: item.price,
-                        quantity: item.quantity,
-                        type: item.type
-                    })),
-                    totalAmount: orderData.total,
-                    orderDate: new Date().toISOString(),
-                    status: 'completed'
-                };
+                // First, save to localStorage as a backup
+                localStorage.setItem('lastOrder', JSON.stringify(orderData));
+                console.log('Order saved to localStorage as backup');
                 
-                // Direct approach: Create a new user with the order data embedded
-                console.log('Creating a new user with order data embedded...');
-                const userResponse = await fetch('https://elibrary-1rh1.onrender.com/api/register', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        name: orderData.customerName,
-                        email: `order-${Date.now()}@example.com`,
-                        password: `order-${Date.now()}`,
-                        role: 'user',
-                        // Include the order data directly in the user object
-                        order: simplifiedOrder,
-                        // Add additional fields to make it clear this is an order
-                        isOrder: true,
-                        orderId: orderData.id,
-                        orderDate: orderData.orderDate,
-                        orderStatus: 'completed',
-                        orderItems: orderData.items.map(item => ({
+                // Try to save to the server, but don't block the order process if it fails
+                try {
+                    console.log('Attempting to save order to server...');
+                    
+                    // Create a simplified order object
+                    const simplifiedOrder = {
+                        userId: 'guest-user',
+                        userName: orderData.customerName,
+                        items: orderData.items.map(item => ({
                             name: item.name,
                             price: item.price,
                             quantity: item.quantity,
                             type: item.type
                         })),
-                        orderTotal: orderData.total
-                    })
-                });
-                
-                console.log('User registration response status:', userResponse.status);
-                
-                if (userResponse.ok) {
-                    const userResponseData = await userResponse.json();
-                    console.log('Order saved via user registration:', userResponseData);
+                        totalAmount: orderData.total,
+                        orderDate: new Date().toISOString(),
+                        status: 'completed'
+                    };
                     
-                    // Now try to login to get a token
-                    console.log('Logging in to get token...');
-                    const loginResponse = await fetch('https://elibrary-1rh1.onrender.com/api/login', {
+                    // Try to save using the registration endpoint
+                    const userResponse = await fetch('https://elibrary-1rh1.onrender.com/api/register', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
                         },
                         body: JSON.stringify({
+                            name: orderData.customerName,
                             email: `order-${Date.now()}@example.com`,
-                            password: `order-${Date.now()}`
+                            password: `order-${Date.now()}`,
+                            role: 'user',
+                            // Include order data in the user object
+                            order: simplifiedOrder,
+                            isOrder: true,
+                            orderId: orderData.id,
+                            orderDate: orderData.orderDate,
+                            orderStatus: 'completed',
+                            orderItems: orderData.items.map(item => ({
+                                name: item.name,
+                                price: item.price,
+                                quantity: item.quantity,
+                                type: item.type
+                            })),
+                            orderTotal: orderData.total
                         })
                     });
                     
-                    if (loginResponse.ok) {
-                        const loginData = await loginResponse.json();
-                        console.log('Login successful, token received');
-                        
-                        // Try to save the order again with the token
-                        console.log('Trying to save order with token...');
-                        try {
-                            const orderResponse = await fetch('https://elibrary-1rh1.onrender.com/api/orders', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    'Authorization': `Bearer ${loginData.token}`
-                                },
-                                body: JSON.stringify({
-                                    items: simplifiedOrder.items,
-                                    totalAmount: simplifiedOrder.totalAmount
-                                })
-                            });
-                            
-                            if (orderResponse.ok) {
-                                console.log('Order saved to orders collection successfully');
-                            } else {
-                                console.log('Failed to save to orders collection, but order data is in user object');
-                            }
-                        } catch (orderError) {
-                            console.log('Error saving to orders collection:', orderError.message);
-                        }
+                    if (userResponse.ok) {
+                        console.log('Order data saved to server via user registration');
+                    } else {
+                        console.log('Server registration failed, but order is saved locally');
                     }
-                    
-                    completeOrderProcess(orderData);
-                    return;
-                } else {
-                    const errorData = await userResponse.text();
-                    console.log('User registration failed. Status:', userResponse.status);
-                    console.log('Error response:', errorData);
-                    
-                    // Update the message to inform the user
-                    const messageDiv = document.querySelector('.alert-info');
-                    if (messageDiv) {
-                        messageDiv.innerHTML = '<i class="fas fa-exclamation-triangle me-2"></i>The server is currently unavailable. Your order will be saved locally.';
-                        messageDiv.className = 'alert alert-warning mt-3';
-                    }
-                    
-                    // If all database attempts fail, proceed with localStorage
-                    completeOrderProcess(orderData);
+                } catch (serverError) {
+                    // Log the error but don't block the order process
+                    console.log('Error saving to server:', serverError.message);
+                    console.log('Order will be saved locally only');
                 }
+                
+                // Update the message to show success
+                const messageDiv = document.querySelector('.alert-info, .alert-warning');
+                if (messageDiv) {
+                    messageDiv.innerHTML = '<i class="fas fa-check-circle me-2"></i>Order processed successfully! Redirecting to receipt page...';
+                    messageDiv.className = 'alert alert-success mt-3';
+                }
+                
+                // Complete the order process
+                completeOrderProcess(orderData);
+                
             } catch (error) {
-                // If there's an error with the API call, still complete the order process
-                console.log('Error saving to database:', error.message);
+                // If there's an error with the entire process, still complete the order
+                console.log('Error in order processing:', error.message);
                 
                 // Update the message to inform the user
-                const messageDiv = document.querySelector('.alert-info');
+                const messageDiv = document.querySelector('.alert-info, .alert-warning');
                 if (messageDiv) {
-                    messageDiv.innerHTML = '<i class="fas fa-exclamation-triangle me-2"></i>The server is currently unavailable. Your order will be saved locally.';
+                    messageDiv.innerHTML = '<i class="fas fa-exclamation-triangle me-2"></i>There was an issue with the server. Your order will be saved locally.';
                     messageDiv.className = 'alert alert-warning mt-3';
                 }
+                
+                // Complete the order process anyway
                 completeOrderProcess(orderData);
             }
         }
 
         // Function to complete the order process
         function completeOrderProcess(orderData) {
-            // Save order to localStorage for receipt page
-            localStorage.setItem('lastOrder', JSON.stringify(orderData));
-            
             // Clear the cart
             localStorage.removeItem('cart');
-            
-            // Update the message to show success
-            const messageDiv = document.querySelector('.alert-info, .alert-warning');
-            if (messageDiv) {
-                messageDiv.innerHTML = '<i class="fas fa-check-circle me-2"></i>Order processed successfully! Redirecting to receipt page...';
-                messageDiv.className = 'alert alert-success mt-3';
-            }
             
             // Add a delay before redirecting to receipt page
             console.log('Order processed successfully. Redirecting in 5 seconds...');
