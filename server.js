@@ -394,8 +394,14 @@ app.put('/api/orders/:orderId/cancel', authenticateToken, async (req, res) => {
         
         const { orderId } = req.params;
         
-        // Find the order
-        const order = await Order.findById(orderId);
+        // Find the order by _id or orderId
+        let order = await Order.findById(orderId);
+        
+        // If not found by _id, try to find by orderId
+        if (!order) {
+            order = await Order.findOne({ orderId: orderId });
+        }
+        
         if (!order) {
             return res.status(404).json({ message: 'Order not found' });
         }
@@ -408,7 +414,7 @@ app.put('/api/orders/:orderId/cancel', authenticateToken, async (req, res) => {
             message: 'Order cancelled successfully',
             order: {
                 id: order._id,
-                orderId: order.orderId,
+                orderId: order.orderId || order._id,
                 status: order.status
             }
         });
