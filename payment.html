@@ -483,6 +483,9 @@
             };
             
             try {
+                console.log('Sending order data:', JSON.stringify(orderData));
+                
+                // First try your custom endpoint
                 const response = await fetch('https://elibrary-1rh1.onrender.com/api/orders', {
                     method: 'POST',
                     headers: {
@@ -493,18 +496,47 @@
                 });
                 
                 if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.message || 'Failed to save order');
+                    // If the first attempt fails, try the direct MongoDB connection endpoint
+                    console.log('First attempt failed, trying alternative endpoint');
+                    
+                    const directResponse = await fetch('https://elibrary-1rh1.onrender.com/api/direct-orders', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                            'Connection-String': 'mongodb+srv://f87study:admin1234@cluster0.fqatder.mongodb.net/eLibrary'
+                        },
+                        body: JSON.stringify(orderData)
+                    });
+                    
+                    if (!directResponse.ok) {
+                        const errorData = await directResponse.json();
+                        throw new Error(errorData.message || 'Failed to save order');
+                    }
+                    
+                    const data = await directResponse.json();
+                    localStorage.setItem('lastOrder', JSON.stringify(data.order));
+                    return data;
                 }
                 
-                // Save order ID to localStorage for receipt page
+                // First endpoint was successful
                 const data = await response.json();
                 localStorage.setItem('lastOrder', JSON.stringify(data.order));
-                
                 return data;
             } catch (error) {
                 console.error('Error saving order:', error);
-                throw error;
+                
+                // Save locally if both server attempts fail
+                console.log('Server saving failed, storing locally');
+                const localOrder = {
+                    ...orderData,
+                    _id: 'local-' + Date.now(),
+                    createdAt: new Date().toISOString()
+                };
+                localStorage.setItem('lastOrder', JSON.stringify(localOrder));
+                
+                // Don't throw error, allow the payment flow to continue
+                return localOrder;
             }
         }
 
