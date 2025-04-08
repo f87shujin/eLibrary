@@ -432,11 +432,81 @@
         // Form submission
         cardForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            // Simulate payment processing
-            alert('Payment processing...');
-            // Redirect to success page or handle response
-            window.location.href = 'receipt.html';
+            // Save order to database
+            saveOrderToDatabase('card')
+                .then(() => {
+                    // Clear cart and redirect
+                    localStorage.removeItem('cart');
+                    window.location.href = 'receipt.html';
+                })
+                .catch(error => {
+                    console.error('Error saving order:', error);
+                    alert('There was an error processing your payment. Please try again.');
+                });
         });
+
+        // PayPal button click handler
+        document.querySelector('.paypal-button').addEventListener('click', function(e) {
+            e.preventDefault();
+            // Save order to database
+            saveOrderToDatabase('paypal')
+                .then(() => {
+                    // Clear cart and redirect
+                    localStorage.removeItem('cart');
+                    window.location.href = 'receipt.html';
+                })
+                .catch(error => {
+                    console.error('Error saving order:', error);
+                    alert('There was an error processing your payment. Please try again.');
+                });
+        });
+
+        // Function to save order data to MongoDB
+        async function saveOrderToDatabase(paymentMethod) {
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const subtotal = cart.reduce((sum, item) => sum + item.price, 0);
+            const tax = subtotal * 0.15;
+            const total = subtotal + tax;
+            
+            // Get user information from localStorage if available
+            const user = JSON.parse(localStorage.getItem('user')) || {};
+            
+            const orderData = {
+                userId: user._id || 'guest',
+                items: cart,
+                paymentMethod: paymentMethod,
+                subtotal: subtotal,
+                tax: tax,
+                total: total,
+                status: 'completed',
+                orderDate: new Date().toISOString()
+            };
+            
+            try {
+                const response = await fetch('https://elibrary-1rh1.onrender.com/api/orders', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify(orderData)
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Failed to save order');
+                }
+                
+                // Save order ID to localStorage for receipt page
+                const data = await response.json();
+                localStorage.setItem('lastOrder', JSON.stringify(data.order));
+                
+                return data;
+            } catch (error) {
+                console.error('Error saving order:', error);
+                throw error;
+            }
+        }
 
         // Load cart items when page loads
         document.addEventListener('DOMContentLoaded', () => {
