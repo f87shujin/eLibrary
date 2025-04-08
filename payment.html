@@ -497,11 +497,16 @@
                     return;
                 }
                 
+                // Get the user object
+                const user = JSON.parse(localStorage.getItem('user')) || {};
+                
                 // Looking at server.js, the expected format for orders is:
                 // userId, userName, items, totalAmount
+                // IMPORTANT: userId must be a valid MongoDB ObjectId, not a string like "guest-user"
                 const simplifiedOrder = {
-                    // Use the userId from the local user object
-                    userId: JSON.parse(localStorage.getItem('user'))?._id || 'guest-user',
+                    // Use the actual MongoDB ObjectId from the user object
+                    // For a guest, we'll pass null and let the server handle it
+                    userId: user._id && user._id.length === 24 ? user._id : null,
                     userName: orderData.customerName,
                     items: orderData.items.map(item => ({
                         name: item.name,
@@ -541,7 +546,13 @@
                     messageDiv.innerHTML = '<i class="fas fa-check-circle me-2"></i>Order saved to database successfully!';
                     messageDiv.className = 'alert alert-success mt-3';
                 } else {
-                    const errorText = await response.text();
+                    // Try to parse the error response
+                    let errorText = "Unknown error";
+                    try {
+                        errorText = await response.text();
+                        console.log('Full error response:', errorText);
+                    } catch (e) {}
+                    
                     console.log('Failed to save order to database. Status:', response.status);
                     console.log('Error response:', errorText);
                     
