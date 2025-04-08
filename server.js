@@ -37,7 +37,7 @@ const Book = mongoose.model('Book', {
 // Serve static files
 app.use(express.static('public'));
 // Add this API endpoint to add a new book
-app.post('/api/books', async (req, res) => {
+app.post('/api/addbooks', async (req, res) => {
     const { name, price, description, image } = req.body;
 
     // Validate the input
