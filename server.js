@@ -11,12 +11,37 @@ const PORT = process.env.PORT || 10000;
 
 // Middleware
 app.use(cors({
-    origin: ['http://localhost:8000', 'http://127.0.0.1:8000'], // Allow your Python server
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    origin: ['http://localhost:8000', 'http://127.0.0.1:8000', 'https://f87shujin.github.io'], // Added GitHub Pages
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Added OPTIONS for preflight requests
     allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
     credentials: true
 }));
 app.use(express.json()); // Parse JSON bodies
+
+// Add a new endpoint for direct order creation without authentication
+app.post('/api/public/orders', async (req, res) => {
+    try {
+        const { items, totalAmount, customerName } = req.body;
+        
+        // Create a simplified order without requiring authentication
+        const order = new Order({
+            userId: 'guest-user',
+            userName: customerName || 'Guest User',
+            items: items,
+            totalAmount: totalAmount,
+            status: 'completed'
+        });
+
+        await order.save();
+        res.status(201).json({ 
+            message: 'Order created successfully', 
+            orderId: order._id 
+        });
+    } catch (error) {
+        console.error('Error creating public order:', error);
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+});
 
 // Connect to MongoDB
 mongoose.connect('mongodb+srv://f87study:admin1234@cluster0.fqatder.mongodb.net/eLibrary')
