@@ -174,4 +174,6 @@ async function startServer() {
   });
 }
 
+app.options('/api/chat', cors()); // Enable preflight for /api/chat
+
 startServer(); 

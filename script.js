@@ -57,81 +57,21 @@ async function checkAPIAvailability() {
 }
 
 async function sendMessage() {
-    const userInput = document.getElementById('user-input');
-    const message = userInput.value.trim();
+    const userInput = document.getElementById('user-input').value;
+    const response = await fetch('http://198.16.179.173:11434/api/chat', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ prompt: userInput }),
+    });
 
-    if (!message) return;
-
-    appendMessage('user', message);
-    userInput.value = '';
-
-    const loadingDiv = showLoading();
-
-    try {
-        const apiUrl = API_BASE_URL.replace('https://', 'http://');
-        const response = await fetch(`${apiUrl}/api/chat`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            mode: 'cors',
-            body: JSON.stringify({
-                model: "toshokan",
-                messages: [
-                    { 
-                        role: "user", 
-                        content: message 
-                    }
-                ],
-                stream: true
-            }),
-        });
-
-        if (!response.ok) {
-            throw new Error(`API Error: ${response.status}`);
-        }
-
-        // Handle streaming response
-        const reader = response.body.getReader();
-        let aiResponse = '';
-        let hasReceivedResponse = false;
-
-        while (true) {
-            const { done, value } = await reader.read();
-            
-            if (done) {
-                console.log('Stream complete');
-                break;
-            }
-
-            const chunk = new TextDecoder().decode(value);
-            const lines = chunk.split('\n').filter(line => line.trim());
-            
-            for (const line of lines) {
-                try {
-                    const jsonResponse = JSON.parse(line);
-                    if (jsonResponse.message?.content) {
-                        hasReceivedResponse = true;
-                        aiResponse += jsonResponse.message.content;
-                        updateLastAIMessage(aiResponse);
-                    }
-                } catch (e) {
-                    console.error('Error parsing chunk:', e, 'Raw chunk:', line);
-                }
-            }
-        }
-
-        loadingDiv.remove();
-
-        if (!hasReceivedResponse) {
-            throw new Error('No response content received from AI');
-        }
-
-    } catch (error) {
-        loadingDiv.remove();
-        console.error('API Error:', error);
-        showError(`Failed to connect to the API. Error: ${error.message}\nAPI URL: ${API_BASE_URL}`);
+    if (!response.ok) {
+        throw new Error('Network response was not ok');
     }
+
+    const data = await response.json();
+    // Handle the response data
 }
 
 function appendMessage(type, content) {
