@@ -179,10 +179,8 @@ app.post('/api/login', async (req, res) => {
         return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    // Compare the plain text password with the hashed password
-    const isMatch = await bcrypt.compare(trimmedPassword, user.password);
-    console.log('Password match result:', isMatch); // Log the result of the password comparison
-    if (!isMatch) {
+    // Temporarily compare the plain text password directly
+    if (trimmedPassword !== user.password) {
         console.log('Password does not match for user:', trimmedEmail);
         return res.status(401).json({ message: 'Invalid credentials' });
     }
