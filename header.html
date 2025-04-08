@@ -1,305 +1,333 @@
 <!-- header.html -->
 <style>
-    /* Library Theme Styles */
-    :root {
-        --library-primary: #2C3639;
-        --library-secondary: #3F4E4F;
-        --library-accent: #A27B5C;
-        --library-text: #DCD7C9;
-    }
+  /* Library Theme Styles */
+  :root {
+    --library-primary: #2c3639;
+    --library-secondary: #3f4e4f;
+    --library-accent: #a27b5c;
+    --library-text: #dcd7c9;
+  }
 
-    body {
-        font-family: 'Libre Baskerville', serif;
-        background-image: url('woodbg.jpg') !important; /* Force the background image */
-        background-size: cover;
-        background-attachment: fixed;
-        background-position: center;
-        color: var(--library-text);
-        min-height: 100vh;
-    }
+  body {
+    font-family: "Libre Baskerville", serif;
+    background-image: url("woodbg.jpg") !important; /* Force the background image */
+    background-size: cover;
+    background-attachment: fixed;
+    background-position: center;
+    color: var(--library-text);
+    min-height: 100vh;
+  }
 
-    .navbar {
-        background-color: var(--library-secondary) !important;
-        border-bottom: 3px solid var(--library-accent);
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    }
+  .navbar {
+    background-color: var(--library-secondary) !important;
+    border-bottom: 3px solid var(--library-accent);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
 
-    .navbar-brand {
-        font-family: 'Playfair Display', serif;
-        font-size: 1.8rem;
-        color: var(--library-accent) !important;
-        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-    }
+  .navbar-brand {
+    font-family: "Playfair Display", serif;
+    font-size: 1.8rem;
+    color: var(--library-accent) !important;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  }
 
-    .nav-link {
-        color: var(--library-text) !important;
-        font-size: 1.1rem;
-        transition: all 0.3s ease;
-        margin: 0 10px;
-        position: relative;
-    }
+  .nav-link {
+    color: var(--library-text) !important;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+    margin: 0 10px;
+    position: relative;
+  }
 
-    .nav-link:hover {
-        color: var(--library-accent) !important;
-        transform: translateY(-2px);
-    }
+  .nav-link:hover {
+    color: var(--library-accent) !important;
+    transform: translateY(-2px);
+  }
 
-    .nav-link::after {
-        content: '';
-        position: absolute;
-        width: 0;
-        height: 2px;
-        bottom: 0;
-        left: 0;
-        background-color: var(--library-accent);
-        transition: width 0.3s ease;
-    }
+  .nav-link::after {
+    content: "";
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: 0;
+    left: 0;
+    background-color: var(--library-accent);
+    transition: width 0.3s ease;
+  }
 
-    .nav-link:hover::after {
-        width: 100%;
-    }
+  .nav-link:hover::after {
+    width: 100%;
+  }
 
-    .cart-icon {
-        position: relative;
-    }
+  .cart-icon {
+    position: relative;
+  }
 
-    .cart-icon i {
-        font-size: 1.2rem;
-    }
+  .cart-icon i {
+    font-size: 1.2rem;
+  }
 
-    .cart-count {
-        position: absolute;
-        top: -8px;
-        right: -8px;
-        background-color: var(--library-accent);
-        color: var(--library-text);
-        border-radius: 50%;
-        padding: 2px 6px;
-        font-size: 0.8rem;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    }
+  .cart-count {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background-color: var(--library-accent);
+    color: var(--library-text);
+    border-radius: 50%;
+    padding: 2px 6px;
+    font-size: 0.8rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
 
-    /* Content Container Styles */
-    .content-container {
-        background-color: rgba(44, 54, 57, 0.95);
-        border-radius: 10px;
-        padding: 20px;
-        margin: 20px auto;
-        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
-        border: 1px solid var(--library-accent);
-    }
+  /* Content Container Styles */
+  .content-container {
+    background-color: rgba(44, 54, 57, 0.95);
+    border-radius: 10px;
+    padding: 20px;
+    margin: 20px auto;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--library-accent);
+  }
 
-    /* Book Card Styles */
-    .book-card {
-        background: var(--library-secondary);
-        border-radius: 8px;
-        padding: 15px;
-        margin: 15px 0;
-        transition: transform 0.3s ease;
-        border: 1px solid var(--library-accent);
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    }
+  /* Book Card Styles */
+  .book-card {
+    background: var(--library-secondary);
+    border-radius: 8px;
+    padding: 15px;
+    margin: 15px 0;
+    transition: transform 0.3s ease;
+    border: 1px solid var(--library-accent);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
 
-    .book-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
-    }
+  .book-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+  }
 
-    /* Button Styles */
-    .btn-library {
-        background-color: var(--library-accent);
-        color: var(--library-text);
-        border: none;
-        padding: 8px 16px;
-        border-radius: 4px;
-        transition: all 0.3s ease;
-    }
+  /* Button Styles */
+  .btn-library {
+    background-color: var(--library-accent);
+    color: var(--library-text);
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+  }
 
-    .btn-library:hover {
-        background-color: #8B6B4D;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    }
+  .btn-library:hover {
+    background-color: #8b6b4d;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
 
-    /* Decorative Elements */
-    .page-title {
-        font-family: 'Playfair Display', serif;
-        color: var(--library-accent);
-        text-align: center;
-        margin: 30px 0;
-        font-size: 2.5rem;
-        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-    }
+  /* Decorative Elements */
+  .page-title {
+    font-family: "Playfair Display", serif;
+    color: var(--library-accent);
+    text-align: center;
+    margin: 30px 0;
+    font-size: 2.5rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  }
 
-    .decorative-line {
-        height: 3px;
-        background: linear-gradient(to right, transparent, var(--library-accent), transparent);
-        margin: 20px 0;
-    }
+  .decorative-line {
+    height: 3px;
+    background: linear-gradient(
+      to right,
+      transparent,
+      var(--library-accent),
+      transparent
+    );
+    margin: 20px 0;
+  }
 </style>
 
 <!-- Add Google Fonts -->
-<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+<link
+  href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Playfair+Display:wght@400;700&display=swap"
+  rel="stylesheet"
+/>
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<link
+  href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+  rel="stylesheet"
+/>
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+/>
 <header>
-    <nav class="navbar navbar-expand-lg">
-        <div class="container">
-            <a class="navbar-brand" href="https://f87shujin.github.io/eLibrary/">
-                <i class="fas fa-book-open me-2"></i>eLibrary
+  <nav class="navbar navbar-expand-lg">
+    <div class="container">
+      <a class="navbar-brand" href="https://f87shujin.github.io/eLibrary/">
+        <i class="fas fa-book-open me-2"></i>eLibrary
+      </a>
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#navbarNav"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav me-auto">
+          <li class="nav-item">
+            <a
+              class="nav-link"
+              href="https://f87shujin.github.io/eLibrary/chat"
+            >
+              <i class="fas fa-comments me-1"></i>Chatbot
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="https://f87shujin.github.io/eLibrary/chat">
-                            <i class="fas fa-comments me-1"></i>Chatbot
-                        </a>
-                    </li>
-                </ul>
-                <ul class="navbar-nav">
-                    <!-- Show when user is NOT logged in -->
-                    <li class="nav-item" id="signin-link">
-                        <a class="nav-link" href="login.html">
-                            <i class="fas fa-sign-in-alt me-1"></i>Sign In
-                        </a>
-                    </li>
-                    <li class="nav-item" id="register-link">
-                        <a class="nav-link" href="register.html">
-                            <i class="fas fa-user-plus me-1"></i>Register
-                        </a>
-                    </li>
-                    
-                    <!-- Show only when user is logged in -->
-                    <li class="nav-item" id="profile-link" style="display: none;">
-                        <a class="nav-link" href="profile.html">
-                            <i class="fas fa-user me-1"></i>Profile
-                        </a>
-                    </li>
-                    
-                    <!-- Show only when user is admin -->
-                    <li class="nav-item" id="admin-link" style="display: none;">
-                        <a class="nav-link" href="admin.html">
-                            <i class="fas fa-user-shield me-1"></i>Admin
-                        </a>
-                    </li>
+          </li>
+        </ul>
+        <ul class="navbar-nav">
+          <!-- Show when user is NOT logged in -->
+          <li class="nav-item" id="signin-link">
+            <a class="nav-link" href="login.html">
+              <i class="fas fa-sign-in-alt me-1"></i>Sign In
+            </a>
+          </li>
+          <li class="nav-item" id="register-link">
+            <a class="nav-link" href="register.html">
+              <i class="fas fa-user-plus me-1"></i>Register
+            </a>
+          </li>
 
-                    <!-- Show only when user is logged in -->
-                    <li class="nav-item" id="logout-link" style="display: none;">
-                        <a class="nav-link" href="#" onclick="logout()">
-                            <i class="fas fa-sign-out-alt me-1"></i>Logout
-                        </a>
-                    </li>
+          <!-- Show only when user is logged in -->
+          <li class="nav-item" id="profile-link" style="display: none">
+            <a class="nav-link" href="profile.html">
+              <i class="fas fa-user me-1"></i>Profile
+            </a>
+          </li>
 
-                    <li class="nav-item cart-icon">
-                        <a class="nav-link" href="payment.html">
-                            <i class="fas fa-shopping-cart"></i>
-                            <span class="cart-count">0</span>
-                        </a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
+          <!-- Show only when user is admin -->
+          <li class="nav-item" id="admin-link" style="display: none">
+            <a class="nav-link" href="admin.html">
+              <i class="fas fa-user-shield me-1"></i>Admin
+            </a>
+          </li>
+
+          <!-- Show only when user is logged in -->
+          <li class="nav-item" id="logout-link" style="display: none">
+            <a class="nav-link" href="#" onclick="logout()">
+              <i class="fas fa-sign-out-alt me-1"></i>Logout
+            </a>
+          </li>
+
+          <li class="nav-item cart-icon">
+            <a class="nav-link" href="payment.html">
+              <i class="fas fa-shopping-cart"></i>
+              <span class="cart-count">0</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
 </header>
 
 <script>
-    // Make sure the script runs immediately
-    (function initializeHeaderScript() {
-        // Simple function to check if user is logged in
-        function isLoggedIn() {
-            const token = localStorage.getItem('token');
-            return !!token;
-        }
+  // Make sure the script runs immediately
+  (function initializeHeaderScript() {
+    // Simple function to check if user is logged in
+    function isLoggedIn() {
+      const token = localStorage.getItem("token");
+      return !!token;
+    }
 
-        // Simple function to check if user is admin
-        function isAdmin() {
-            const token = localStorage.getItem('token');
-            if (!token) {
-                return false;
-            }
-            try {
-                const tokenPayload = JSON.parse(atob(token.split('.')[1]));
-                return tokenPayload.role === 'admin';
-            } catch (error) {
-                return false;
-            }
-        }
+    // Simple function to check if user is admin
+    function isAdmin() {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        return false;
+      }
+      try {
+        const tokenPayload = JSON.parse(atob(token.split(".")[1]));
+        return tokenPayload.role === "admin";
+      } catch (error) {
+        return false;
+      }
+    }
 
-        // Function to update header UI
-        function updateHeaderUI() {
-            // Find elements in the current document
-            const signinLink = document.getElementById('signin-link');
-            const registerLink = document.getElementById('register-link');
-            const profileLink = document.getElementById('profile-link');
-            const adminLink = document.getElementById('admin-link');
-            const logoutLink = document.getElementById('logout-link');
+    // Function to update header UI
+    function updateHeaderUI() {
+      // Find elements in the current document
+      const signinLink = document.getElementById("signin-link");
+      const registerLink = document.getElementById("register-link");
+      const profileLink = document.getElementById("profile-link");
+      const adminLink = document.getElementById("admin-link");
+      const logoutLink = document.getElementById("logout-link");
 
-            if (!signinLink || !registerLink || !profileLink || !adminLink || !logoutLink) {
-                return;
-            }
+      if (
+        !signinLink ||
+        !registerLink ||
+        !profileLink ||
+        !adminLink ||
+        !logoutLink
+      ) {
+        return;
+      }
 
-            if (isLoggedIn()) {
-                signinLink.style.display = 'none';
-                registerLink.style.display = 'none';
-                profileLink.style.display = 'block';
-                logoutLink.style.display = 'block';
-                
-                if (isAdmin()) {
-                    adminLink.style.display = 'block';
-                } else {
-                    adminLink.style.display = 'none';
-                }
-            } else {
-                signinLink.style.display = 'block';
-                registerLink.style.display = 'block';
-                profileLink.style.display = 'none';
-                adminLink.style.display = 'none';
-                logoutLink.style.display = 'none';
-            }
-        }
+      if (isLoggedIn()) {
+        signinLink.style.display = "none";
+        registerLink.style.display = "none";
+        profileLink.style.display = "block";
+        logoutLink.style.display = "block";
 
-        // Logout function
-        window.logout = function() {
-            localStorage.removeItem('token');
-            window.location.href = 'index.html';
-        };
-
-        // Update header UI immediately
-        updateHeaderUI();
-
-        // Set up periodic checks
-        setInterval(updateHeaderUI, 1000);
-
-        // Listen for storage changes
-        window.addEventListener('storage', (e) => {
-            updateHeaderUI();
-        });
-
-        // Listen for our custom headerLoaded event
-        window.addEventListener('headerLoaded', () => {
-            updateHeaderUI();
-        });
-
-        // Listen for token changes
-        window.addEventListener('tokenChanged', () => {
-            updateHeaderUI();
-        });
-
-        // Listen for DOMContentLoaded to ensure elements are available
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', updateHeaderUI);
+        if (isAdmin()) {
+          adminLink.style.display = "block";
         } else {
-            updateHeaderUI();
+          adminLink.style.display = "none";
         }
-    })();
+      } else {
+        signinLink.style.display = "block";
+        registerLink.style.display = "block";
+        profileLink.style.display = "none";
+        adminLink.style.display = "none";
+        logoutLink.style.display = "none";
+      }
+    }
+
+    // Logout function
+    window.logout = function () {
+      localStorage.removeItem("token");
+      window.location.href = "index.html";
+    };
+
+    // Update header UI immediately
+    updateHeaderUI();
+
+    // Set up periodic checks
+    setInterval(updateHeaderUI, 1000);
+
+    // Listen for storage changes
+    window.addEventListener("storage", (e) => {
+      updateHeaderUI();
+    });
+
+    // Listen for our custom headerLoaded event
+    window.addEventListener("headerLoaded", () => {
+      updateHeaderUI();
+    });
+
+    // Listen for token changes
+    window.addEventListener("tokenChanged", () => {
+      updateHeaderUI();
+    });
+
+    // Listen for DOMContentLoaded to ensure elements are available
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", updateHeaderUI);
+    } else {
+      updateHeaderUI();
+    }
+  })();
 </script>
 
 <div class="content-container">
-    <h1 class="page-title">Welcome to eLibrary</h1>
-    <div class="decorative-line"></div>
-    <!-- Your existing content here -->
+  <h1 class="page-title">Welcome to eLibrary</h1>
+  <div class="decorative-line"></div>
+  <!-- Your existing content here -->
 </div>
