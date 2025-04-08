@@ -468,17 +468,55 @@
                     orderDate: new Date().toISOString()
                 };
                 
-                // Save order to localStorage for receipt page
-                localStorage.setItem('lastOrder', JSON.stringify(orderData));
-                
-                // Clear the cart
-                localStorage.removeItem('cart');
-                
-                // Redirect to receipt page
-                window.location.href = 'receipt.html';
+                // Try to save to database if user is logged in
+                if (user._id && user.token) {
+                    saveOrderToDatabase(orderData, user.token);
+                } else {
+                    // If not logged in, just save to localStorage and proceed
+                    completeOrderProcess(orderData);
+                }
             } catch (error) {
                 alert('There was an error processing your order. Please try again.');
             }
+        }
+
+        // Function to save order to database
+        async function saveOrderToDatabase(orderData, token) {
+            try {
+                const response = await fetch('https://elibrary-1rh1.onrender.com/api/orders', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(orderData)
+                });
+
+                if (response.ok) {
+                    // Successfully saved to database
+                    completeOrderProcess(orderData);
+                } else {
+                    // If database save fails, still complete the order process
+                    console.log('Could not save to database, proceeding with local storage only');
+                    completeOrderProcess(orderData);
+                }
+            } catch (error) {
+                // If there's an error with the API call, still complete the order process
+                console.log('Error saving to database, proceeding with local storage only');
+                completeOrderProcess(orderData);
+            }
+        }
+
+        // Function to complete the order process
+        function completeOrderProcess(orderData) {
+            // Save order to localStorage for receipt page
+            localStorage.setItem('lastOrder', JSON.stringify(orderData));
+            
+            // Clear the cart
+            localStorage.removeItem('cart');
+            
+            // Redirect to receipt page
+            window.location.href = 'receipt.html';
         }
 
         // Load cart items when page loads
