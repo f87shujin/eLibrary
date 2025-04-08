@@ -249,9 +249,9 @@
             // Filter orders based on search term and status
             const filteredOrders = orders.filter(order => {
                 const matchesSearch = 
-                    order.orderId.toLowerCase().includes(searchTerm) ||
-                    (order.customerName && order.customerName.toLowerCase().includes(searchTerm)) ||
-                    (order.userId && order.userId.toLowerCase().includes(searchTerm));
+                    (order.orderId ? order.orderId.toLowerCase() : '').includes(searchTerm) ||
+                    (order.customerName ? order.customerName.toLowerCase() : '').includes(searchTerm) ||
+                    (order.userId ? order.userId.toLowerCase() : '').includes(searchTerm);
                 
                 const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
                 
@@ -266,8 +266,9 @@
             let ordersHTML = '';
             
             filteredOrders.forEach(order => {
-                const orderDate = new Date(order.orderDate).toLocaleString();
-                const statusClass = getStatusClass(order.status);
+                const orderDate = order.orderDate ? new Date(order.orderDate).toLocaleString() : 'Date not available';
+                const statusClass = getStatusClass(order.status || 'pending');
+                const orderId = order.orderId || order._id || 'Unknown';
                 
                 let itemsHTML = '';
                 if (order.items && order.items.length > 0) {
@@ -275,7 +276,7 @@
                         itemsHTML += `
                             <div class="order-item">
                                 <span>${item.title || 'Unknown Item'}</span>
-                                <span>$${item.price.toFixed(2)}</span>
+                                <span>$${(item.price || 0).toFixed(2)}</span>
                             </div>
                         `;
                     });
@@ -289,10 +290,10 @@
                     <div class="order-card">
                         <div class="order-header">
                             <div>
-                                <span class="order-id">Order #${order.orderId}</span>
+                                <span class="order-id">Order #${orderId}</span>
                                 <span class="order-date">${orderDate}</span>
                             </div>
-                            <span class="order-status ${statusClass}">${order.status.toUpperCase()}</span>
+                            <span class="order-status ${statusClass}">${(order.status || 'pending').toUpperCase()}</span>
                         </div>
                         <div class="order-details">
                             <p><strong>Customer:</strong> ${order.customerName || 'Guest'}</p>
@@ -303,12 +304,12 @@
                             ${itemsHTML}
                         </div>
                         <div class="order-total">
-                            Total: $${order.total.toFixed(2)}
+                            Total: $${(order.total || 0).toFixed(2)}
                         </div>
                         <div class="mt-3 text-end">
                             <button 
                                 class="cancel-btn" 
-                                onclick="cancelOrder('${order.orderId}')"
+                                onclick="cancelOrder('${orderId}')"
                                 ${!canCancel ? 'disabled' : ''}
                             >
                                 ${canCancel ? 'Cancel Order' : 'Already Cancelled'}
@@ -345,13 +346,26 @@
             const token = localStorage.getItem('token');
             
             try {
-                const response = await fetch(`https://elibrary-1rh1.onrender.com/api/orders/${orderId}/cancel`, {
+                // First try with the orderId as is
+                let response = await fetch(`https://elibrary-1rh1.onrender.com/api/orders/${orderId}/cancel`, {
                     method: 'PUT',
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
                     }
                 });
+                
+                // If that fails with 404, try with the _id format
+                if (response.status === 404) {
+                    console.log('Order not found with orderId, trying with _id format...');
+                    response = await fetch(`https://elibrary-1rh1.onrender.com/api/orders/${orderId}/cancel`, {
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                }
                 
                 if (!response.ok) {
                     throw new Error(`HTTP error! Status: ${response.status}`);

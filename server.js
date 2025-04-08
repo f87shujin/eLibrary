@@ -262,31 +262,16 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
-// Middleware to authenticate JWT token
-const authenticateToken = (req, res, next) => {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
-    
-    if (!token) {
-        return res.status(401).json({ message: 'Access denied. No token provided.' });
-    }
-    
-    try {
-        const decoded = jwt.verify(token, 'your_jwt_secret');
-        req.user = decoded;
-        next();
-    } catch (error) {
-        console.error('Token verification error:', error);
-        return res.status(403).json({ message: 'Invalid token.' });
-    }
-};
-
 // Middleware to check if user is admin
 const isAdmin = (req, res, next) => {
-    if (!req.user || req.user.role !== 'admin') {
-        return res.status(403).json({ message: 'Access denied. Admin privileges required.' });
-    }
-    next();
+    const token = req.headers['authorization']?.split(' ')[1];
+    if (!token) return res.status(403).json({ message: 'No token provided' });
+    jwt.verify(token, 'your_jwt_secret', (err, decoded) => {
+        if (err) return res.status(500).json({ message: 'Failed to authenticate token' });
+        if (decoded.role !== 'admin') return res.status(403).json({ message: 'Access denied' });
+        req.userId = decoded.id;
+        next();
+    });
 };
 
 // Admin route
@@ -368,15 +353,14 @@ app.post('/api/orders', async (req, res) => {
     }
 });
 
-// Get all orders (admin only)
-app.get('/api/orders', authenticateToken, async (req, res) => {
+// Add endpoint to get user's orders
+app.get('/api/orders', async (req, res) => {
+    const token = req.headers['authorization']?.split(' ')[1];
+    if (!token) return res.status(403).json({ message: 'No token provided' });
+
     try {
-        // Check if user is admin
-        if (req.user.role !== 'admin') {
-            return res.status(403).json({ message: 'Access denied. Admin privileges required.' });
-        }
-        
-        const orders = await Order.find().sort({ orderDate: -1 });
+        const decoded = jwt.verify(token, 'your_jwt_secret');
+        const orders = await Order.find({ userId: decoded.id }).sort({ orderDate: -1 });
         res.json(orders);
     } catch (error) {
         console.error('Error fetching orders:', error);
@@ -394,8 +378,14 @@ app.put('/api/orders/:orderId/cancel', authenticateToken, async (req, res) => {
         
         const { orderId } = req.params;
         
-        // Find the order
-        const order = await Order.findById(orderId);
+        // Find the order by _id or orderId
+        let order = await Order.findById(orderId);
+        
+        // If not found by _id, try to find by orderId
+        if (!order) {
+            order = await Order.findOne({ orderId: orderId });
+        }
+        
         if (!order) {
             return res.status(404).json({ message: 'Order not found' });
         }
@@ -408,7 +398,7 @@ app.put('/api/orders/:orderId/cancel', authenticateToken, async (req, res) => {
             message: 'Order cancelled successfully',
             order: {
                 id: order._id,
-                orderId: order.orderId,
+                orderId: order.orderId || order._id,
                 status: order.status
             }
         });
