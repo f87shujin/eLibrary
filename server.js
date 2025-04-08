@@ -31,6 +31,11 @@ const Book = mongoose.model('Book', {
     image: String
 });
 
+
+
+
+// Serve static files
+app.use(express.static('public'));
 // Add this API endpoint to add a new book
 app.post('/api/books', async (req, res) => {
     const { name, price, description, image } = req.body;
@@ -55,10 +60,6 @@ app.post('/api/books', async (req, res) => {
         res.status(500).json({ message: 'Internal Server Error' });
     }
 });
-
-
-// Serve static files
-app.use(express.static('public'));
 
 // API endpoint to get books with optional search query
 app.get('/api/books', async (req, res) => {
