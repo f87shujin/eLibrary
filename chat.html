@@ -1,117 +1,172 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Chatbot</title>
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="dark-theme.css">
+    <link
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Playfair+Display:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="dark-theme.css" />
     <style>
-        #chat-box {
-            height: 400px;
-            overflow-y: auto;
-            background-color: var(--library-secondary);
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 20px;
-        }
+      #chat-box {
+        height: 400px;
+        overflow-y: auto;
+        background-color: var(--library-secondary);
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+      }
 
-        .user-message, .ai-message {
-            margin: 10px;
-            padding: 15px;
-            border-radius: 8px;
-            max-width: 80%;
-        }
+      .user-message,
+      .ai-message {
+        margin: 10px;
+        padding: 15px;
+        border-radius: 8px;
+        max-width: 80%;
+        white-space: pre-wrap; /* This will preserve formatting */
+      }
 
-        .user-message {
-            background-color: var(--library-accent);
-            margin-left: auto;
-        }
+      .user-message {
+        background-color: var(--library-accent);
+        margin-left: auto;
+      }
 
-        .ai-message {
-            background-color: rgba(220, 215, 201, 0.1);
-            margin-right: auto;
-        }
+      .ai-message {
+        background-color: #e0f7fa;
+        color: #000;
+        margin-right: auto;
+        font-size: 0.95em;
+        line-height: 1.4;
+      }
+
+      .book-list {
+        margin-top: 10px;
+        padding-left: 20px;
+      }
+
+      .book-item {
+        margin: 5px 0;
+      }
+
+      .loading {
+        font-style: italic;
+        color: gray;
+      }
+
+      .error-message {
+        color: red;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <!-- Header -->
     <header>
-        <div id="header"></div>
+      <div id="header"></div>
     </header>
 
     <div class="library-container">
-        <h2 class="library-title">AI Library Assistant</h2>
-        <div class="decorative-line"></div>
-        <div id="chat-box"></div>
-        <div class="input-group">
-            <input type="text" id="user-input" class="library-input" placeholder="Ask me anything about books...">
-            <button id="send-button" class="library-btn">Send</button>
-        </div>
+      <h2 class="library-title">AI Library Assistant</h2>
+      <div class="decorative-line"></div>
+      <div id="chat-box" aria-live="polite"></div>
+      <div class="input-group">
+        <input
+          type="text"
+          id="user-input"
+          class="library-input"
+          placeholder="Ask about books, prices, or get recommendations..."
+        />
+        <button id="send-button" class="library-btn">Send</button>
+      </div>
+      <small class="text-muted mt-2">
+        Try asking: "What books do you have?", "Tell me about [book name]", or "What's the price of [book name]?"
+      </small>
     </div>
-    
+
     <!-- Footer -->
     <footer>
-        <div id="footer"></div>
+      <div id="footer"></div>
     </footer>
 
     <div class="alert alert-warning" role="alert">
-        If the chat is not working, please click the shield icon in your browser's address bar and allow mixed content.
+      If the chat is not working, please click the shield icon in your browser's
+      address bar and allow mixed content.
     </div>
 
     <script src="script.js"></script>
     <script>
-        console.log('Chat page script starting...');
+      console.log("Chat page script starting...");
 
-        // Function to load HTML content
-        function loadHTML(elementId, filePath) {
-            console.log(`Loading ${filePath} into ${elementId}...`);
-            fetch(filePath)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.text();
-                })
-                .then(data => {
-                    const tempDiv = document.createElement('div');
-                    tempDiv.innerHTML = data;
-                    
-                    // Extract and execute scripts
-                    const scripts = tempDiv.getElementsByTagName('script');
-                    for (let script of scripts) {
-                        const newScript = document.createElement('script');
-                        newScript.textContent = script.textContent;
-                        document.body.appendChild(newScript);
-                    }
-                    
-                    // Remove scripts from the content before inserting
-                    const scriptsToRemove = tempDiv.getElementsByTagName('script');
-                    while (scriptsToRemove.length > 0) {
-                        scriptsToRemove[0].remove();
-                    }
-                    
-                    // Insert the remaining content
-                    document.getElementById(elementId).innerHTML = tempDiv.innerHTML;
-                    console.log(`${filePath} loaded successfully`);
-                    
-                    // Dispatch a custom event when header is loaded
-                    if (elementId === 'header') {
-                        window.dispatchEvent(new Event('headerLoaded'));
-                    }
-                })
-                .catch(error => {
-                    console.error('Error loading HTML:', error);
-                });
-        }
+      // Function to load HTML content
+      function loadHTML(elementId, filePath) {
+        console.log(`Loading ${filePath} into ${elementId}...`);
+        fetch(filePath)
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error("Network response was not ok");
+            }
+            return response.text();
+          })
+          .then((data) => {
+            const tempDiv = document.createElement("div");
+            tempDiv.innerHTML = data;
 
-        // Load header and footer
-        loadHTML('header', 'header.html');
-        loadHTML('footer', 'footer.html');
+            // Extract and execute scripts
+            const scripts = tempDiv.getElementsByTagName("script");
+            for (let script of scripts) {
+              const newScript = document.createElement("script");
+              newScript.textContent = script.textContent;
+              document.body.appendChild(newScript);
+            }
 
-        // Your existing chat.html scripts here
+            // Remove scripts from the content before inserting
+            const scriptsToRemove = tempDiv.getElementsByTagName("script");
+            while (scriptsToRemove.length > 0) {
+              scriptsToRemove[0].remove();
+            }
+
+            // Insert the remaining content
+            document.getElementById(elementId).innerHTML = tempDiv.innerHTML;
+            console.log(`${filePath} loaded successfully`);
+
+            // Dispatch a custom event when header is loaded
+            if (elementId === "header") {
+              window.dispatchEvent(new Event("headerLoaded"));
+            }
+          })
+          .catch((error) => {
+            console.error("Error loading HTML:", error);
+          });
+      }
+
+      // Load header and footer
+      loadHTML("header", "header.html");
+      loadHTML("footer", "footer.html");
+
+      // Function to append messages
+      function appendMessage(message, sender) {
+        const chatBox = document.getElementById("chat-box");
+        const messageDiv = document.createElement("div");
+        messageDiv.classList.add(
+          sender === "user" ? "user-message" : "ai-message"
+        );
+        messageDiv.textContent = message;
+        chatBox.appendChild(messageDiv);
+        chatBox.scrollTop = chatBox.scrollHeight; // Scroll to the bottom
+      }
+
+      // Example usage
+      document.getElementById("send-button").addEventListener("click", () => {
+        const userInput = document.getElementById("user-input").value;
+        appendMessage(userInput, "user");
+        // Call your AI response function here and append the AI message
+      });
     </script>
-</body>
+  </body>
 </html>

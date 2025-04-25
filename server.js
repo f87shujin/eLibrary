@@ -262,35 +262,24 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
-// Middleware to authenticate JWT token
+// Middleware to check if the user is authenticated
 const authenticateToken = (req, res, next) => {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
-    
-    if (!token) {
-        return res.status(401).json({ message: 'Access denied. No token provided.' });
-    }
-    
-    try {
-        const decoded = jwt.verify(token, 'your_jwt_secret');
-        req.user = decoded;
-        next();
-    } catch (error) {
-        console.error('Token verification error:', error);
-        return res.status(403).json({ message: 'Invalid token.' });
-    }
+    const token = req.headers['authorization']?.split(' ')[1]; // Get token from Authorization header
+    if (!token) return res.status(403).json({ message: 'No token provided' });
+
+    jwt.verify(token, 'your_jwt_secret', (err, decoded) => {
+        if (err) return res.status(403).json({ message: 'Failed to authenticate token' });
+        req.user = decoded; // Attach the decoded user info to the request
+        next(); // Proceed to the next middleware or route handler
+    });
 };
 
-// Middleware to check if user is admin
-const isAdmin = (req, res, next) => {
-    if (!req.user || req.user.role !== 'admin') {
-        return res.status(403).json({ message: 'Access denied. Admin privileges required.' });
+// Example of a protected route
+app.get('/api/admin', authenticateToken, (req, res) => {
+    // Check if the user is an admin
+    if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: 'Access denied' });
     }
-    next();
-};
-
-// Admin route
-app.get('/api/admin', isAdmin, (req, res) => {
     res.json({ message: 'Welcome to the admin page!' });
 });
 
@@ -368,15 +357,14 @@ app.post('/api/orders', async (req, res) => {
     }
 });
 
-// Get all orders (admin only)
-app.get('/api/orders', authenticateToken, async (req, res) => {
+// Add endpoint to get user's orders
+app.get('/api/orders', async (req, res) => {
+    const token = req.headers['authorization']?.split(' ')[1];
+    if (!token) return res.status(403).json({ message: 'No token provided' });
+
     try {
-        // Check if user is admin
-        if (req.user.role !== 'admin') {
-            return res.status(403).json({ message: 'Access denied. Admin privileges required.' });
-        }
-        
-        const orders = await Order.find().sort({ orderDate: -1 });
+        const decoded = jwt.verify(token, 'your_jwt_secret');
+        const orders = await Order.find({ userId: decoded.id }).sort({ orderDate: -1 });
         res.json(orders);
     } catch (error) {
         console.error('Error fetching orders:', error);
@@ -384,6 +372,7 @@ app.get('/api/orders', authenticateToken, async (req, res) => {
     }
 });
 
+// Cancel an order (admin only)
 // Cancel an order (admin only)
 app.put('/api/orders/:orderId/cancel', authenticateToken, async (req, res) => {
     try {
@@ -518,6 +507,46 @@ app.delete('/api/books/:id', async (req, res) => {
         res.json({ message: 'Book deleted successfully' });
     } catch (error) {
         console.error('Error deleting book:', error);
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+});
+
+// Updated endpoint to delete an order without authentication
+app.delete('/api/orders/:orderId', async (req, res) => {
+    try {
+        const deletedOrder = await Order.findByIdAndDelete(req.params.orderId);
+        if (!deletedOrder) {
+            return res.status(404).json({ message: 'Order not found' });
+        }
+        res.json({ message: 'Order deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting order:', error);
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+});
+
+// Updated endpoint to get all orders without authentication
+app.get('/api/orders/all', async (req, res) => {
+    try {
+        // Simply fetch and return all orders
+        const orders = await Order.find().sort({ orderDate: -1 });
+        res.json(orders);
+    } catch (error) {
+        console.error('Error fetching all orders:', error);
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+});
+
+// Updated endpoint to get a specific order without authentication
+app.get('/api/orders/:orderId', async (req, res) => {
+    try {
+        const order = await Order.findById(req.params.orderId);
+        if (!order) {
+            return res.status(404).json({ message: 'Order not found' });
+        }
+        res.json(order);
+    } catch (error) {
+        console.error('Error fetching order:', error);
         res.status(500).json({ message: 'Internal Server Error' });
     }
 });
