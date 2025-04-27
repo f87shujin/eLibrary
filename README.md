@@ -61,26 +61,37 @@ Données :
 ---
 
 
-## Comment utiliser le projet après l’avoir installé
+### Comment utiliser le projet
 
-###  Accéder à l’interface utilisateur :
-- Ouvre le fichier **index.html** directement ou utilise un serveur local comme **WAMPSERVER** ou **XAMPP**.
+### Accès à l’interface utilisateur
+Le projet est déjà hébergé sur GitHub Pages à l'adresse suivante :
+https://f87shujin.github.io/eLibrary/
+Veuillez noter qu'au premier accès, le serveur Render peut nécessiter environ une minute pour être entièrement opérationnel.
+Il n'est donc pas nécessaire de l'ouvrir manuellement ou de l'installer localement.
 
-### S’inscrire / Se connecter :
-- Utilise **register.html** pour créer un compte ou **login.html** pour se connecter.
+### Fonctionnalités principales
 
-###  Naviguer :
-- Consulte **books.html** pour voir la liste des livres.
-- Accède à **details.html** pour voir les détails d'un livre.
-- Utilise **buy.html** pour acheter un livre.
+### S’inscrire / Se connecter
+Utiliser `register.html` pour créer un compte, ou `login.html` pour se connecter.
 
-###  Utiliser le chatbot (optionnel) :
-- Va sur **chat.html** pour poser des questions ou obtenir des recommandations.
+### Naviguer dans la bibliothèque
+Accéder à `books.html` pour consulter la liste des livres.
+Ouvrir `details.html` pour voir les détails d'un livre spécifique.
+Utiliser `buy.html` pour acheter un livre.
 
-###  Administration :
-- En tant qu’admin, ouvre **admin.html** pour gérer les livres (ajout, modification, suppression).
+### Utiliser le chatbot (optionnel)
+Le chatbot repose sur un modèle local utilisant Ollama.
+Il ne fonctionnera pas tant que Ollama n'est pas installé localement.
+Vous devrez également ouvrir `chat.html` à l’aide d’un serveur proxy local à cause des restrictions de sécurité.
+En raison de la taille du modèle et des limites des offres gratuites, l'IA (LLM) n’a pas pu être hébergée sur un serveur public.
 
-###  Gestion des commandes :
-- Consulte tes reçus et commandes via **orders.html** et **receipt.html**.
+### Administration
+Accéder à `admin.html` pour ajouter, modifier ou supprimer des livres.
+
+### Gestion des commandes
+Consulter vos reçus et votre historique de commandes via `orders.html` et `receipt.html`.
+
+
+
 
 
